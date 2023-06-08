@@ -22,6 +22,5 @@
       "~/": ["src/"]
     }
   },
-  "exclude": ["./dist"],
-  "include": ["./src", "./src/global.d.ts", "./test"]
+  "exclude": ["./dist"]
 }
