@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["vitest/globals", "vitest/importMeta"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es6",
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "paths": {
+      "~/": ["src/"]
+    }
+  },
+  "exclude": ["./dist"],
+  "include": ["./src", "./src/global.d.ts", "./test"]
+}

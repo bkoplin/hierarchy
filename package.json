@@ -1,56 +1,67 @@
 {
-  "name": "d3-hierarchy",
+  "name": "@bkoplin/hierarchy",
   "version": "3.1.2",
-  "description": "Layout algorithms for visualizing hierarchical data.",
-  "homepage": "https://d3js.org/d3-hierarchy/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/d3/d3-hierarchy.git"
-  },
-  "keywords": [
-    "d3",
-    "d3-module",
-    "layout",
-    "tree",
-    "treemap",
-    "hierarchy",
-    "infovis"
-  ],
-  "license": "ISC",
-  "author": {
-    "name": "Mike Bostock",
-    "url": "http://bost.ocks.org/mike"
-  },
-  "type": "module",
+  "main": "./dist/common.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "packageManager": "pnpm@8",
+  "license": "MIT",
   "files": [
-    "dist/**/*.js",
-    "src/**/*.js"
+    "dist"
   ],
-  "module": "src/index.js",
-  "main": "src/index.js",
-  "jsdelivr": "dist/d3-hierarchy.min.js",
-  "unpkg": "dist/d3-hierarchy.min.js",
-  "exports": {
-    "umd": "./dist/d3-hierarchy.min.js",
-    "default": "./src/index.js"
-  },
-  "sideEffects": false,
-  "devDependencies": {
-    "benchmark": "2",
-    "d3-array": "1.2.0 - 3",
-    "d3-dsv": "1 - 3",
-    "d3-random": "1.1.0 - 3",
-    "eslint": "8",
-    "mocha": "9",
-    "rollup": "2",
-    "rollup-plugin-terser": "7"
+  "publishConfig": {
+    "@bkoplin:registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "scripts": {
-    "test": "mocha 'test/**/*-test.js' && eslint src test",
-    "prepublishOnly": "rm -rf dist && yarn test && rollup -c",
-    "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../${npm_package_name}/dist/${npm_package_name}.js ${npm_package_name}.v${npm_package_version%%.*}.js && cp ../${npm_package_name}/dist/${npm_package_name}.min.js ${npm_package_name}.v${npm_package_version%%.*}.min.js && git add ${npm_package_name}.v${npm_package_version%%.*}.js ${npm_package_name}.v${npm_package_version%%.*}.min.js && git commit -m \"${npm_package_name} ${npm_package_version}\" && git push && cd -"
+    "build": "tsup",
+    "test": "vitest",
+    "lint": "eslint --ext .ts,.tsx src",
+    "op:env": "op inject -i env.tpl -o .env && cat .env",
+    "release": "pnpm build && pnpm bumpp && pnpm changelogithub"
   },
-  "engines": {
-    "node": ">=12"
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.35.2",
+    "@antfu/utils": "^0.7.2",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "@swc/core": "^1.3.36",
+    "@types/fs-extra": "^9.0.13",
+    "@types/lodash": "^4.14.191",
+    "@types/lodash-es": "^4.17.6",
+    "@types/react": "^18.0.26",
+    "@types/treeify": "^1.0.0",
+    "@types/underscore.string": "0.0.38",
+    "@types/valid-url": "^1.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "ap-style-title-case": "^2.0.0",
+    "bumpp": "^9.0.0",
+    "changelogithub": "^0.12.7",
+    "chardet": "^1.5.1",
+    "esbuild": "^0.16.10",
+    "esbuild-plugins-node-modules-polyfill": "^1.0.10",
+    "eslint": "^8.30.0",
+    "esno": "^0.16.3",
+    "fast-glob": "^3.2.12",
+    "js-base64": "^3.7.5",
+    "lodash-es": "^4.17.21",
+    "query-string": "^8.1.0",
+    "rambdax": "^9.1.1",
+    "straighten-quotes": "^0.1.0",
+    "tsup": "^6.6.3",
+    "type-fest": "^3.4.0",
+    "typescript": "^4.9.4",
+    "underscore.string": "^3.3.6",
+    "valid-url": "^1.0.9",
+    "vitest": "^0.28.5",
+    "yaml": "^2.2.1"
+  },
+  "dependencies": {
+    "@antfu/eslint-config-ts": "^0.34.0",
+    "@rollup/plugin-typescript": "^10.0.1",
+    "@types/klaw-sync": "^6.0.1",
+    "klaw-sync": "^6.0.0",
+    "treeify": "^1.1.0"
   }
 }
