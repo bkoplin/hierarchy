@@ -1,5 +1,7 @@
 import type { HierarchyNode, } from 'd3-hierarchy'
-import h from './hierarchy/index'
+import chroma from 'chroma-js'
+import * as R from 'rambdax'
+
 import { scaleDiverging, } from 'd3-scale'
 import { group, } from 'd3-array'
 import {
@@ -10,19 +12,15 @@ import type {
   IterableElement,
   JsonArray,
   JsonObject,
-  LiteralUnion,
   Merge,
-  SetNonNullable,
   SetRequired,
   StringKeyOf,
   Writable,
 } from 'type-fest'
 import { pie, } from 'd3-shape'
 import type { Writeable, } from 'zod'
-import { chroma, } from '@bkoplin/loki_utility_packager/draw'
 import paper from 'paper'
-
-import { R, } from '~/composables/utilities'
+import h from './hierarchy/index'
 
 export const angleConverter = {
   fromPaper: scaleDiverging()
@@ -41,38 +39,10 @@ export const angleConverter = {
       angle: (radiansRaw / Math.PI * 180) + 270,
       length: 1,
     })
+
     return pt.angle
-    // const rotationsRaw = radiansRaw / 2 / Math.PI
-    // const rotations = radiansRaw < 0
-    //   ? rotationsRaw - Math.ceil(rotationsRaw)
-    //   : rotationsRaw - Math.floor(rotationsRaw)
-    // return scaleDiverging().domain([
-    //   -0.25,
-    //   0.25,
-    //   0.75,
-    // ])
-    //   .range([
-    //     -180,
-    //     0,
-    //     180,
-    //   ])(rotations)
   },
 }
-
-// const sideScale = scaleOrdinal<number, 'left' | 'right'>().domain([
-//   -1,
-//   -0.5,
-//   0,
-//   0.5,
-//   1,
-// ])
-//   .range([
-//     'left',
-//     'right',
-//     'left',
-//     'right',
-//     'left',
-//   ])
 
 const aggregate: HierarchyNode['aggregate'] = function (
   aggFunction:
@@ -107,6 +77,7 @@ const setNodeName: HierarchyNode['setNodeName'] = function (
     if (node.hasParent() && node.depth <= nameFields.length) {
       const nameField = nameFields[node.depth - 1]
       let data = node.records?.[0]
+
       if (Array.isArray(data))
         data = data[0]
       node.name = ((data?.[nameField] ?? node.id) as unknown) as string
@@ -143,14 +114,17 @@ const setColor: HierarchyNode['setColor'] = function (
       return (node as Writeable<HierarchyNode>)?.depth / 2 <= rules.length
     else return (node as Writeable<HierarchyNode>)?.depth <= rules.length
   }
+
   return this.eachBefore((node) => {
     const dims = R.uniq(this.records?.map(d => d[node.dim ?? '']) ?? []).sort() as string[]
+
     if (typeof rules === 'string') {
       const colorScale = R.zipObj(
         dims,
         chroma.scale(rules).colors(dims?.length ?? 1)
       )
       const color = colorScale[node.id as string]
+
       node.color = color
     }
     else if (depthTest(node) && Array.isArray(rules)) {
@@ -165,6 +139,7 @@ const setColor: HierarchyNode['setColor'] = function (
             chroma.scale(rules[ruleIndex]).colors(dims?.length ?? 1)
           )
           const color = colorScale[node.id as string]
+
           node.color = color
         }
       }
@@ -174,6 +149,7 @@ const setColor: HierarchyNode['setColor'] = function (
           chroma.scale(rules[node.depth - 1]).colors(dims?.length ?? 1)
         )
         const color = colorScale[node.id as string]
+
         node.color = color
       }
     }
@@ -182,7 +158,6 @@ const setColor: HierarchyNode['setColor'] = function (
     }
   })
 }
-
 const makePies: HierarchyNode['makePies'] = function (
   this: HierarchyNode,
   pieStart: number,
@@ -195,12 +170,13 @@ const makePies: HierarchyNode['makePies'] = function (
     { parent: Writeable<HierarchyNode> }
   > => {
     if (
-      ((node as Writeable<HierarchyNode>)?.depth ?? 0) === 0
-      || ((node as Writeable<HierarchyNode>)?.height ?? 0) === 0
+      ((node as Writeable<HierarchyNode>)?.depth ?? 0) === 0 ||
+      ((node as Writeable<HierarchyNode>)?.height ?? 0) === 0
     )
       return false
     else return true
   }
+
   return this.eachBefore((node) => {
     if (depthTest(node)) {
       if (node.parent.hasChildren()) {
@@ -209,14 +185,14 @@ const makePies: HierarchyNode['makePies'] = function (
           a,
           b
         ))
-        const nodePadAngle = node.depth === 1
-          ? piePadding
-          : node.depth <= paddingMaxDepth
-            ? R.min(
+        const nodePadAngle = node.depth === 1 ?
+          piePadding :
+          node.depth <= paddingMaxDepth ?
+            R.min(
               node.parent.padAngle,
               minParentArcWidth
-            ) / children.length
-            : 0
+            ) / children.length :
+            0
         const nodePieStart = node.depth === 1 ? (pieStart) : (node.parent.startAngle)
         const nodePieEnd = node.depth === 1 ? (pieEnd) : (node.parent.endAngle)
         const pies = pie<IterableElement<typeof node['children']>>()
@@ -240,16 +216,18 @@ const makePies: HierarchyNode['makePies'] = function (
             } = p
             const startAngle = startAngleIn
             const endAngle = endAngleIn - padAngle
+
             node.padAngle = padAngle
             node.startAngle = startAngle
             node.endAngle = endAngle
             const arcWidthRadians = endAngleIn - startAngleIn - padAngle
             const halfAngle = arcWidthRadians / 2
             const rotationsRaw = (halfAngle + startAngle) / 2 / Math.PI
-            const rotations = halfAngle + startAngle < 0
-              ? rotationsRaw - Math.ceil(rotationsRaw)
-              : rotationsRaw - Math.floor(rotationsRaw)
+            const rotations = halfAngle + startAngle < 0 ?
+              rotationsRaw - Math.ceil(rotationsRaw) :
+              rotationsRaw - Math.floor(rotationsRaw)
             const paperMidPoint = angleConverter.toPaper(halfAngle + startAngle)
+
             node.midPointAngle = {
               radians: halfAngle + startAngle,
               degrees: ((halfAngle + startAngle) * 180) / Math.PI,
@@ -273,11 +251,10 @@ const makePies: HierarchyNode['makePies'] = function (
     }
   })
 }
-
 const leafNodes: HierarchyNode['leafNodes'] = function (this: HierarchyNode) {
   if (this.height === 1) {
     return (
-      this.parent?.children ?? (([] as unknown) as Writable<HierarchyNode>[])
+      this.parent?.children ?? (([] as unknown) as Array<Writable<HierarchyNode>>)
     )
   }
   return this.descendants().filter(d => d.height === 1)
@@ -295,6 +272,7 @@ const rootNodesAt: HierarchyNode['rootNodesAt'] = function (
   depthOrDim: number | string | null
 ) {
   const root = this.ancestorAt(0)
+
   if (typeof root === 'undefined' || depthOrDim === null)
     return []
   else if (typeof depthOrDim === 'number')
@@ -319,7 +297,6 @@ const collapseOnlyChildren: HierarchyNode['collapseOnlyChildren'] = function (th
     }
   })
 }
-
 const ancestorAt: HierarchyNode['ancestorAt'] = function (
   this: HierarchyNode,
   filter: string | number
@@ -344,26 +321,28 @@ h.prototype.ancestorAt = ancestorAt
 
 export function hierarchy<T extends Record<string | number, any>>(
   data?: T[],
-  dims?: (StringKeyOf<T> | Array<StringKeyOf<T>> | undefined)[]
+  dims?: Array<StringKeyOf<T> | Array<StringKeyOf<T>> | undefined>
 ) {
-  const levels = (dims ?? []).filter(v => typeof v !== 'undefined' && v !== '').map(f => Array.isArray(f)
-    ? R.filter(
+  const levels = (dims ?? []).filter(v => typeof v !== 'undefined' && v !== '').map(f => Array.isArray(f) ?
+    R.filter(
       v => typeof v !== 'undefined' && v !== '',
       f
-    )
-    : f)
+    ) :
+    f)
   const g = R.apply(group)([
     data ?? [],
-    ...levels.map(l => Array.isArray(l)
-      ? R.pipe(
+    ...levels.map(l => Array.isArray(l) ?
+      R.pipe(
         R.paths(l),
         R.join('|')
-      )
-      : R.path(l)),
+      ) :
+      R.path(l)),
   ])
   const root = (h(g) as unknown) as HierarchyNode
+
   root.eachBefore((node) => {
     const dim = levels?.[node.depth - 1]
+
     node.dim = dim ? `${dim}` : null
     node.id = node?.data?.[0] ?? null
     node.name = null
@@ -405,6 +384,7 @@ export function hierarchy<T extends Record<string | number, any>>(
   })
   root.each((node) => {
     const base = node.ancestorAt(0)
+
     if (typeof base === 'undefined')
       node.parentIdList = []
 
@@ -427,6 +407,7 @@ export function rollupFunction(
   return (values) => {
     const valueArray = values.map(v => v[valueField] || 0)
     const valuesAreNumbers = areAllNumbers(valueArray)
+
     if (aggFunction === 'sum' && valuesAreNumbers) {
       return sumBy(
         values,
@@ -450,6 +431,7 @@ export function rollupFunction(
         values,
         valueField
       )
+
       return max(objectEntries(g).map(([
         , arr,
       ]) => arr.length)) as number
@@ -462,7 +444,8 @@ export function rollupFunction(
     }
   }
 }
-function areAllNumbers(valueArray: Array<number> | unknown): valueArray is number[] {
+
+function areAllNumbers(valueArray: number[] | unknown): valueArray is number[] {
   return (valueArray as JsonArray)?.every(v => typeof v === 'number') || false
 }
 
@@ -471,206 +454,11 @@ function hasParent(this: Merge<
     { parent: SetRequired<HierarchyNode, 'children'> }
   >) {
   return (
-    (this as HierarchyNode)?.parent !== undefined
-    && (this as HierarchyNode)?.parent !== null
-    && typeof (this as HierarchyNode)?.parent?.children !== 'undefined'
+    (this as HierarchyNode)?.parent !== undefined &&
+    (this as HierarchyNode)?.parent !== null &&
+    typeof (this as HierarchyNode)?.parent?.children !== 'undefined'
   )
 }
 function hasChildren(this: HierarchyNode | unknown) {
   return (this as HierarchyNode)?.children !== undefined
-}
-
-declare module 'd3-hierarchy' {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  interface HierarchyNode<Datum = [string, JsonObject]> {
-    label: string | null
-    color: string | null
-    name: string | null
-    id: string | number | null
-    height: number
-    parentId: string | number | null
-    value: number
-    children?: Writable<this>[]
-    data: Datum
-    datum: JsonObject | null
-    midPointAngle: {
-      radians: number
-      degrees: number
-      rotations: number
-      paper: number
-      side: 'left' | 'right'
-    }
-    nodeArcWidth: {
-      radians: number
-      degrees: number
-    }
-    startAngle: number
-    paperAngles: {
-      startAngle: number
-      endAngle: number
-      padAngle: number
-      midPointAngle: number
-    }
-    angleConverter: typeof angleConverter
-    endAngle: number
-    padAngle: number
-    parent: Writable<this> | null
-    dim: string | null
-    leaves(): Writable<HierarchyNode<Array<JsonObject> | JsonObject>>[]
-    leafNodes(): Writable<this>[]
-    parentIndex: number | null
-    parentList: Writable<this>[]
-    parentIdList: (string | number | null)[]
-    dimPath: (string | null)[]
-    idPath: (string | number | null)[]
-    records: JsonObject[]
-    ancestorAt<Depth extends number>(
-      depth: Depth,
-    ): Writable<this> | undefined
-    ancestorAt(dimName: string): Writable<this> | undefined
-    hasParent(): this is SetNonNullable<Writable<this>, 'parent'>
-    hasChildren(): this is SetRequired<Writable<this>, 'children'>
-    collapseOnlyChildren: () => Writable<this>
-    descendantsAt(depth: number): Writable<this>[]
-    descendantsAt(dimName: string): Writable<this>[]
-    rootNodesAt(level: number): Writable<this>[]
-    rootNodesAt(dimName: string | null): Writable<this>[]
-    eachBefore(
-      callback: (node: Writable<this>, index: number) => void,
-    ): Writable<this>
-    each(
-      callback: (node: Writable<this>, index: number) => void,
-    ): Writable<this>
-    aggregate(
-      this: Writable<this>,
-      aggFunction:
-      | 'sum'
-      | 'mean'
-      | 'median'
-      | 'mode'
-      | 'count'
-      | 'count (distinct)'
-      | Function,
-      valueField: string,
-    ): Writable<this>
-    aggregates(
-      this: Writable<this>,
-      aggFunction:
-      | 'sum'
-      | 'mean'
-      | 'median'
-      | 'mode'
-      | 'count'
-      | 'count (distinct)'
-      | Function,
-      valueField: string,
-    ): Record<string, number>
-    setNodeName(this: Writable<this>, nameFields: string[]): Writable<this>
-    setColor(
-      this: Writable<this>,
-      colorScale: keyof chroma.ChromaStatic['brewer'],
-    ): Writable<this>
-    setColor(
-      this: Writable<this>,
-      colorScale: Array<keyof chroma.ChromaStatic['brewer']>,
-      type: 'byParent',
-    ): Writable<this>
-    makePies(
-      this: Writable<this>,
-      pieStart: number,
-      pieEnd: number,
-      piePadding?: LiteralUnion<0, number>,
-      paddingMaxDepth?: LiteralUnion<0, number>,
-    ): Writable<this>
-  }
-
-  interface HierarchyCircularNode<Datum = [string, JsonObject]> extends HierarchyNode<Datum> {
-    /**
-     * The x-coordinate of the circle’s center.
-     */
-    x: number
-
-    /**
-     * The y-coordinate of the circle’s center.
-     */
-    y: number
-
-    /**
-     * The radius of the circle.
-     */
-    r: number
-
-    /**
-     * Returns an array of links for this node, where each link is an object that defines source and target properties.
-     * The source of each link is the parent node, and the target is a child node.
-     */
-    links(): Array<HierarchyCircularLink<Datum>>
-  }
-
-  interface PackLayout<Datum = [string, JsonObject]> {
-    /**
-     * Lays out the specified root hierarchy.
-     * You must call `root.sum` before passing the hierarchy to the pack layout.
-     * You probably also want to call `root.sort` to order the hierarchy before computing the layout.
-     *
-     * @param root The specified root hierarchy.
-     */
-    (root: HierarchyNode<Datum>): HierarchyCircularNode<Datum>
-
-    /**
-     * Returns the current radius accessor, which defaults to null.
-     */
-    radius(): null | ((node: HierarchyCircularNode<Datum>) => number)
-    /**
-     * Sets the pack layout’s radius accessor to the specified function and returns this pack layout.
-     * If the radius accessor is null, the radius of each leaf circle is derived from the leaf `node.value` (computed by `node.sum`);
-     * the radii are then scaled proportionally to fit the layout size.
-     * If the radius accessor is not null, the radius of each leaf circle is specified exactly by the function.
-     *
-     * @param radius The specified radius accessor.
-     */
-    radius(radius: null | ((node: HierarchyCircularNode<Datum>) => number)): this
-
-    /**
-     * Returns the current size, which defaults to [1, 1].
-     */
-    size(): [number, number]
-    /**
-     * Sets this pack layout’s size to the specified [width, height] array and returns this pack layout.
-     *
-     * @param size The specified two-element size array.
-     */
-    size(size: [number, number]): this
-
-    /**
-     * Returns the current padding accessor, which defaults to the constant zero.
-     */
-    padding(): (node: HierarchyCircularNode<Datum>) => number
-    /**
-     * Sets this pack layout’s padding accessor to the specified number and returns this pack layout.
-     * Returns the current padding accessor, which defaults to the constant zero.
-     *
-     * When siblings are packed, tangent siblings will be separated by approximately the specified padding;
-     * the enclosing parent circle will also be separated from its children by approximately the specified padding.
-     * If an explicit radius is not specified, the padding is approximate because a two-pass algorithm
-     * is needed to fit within the layout size: the circles are first packed without padding;
-     * a scaling factor is computed and applied to the specified padding; and lastly the circles are re-packed with padding.
-     *
-     * @param padding The specified padding value.
-     */
-    padding(padding: number): this
-    /**
-     * Sets this pack layout’s padding accessor to the specified function and returns this pack layout.
-     * Returns the current padding accessor, which defaults to the constant zero.
-     *
-     * When siblings are packed, tangent siblings will be separated by approximately the specified padding;
-     * the enclosing parent circle will also be separated from its children by approximately the specified padding.
-     * If an explicit radius is not specified, the padding is approximate because a two-pass algorithm
-     * is needed to fit within the layout size: the circles are first packed without padding;
-     * a scaling factor is computed and applied to the specified padding; and lastly the circles are re-packed with padding.
-     *
-     * @param padding The specified padding function.
-     */
-    padding(padding: (node: HierarchyCircularNode<Datum>) => number): this
-  }
 }
