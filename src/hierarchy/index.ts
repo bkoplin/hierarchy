@@ -11,18 +11,20 @@ import node_descendants from './descendants.js'
 import node_leaves from './leaves.js'
 import node_links from './links.js'
 import node_iterator from './iterator.js'
+import {F} from 'ts-toolbelt'
+import {group} from '../array/group.ts'
 
-export default function hierarchy(data, children) {
+export default function hierarchy(data, childrenFn) {
   if (data instanceof Map) {
     data = [
       undefined,
       data,
     ]
-    if (children === undefined)
-      children = mapChildren
+    if (childrenFn === undefined)
+      childrenFn = mapChildren
   }
-  else if (children === undefined) {
-    children = objectChildren
+  else if (childrenFn === undefined) {
+    childrenFn = objectChildren
   }
 
   const root = new Node(data)
@@ -34,7 +36,7 @@ export default function hierarchy(data, children) {
   let n
 
   while (node = nodes.pop()) {
-    if ((childs = children(node.data)) && (n = (childs = Array.from(childs)).length)) {
+    if ((childs = childrenFn(node.data)) && (n = (childs = Array.from(childs)).length)) {
       node.children = childs
       for (i = n - 1; i >= 0; --i) {
         nodes.push(child = childs[i] = new Node(childs[i]))
@@ -74,12 +76,12 @@ export function computeHeight(node) {
 export class Node {
   constructor(data) {
     this.data = data
-    this.depth =
+    this.depth = 0
     this.height = 0
     this.parent = null
   }
 
-  each<T extends Function>(this: Node[], callback: T, that?: ThisParameterType<T>) {
+  each<T extends F.Function<[Node, number, Node[]], Node[]>>(this: Node[], callback: T, that = Node) {
     let index = -1
 
     for (const node of this) {

@@ -1,101 +1,68 @@
-import {
-  get,
-  identity,
-} from 'lodash-es'
-import { groupBy, } from 'rambdax'
 import type {
-  JsonObject, StringKeyOf, ValueOf,
+  FixedLengthArray,
+  JsonObject, JsonPrimitive, LiteralUnion, ValueOf,
 } from 'type-fest'
+import type {
+  I, L, N,
+} from 'ts-toolbelt'
 
-export default function group<T extends JsonObject, Keys extends Array<StringKeyOf<T>> | Array<(d: T, key?: StringKeyOf<T>) => ValueOf<T>>>(inputArray: T[], ...keys: Keys) {
-  return function regroup(values, i: number) {
-    if (i >= keys.length) return values
-    const keyFn = keys[i]
-    const tempGrp = groupBy(
-      (value) => {
-        if (typeof keyFn === 'string') {
-          return get(
-            value,
-            keyFn
-          )
-        }
-        else {
-          return keyFn(value)
-        }
-      },
-      inputArray
-    )
-  }
+import {
+  identity, uniq,
+} from 'lodash-es'
+import { flatten, } from './flatten'
+
+export function group<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+  return nest(
+    values,
+    identity,
+    identity,
+    keys
+  ) as unknown as NestedMap<T, N.Sub<L.Length<KeyFns>, 1>>
 }
-export function groups(values, ...keys) {
+export function rollup<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
+  return nest(
+    values,
+    identity,
+    reduce,
+    keys
+  ) as unknown as NestedRollup<T, N.Sub<L.Length<KeyFns>, 1>>
+}
+export function rollups<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
+  return nest(
+    values,
+    Array.from,
+    reduce,
+    keys
+  ) as unknown as NestedRollups<T, N.Sub<L.Length<KeyFns>, 1>>
+}
+export { group as default, }
+export function groups<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
     identity,
     keys
-  )
+  ) as unknown as NestedArray<T, N.Sub<L.Length<KeyFns>, 1>>
 }
-
-function flatten(groups, keys) {
-  for (let i = 1, n = keys.length; i < n; ++i) {
-    groups = groups.flatMap(g => g.pop().map(([
-      key,
-      value,
-    ]) => [
-      ...g,
-      key,
-      value,
-    ]))
-  }
-
-  return groups
-}
-
-export function flatGroup(values, ...keys) {
+export function flatGroup<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
   return flatten(
-    groups(
+    groups<T, KeyFns>(
       values,
       ...keys
     ),
     keys
   )
 }
-export function flatRollup(values, reduce, ...keys) {
-  return flatten(
-    rollups(
-      values,
-      reduce,
-      ...keys
-    ),
-    keys
-  )
-}
-export function rollup(values, reduce, ...keys) {
-  return nest(
-    values,
-    identity,
-    reduce,
-    keys
-  )
-}
-export function rollups(values, reduce, ...keys) {
-  return nest(
-    values,
-    Array.from,
-    reduce,
-    keys
-  )
-}
-export function index(values, ...keys) {
-  return nest(
+export function index<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+  return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     identity,
     unique,
     keys
   )
 }
-export function indexes(values, ...keys) {
-  return nest(
+export function indexes<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+  return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     Array.from,
     unique,
@@ -104,49 +71,97 @@ export function indexes(values, ...keys) {
 }
 
 function unique(values) {
-  if (values.length !== 1)
-    throw new Error('duplicate key')
-  return values[0]
+  return uniq(values)[0]
 }
 
-function nest(values, map, reduce, keys) {
-  return (function regroup(values, i) {
-    if (i >= keys.length)
-      return reduce(values)
-    const groups = new InternMap()
-    const keyof = keys[i++]
-    let index = -1
+export type KeyFn<T extends JsonObject> = (obj: T, idx: number, objs: T[]) => ValueOf<T>
+export type NestedMap<
+  T,
+  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
+  Iter extends I.Iteration = I.IterationOf<Len>,
+  M extends Map<any, any> = Map<keyof T, T[]>
+> = {
+  0: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>
+  1: Map<keyof T, M>
+}[N.IsZero<I.Pos<Iter>>]
+export type NestedRollup<
+  T,
+  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
+  Iter extends I.Iteration = I.IterationOf<Len>,
+  M extends Map<any, any> = Map<keyof T, number>
+> = {
+  0: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>
+  1: Map<keyof T, M>
+}[N.IsZero<I.Pos<Iter>>]
+export type NestedArray<
+  T,
+  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
+  Iter extends I.Iteration = I.IterationOf<Len>,
+  M = [keyof T, T[]]
+> = {
+  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>
+  1: [keyof T, M[]]
+}[N.IsZero<I.Pos<Iter>>]
+export type NestedRollups<
+  T,
+  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
+  Iter extends I.Iteration = I.IterationOf<Len>,
+  M = [keyof T, number]
+> = {
+  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>
+  1: [keyof T, M[]]
+}[N.IsZero<I.Pos<Iter>>]
+export function nest<Levels extends number, T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: {
+  <R>(map: R): R
+  <R>(map: Map<ValueOf<R>, R[]>): Array<[ValueOf<R>, R[]]>
+}, reduceFn: {
+  (acc: T[]): number
+}, keyFns: KeyFns) {
+  return (function regroup(groupValues: T[], i) {
+    if (i >= keyFns.length)
+      return reduceFn(groupValues)
+    const firstValue = groupValues.shift() as T
+    const keyof = keyFns[i++]
+    const firstKey = keyof(
+      firstValue,
+      0,
+      groupValues
+    )
+    const subGroups = new Map([ [
+      firstKey,
+      [ firstValue, ],
+    ], ])
 
-    for (const value of values) {
+    groupValues.forEach((value, subIndex) => {
       const key = keyof(
         value,
-        ++index,
-        values
+        ++subIndex,
+        groupValues
       )
-      const group = groups.get(key)
+      const subGroup = subGroups.get(key)
 
-      if (group) { group.push(value) }
+      if (subGroup) { subGroup.push(value) }
       else {
-        groups.set(
+        subGroups.set(
           key,
           [ value, ]
         )
       }
-    }
+    })
     for (const [
       key,
-      values,
-    ] of groups) {
-      groups.set(
+      mapValues,
+    ] of subGroups) {
+      subGroups.set(
         key,
         regroup(
-          values,
+          mapValues,
           i
-        )
+        ) as T[]
       )
     }
 
-    return map(groups)
+    return mapFn(subGroups)
   })(
     values,
     0

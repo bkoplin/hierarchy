@@ -1,13 +1,14 @@
+import type {
+  JsonObject, JsonPrimitive,
+} from 'type-fest'
+
 export class InternMap extends Map {
-  constructor(entries, key = keyof) {
+  _intern: Map<any, any>
+  _key: <T extends JsonPrimitive | JsonObject>(value: T) => Object | T
+  constructor(entries: null | ConstructorParameters<typeof Map>[0], keyFn = keyof) {
     super()
-    Object.defineProperties(
-      this,
-      {
-        _intern: { value: new Map(), },
-        _key: { value: key, },
-      }
-    )
+    this._intern = new Map()
+    this._key = keyFn
     if (entries != null) {
       for (const [
         key,
@@ -21,7 +22,7 @@ export class InternMap extends Map {
     }
   }
 
-  get(key) {
+  get(key: JsonPrimitive | JsonObject) {
     return super.get(intern_get(
       this,
       key
@@ -53,15 +54,12 @@ export class InternMap extends Map {
   }
 }
 export class InternSet extends Set {
-  constructor(values, key = keyof) {
+  _intern: Map<any, any>
+  _key: <T extends JsonPrimitive | JsonObject>(value: T) => Object | T
+  constructor(values: null | ConstructorParameters<typeof Set>[0], keyFn = keyof) {
     super()
-    Object.defineProperties(
-      this,
-      {
-        _intern: { value: new Map(), },
-        _key: { value: key, },
-      }
-    )
+    this._intern = new Map()
+    this._key = keyFn
     if (values != null)
       for (const value of values) this.add(value)
   }
@@ -90,7 +88,7 @@ export class InternSet extends Set {
 
 function intern_get({
   _intern, _key,
-}, value) {
+}: InstanceType<typeof InternMap> | InstanceType<typeof InternSet>, value: JsonPrimitive | JsonObject) {
   const key = _key(value)
 
   return _intern.has(key) ? _intern.get(key) : value
@@ -98,7 +96,7 @@ function intern_get({
 
 function intern_set({
   _intern, _key,
-}, value) {
+}: InstanceType<typeof InternMap> | InstanceType<typeof InternSet>, value: JsonPrimitive | JsonObject) {
   const key = _key(value)
 
   if (_intern.has(key))
@@ -112,7 +110,7 @@ function intern_set({
 
 function intern_delete({
   _intern, _key,
-}, value) {
+}: InstanceType<typeof InternMap> | InstanceType<typeof InternSet>, value: JsonPrimitive | JsonObject) {
   const key = _key(value)
 
   if (_intern.has(key)) {
@@ -122,6 +120,6 @@ function intern_delete({
   return value
 }
 
-function keyof(value) {
+function keyof<T extends JsonPrimitive | JsonObject>(value: T) {
   return value !== null && typeof value === 'object' ? value.valueOf() : value
 }
