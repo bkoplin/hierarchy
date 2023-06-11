@@ -106,3 +106,5 @@ dist
 # Yarn zero-installs ignore [Which files should be gitignored?](https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored)
 .yarn
 .history
+
+.DS_Store
