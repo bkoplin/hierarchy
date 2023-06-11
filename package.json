@@ -58,6 +58,7 @@
     "paper": "^0.12.17",
     "query-string": "^8.1.0",
     "rambdax": "^9.1.1",
+    "safe-stable-stringify": "^2.4.3",
     "straighten-quotes": "^0.1.0",
     "taze": "^0.10.2",
     "ts-toolbelt": "^9.6.0",

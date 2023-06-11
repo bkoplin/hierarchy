@@ -1,0 +1,27 @@
+- crime_rate: 998.33
+  education_level: Bachelor's Degree
+  ethnicity: Two or More Races
+  median_age: 16
+  median_income: 15379
+  population: 6909596
+  poverty_rate: 79.28
+  region: South
+  state: Missouri
+  unemployment_rate: 43.28
+- - Missouri
+  - - crime_rate: 998.33
+      education_level: Bachelor's Degree
+      ethnicity: Two or More Races
+      median_age: 16
+      median_income: 15379
+      population: 6909596
+      poverty_rate: 79.28
+      region: South
+      state: Missouri
+      unemployment_rate: 43.28
+- - Bachelor's Degree
+  - {}
+- - South
+  - {}
+- - null
+  - {}

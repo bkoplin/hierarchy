@@ -6,7 +6,6 @@ import type {
 } from 'type-fest'
 import { angleConverter } from 'src'
 
-
 declare module 'd3-hierarchy' {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   interface HierarchyNode<Datum = [ string, JsonObject ]> {

@@ -1,112 +1,167 @@
 import type {
-  FixedLengthArray, JsonObject, JsonPrimitive,
+  FixedLengthArray, JsonObject, JsonPrimitive, StringKeyOf,
 } from 'type-fest'
-import { zipObject, } from 'lodash-es'
+import {
+  uniq, zipObject,
+} from 'lodash-es'
 import chroma from 'chroma-js'
-import type { KeyFn, } from '../array/group.ts'
-import { group, } from '../array/group.ts'
+import type { L, } from 'ts-toolbelt'
+import { prop, } from 'rambdax'
+import type {
+  KeyFn, NestedMap,
+} from '../array/types'
+import { group, } from '../array/group'
+import node_each from './each.js'
+import node_eachAfter from './eachAfter.js'
+import node_eachBefore from './eachBefore.js'
+import node_count from './count.js'
+import node_ancestors from './ancestors.js'
+import node_descendants from './descendants.js'
+import node_find from './find.js'
+import node_leaves from './leaves.js'
+import node_sum from './sum.js'
+import node_sort from './sort.js'
+import node_path from './path.js'
+import node_links from './links.js'
+import node_iterator from './iterator'
 
-export function hierarchy<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], childrenFns: KeyFns, dims?: string[]) {
+// export function hierarchy<T>(): Node<>
+export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>] | string, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...childrenFns: KeyFns) {
+  const [ firstChildFn, ] = childrenFns
+  const funcs = childrenFns.map((c) => {
+    if (typeof c === 'string') {
+      return d => prop(
+        c,
+        d
+      )
+    }
+    else {
+      return c[1]
+    }
+  })
+  const dims = childrenFns.map((c) => {
+    if (typeof c === 'string')
+      return c
+
+    else
+      return c[0]
+  })
   const data = [
     undefined,
-    group<T, KeyFns>(
+    group<T, FixedLengthArray<KeyFn<T>, L.Length<KeyFns>>>(
       values,
-      ...childrenFns
+      ...funcs
     ),
-  ]
+  ] as const
+  const children = (d) => {
+    return Array.isArray(d) ? d[1] : null
+  }
   const root = new Node(
     data,
-    childrenFns,
+    funcs,
     dims
   )
+  let node
   const nodes = [ root, ]
-  let node = nodes.pop()
+  let child
+  let childs
+  let i
+  let n
 
-  while (node) {
-    const children = Array.isArray(node.data) ? Array.from(node.data[1]) : null
-
-    node.children = (children ?? []).map((child, i) => {
-      const nodeChild = new Node(
-        child,
-        childrenFns,
-        dims
-      )
-
-      nodeChild.parent = node
-      nodeChild.depth = node.depth + 1
-      nodes.push(nodeChild)
-      return nodeChild
-    })
-    node = nodes.pop()
+  while (node = nodes.pop()) {
+    if ((childs = children(node.data)) && (n = (childs = Array.from(childs)).length)) {
+      node.children = childs;
+      for (i = n - 1; i >= 0; --i) {
+        nodes.push(child = childs[i] = new Node(childs[i], funcs, dims));
+        child.parent = node;
+        child.depth = node.depth + 1;
+      }
+    }
   }
 
-  return root.eachBefore(computeHeight)
+  return root.eachAfter(node => {
+    if (typeof node.children === 'undefined') delete node.children
+  }).eachBefore((node) => {
+    let height = 0
+
+    do node.height = height
+    while ((node = node.parent) && (node.height < ++height))
+  }).each((node) => {
+    if (typeof node.data === 'undefined') return
+    node.dim = node.dims?.[node.depth - 1]
+    node.id = Array.isArray(node.data) ? node.data[0] : node.data[node.dim]
+  }) as unknown as Node<[undefined, NestedMap<T, number & L.Length<KeyFns>>], KeyFns, T>
 }
 
-function node_copy() {
-  return hierarchy(this).eachBefore(copyData)
-}
-
-function objectChildren(d) {
-  return d.children
-}
-
-function mapChildren<T>(d: T[]) {
-  return Array.isArray(d) ? d[1] : null
-}
-
-function copyData(node) {
-  if (node.data.value !== undefined)
-    node.value = node.data.value
-  node.data = node.data.data
-}
-
-export function computeHeight(node: Node<any>) {
+function computeHeight(node: Node<any>) {
   let height = 0
 
   do node.height = height
   while ((node = node.parent) && (node.height < ++height))
 }
-export class Node<T> {
-  data: FixedLengthArray<T | JsonObject, 2>
+export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>, RecType = JsonObject> {
+  [Symbol.iterator] = node_iterator
+  id: JsonPrimitive | undefined
+  dim: StringKeyOf<RecType> | undefined
+  data: T
   depth: number
   height: number
-  #parent: null | Node<T> = null
-  #children?: Array<Node<T>> = []
-  #keyFns: FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>
-  #dims: string[]
-  constructor(data: [any, T | JsonObject], keyFns: FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>, dims?: string[]) {
+  parent: null | Node<T, KeyFns> = null
+  children?: Array<Node<T, KeyFns>>
+  #keyFns: KeyFns
+  dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>
+  constructor(data: T, keyFns: KeyFns, dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>) {
     this.data = data
     this.depth = 0
     this.height = 0
+    this.parent = null
     this.#keyFns = keyFns
-    this.#dims = dims ?? []
+    this.dims = dims
+    this.dim = undefined
+    this.id = undefined
   }
 
-  color(scale: keyof chroma.ChromaStatic['brewer']) {
-    const depth = this.depth
-    const ids = this?.ancestors()?.reverse()?.[0] as string[]
+  count = node_count
+  each(callBack: (node: this) => this, that?: this): this {
+    return node_each.bind(this)(
+      callBack,
+      that
+    )
+  }
+
+  eachBefore(callBack: (node: this) => this, that?: this): this {
+    return node_eachBefore.bind(this)(
+      callBack,
+      that
+    )
+  }
+
+  eachAfter(callBack: (node: this) => this, that?: this): this {
+    return node_eachAfter.bind(this)(
+      callBack,
+      that
+    )
+  }
+
+  find(...args: Parameters<typeof node_find>) { return node_find.bind(this)(...args) }
+  sum(...args: Parameters<typeof node_sum>) { return node_sum.bind(this)(...args) }
+  sort(...args: Parameters<typeof node_sort>) { return node_sort.bind(this)(...args) }
+  path(...args: Parameters<typeof node_path>) { return node_path.bind(this)(...args) }
+  ancestors(...args: Parameters<typeof node_ancestors>) { return node_ancestors.bind(this)(...args) as this[] }
+  descendants(...args: Parameters<typeof node_descendants>) { return node_descendants.bind(this)(...args) }
+  leaves() { return node_leaves.bind(this)() as this[] }
+  links(...args: Parameters<typeof node_links>) { return node_links.bind(this)(...args) }
+  color(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
+    const root = this.ancestors().reverse()[0]
+    const ids = uniq(root.descendants().filter(d => d.dim === this.dim)
+      .map(d => d.id)) as string[]
     const colors = chroma.scale(scale).colors(ids.length)
     const colorObject = zipObject(
       ids,
       colors
     )
 
-    console.log(ids.descendants())
-
     return colorObject[this.id as string]
-  }
-
-  get id() {
-    return this.data[0]
-  }
-
-  get parent() {
-    return this.#parent
-  }
-
-  set parent(val) {
-    this.#parent = val
   }
 
   get idPath() {
@@ -120,110 +175,11 @@ export class Node<T> {
   }
 
   get records() {
-    return this.leaves().map(leaf => leaf.data)
-  }
-
-  get children() {
-    return this.#children
-  }
-
-  set children(children) {
-    if (children?.length)
-      this.#children = children
-  }
-
-  get dim(): string | undefined {
-    return this.#dims?.[this.depth - 1]
+    return this.leaves().map(leaf => leaf.data) as RecType[]
   }
 
   get keyFn() {
     return this.#keyFns[this.depth - 1]
-  }
-
-  eachBefore(callback: { (node: Node<T>): void; (node: any): void; call?: any }, that?: Node<T>): this {
-    const nodes = [ this, ]
-    let node = nodes.pop()
-    let children = node?.children
-    let index = -1
-
-    while (node) {
-      callback.call(
-        that,
-        node,
-        ++index,
-        this
-      )
-      children?.forEach((child) => { nodes.push(child) })
-      node = nodes.pop()
-      children = node?.children
-    }
-    return this
-  }
-
-  eachAfter(callback: { (node: Node<T>): void; (node: any): void; call?: any }, that?: Node<T>): this {
-    const nodes = [ this, ]
-    let node = nodes.pop()
-    let children = node?.children
-    const next: Array<Node<T>> = []
-    let index = -1
-
-    while (node) {
-      next.push(node)
-      children?.forEach((child) => { nodes.push(child) })
-      callback.call(
-        that,
-        node,
-        ++index,
-        this
-      )
-      node = next.pop()
-      children = node?.children
-    }
-    return this
-  }
-
-  leaves() {
-    const leaves: Array<Node<T>> = []
-
-    this.eachBefore((node) => {
-      if (!node.height)
-        leaves.push(node)
-    })
-    return leaves
-  }
-
-  descendants() {
-    const nodes = [ this, ]
-
-    this.eachAfter((node) => { nodes.push(node) })
-
-    return nodes
-  }
-
-  ancestors() {
-    const nodes = [ this, ]
-    let node = this.parent
-
-    while (node) {
-      nodes.push(node)
-      node = node.parent
-    }
-
-    return nodes
-  }
-
-  find(callback: { (data: JsonObject): void; (node: any): void; call?: any }, that?: Node<T>) {
-    let index = -1
-
-    for (const node of this.leaves()) {
-      if (callback.call(
-        that,
-        node,
-        ++index,
-        this
-      ))
-        return node
-    }
   }
 }
 

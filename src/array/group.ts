@@ -1,33 +1,36 @@
 import type {
-  FixedLengthArray,
-  JsonObject, JsonPrimitive, LiteralUnion, ValueOf,
+  FixedLengthArray, ValueOf,
 } from 'type-fest'
 import type {
-  I, L, N,
+  L, N,
 } from 'ts-toolbelt'
 
 import {
-  identity, uniq,
+  identity,
+  uniq as unique,
 } from 'lodash-es'
 import { flatten, } from './flatten'
+import type {
+  KeyFn, NestedArray, NestedMap, NestedRollups,
+} from './types'
 
-export function group<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
-  return nest(
+export function group<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+  return nest<T, KeyFns>(
     values,
     identity,
     identity,
     keys
-  ) as unknown as NestedMap<T, N.Sub<L.Length<KeyFns>, 1>>
+  )
 }
-export function rollup<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
+export function rollup<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
   return nest(
     values,
     identity,
     reduce,
     keys
-  ) as unknown as NestedRollup<T, N.Sub<L.Length<KeyFns>, 1>>
+  )
 }
-export function rollups<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
+export function rollups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
@@ -36,7 +39,7 @@ export function rollups<T extends JsonObject, KeyFns extends FixedLengthArray<Ke
   ) as unknown as NestedRollups<T, N.Sub<L.Length<KeyFns>, 1>>
 }
 export { group as default, }
-export function groups<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+export function groups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
@@ -44,7 +47,7 @@ export function groups<T extends JsonObject, KeyFns extends FixedLengthArray<Key
     keys
   ) as unknown as NestedArray<T, N.Sub<L.Length<KeyFns>, 1>>
 }
-export function flatGroup<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+export function flatGroup<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return flatten(
     groups<T, KeyFns>(
       values,
@@ -53,7 +56,7 @@ export function flatGroup<T extends JsonObject, KeyFns extends FixedLengthArray<
     keys
   )
 }
-export function index<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+export function index<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     identity,
@@ -61,7 +64,7 @@ export function index<T extends JsonObject, KeyFns extends FixedLengthArray<KeyF
     keys
   )
 }
-export function indexes<T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
+export function indexes<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     Array.from,
@@ -69,52 +72,11 @@ export function indexes<T extends JsonObject, KeyFns extends FixedLengthArray<Ke
     keys
   )
 }
-
-function unique(values) {
-  return uniq(values)[0]
-}
-
-export type KeyFn<T> = (obj: T, idx: number, objs: T[]) => ValueOf<T>
-export type NestedMap<
-  T,
-  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M extends Map<any, any> = Map<keyof T, T[]>
-> = {
-  0: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>
-  1: Map<keyof T, M>
-}[N.IsZero<I.Pos<Iter>>]
-export type NestedRollup<
-  T,
-  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M extends Map<any, any> = Map<keyof T, number>
-> = {
-  0: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>
-  1: Map<keyof T, M>
-}[N.IsZero<I.Pos<Iter>>]
-export type NestedArray<
-  T,
-  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M = [keyof T, T[]]
-> = {
-  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>
-  1: [keyof T, M[]]
-}[N.IsZero<I.Pos<Iter>>]
-export type NestedRollups<
-  T,
-  Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M = [keyof T, number]
-> = {
-  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>
-  1: [keyof T, M[]]
-}[N.IsZero<I.Pos<Iter>>]
-export function nest<Levels extends number, T extends JsonObject, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: {
-  <R>(map: R): R
+export function nest<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], mapFn: typeof identity, reduceFn: typeof identity, keyFns: KeyFns): NestedMap<T, L.Length<KeyFns>>
+export function nest<Levels extends number, T, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: ArrayConstructor['from'], reduceFn: typeof identity, keyFns: KeyFns): NestedArray<T, Levels>
+export function nest<Levels extends number, T, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: {
   <R>(map: Map<ValueOf<R>, R[]>): Array<[ValueOf<R>, R[]]>
-}, reduceFn: {
+} | typeof identity, reduceFn: typeof identity | {
   (acc: T[]): number
 }, keyFns: KeyFns) {
   return (function regroup(groupValues: T[], i) {

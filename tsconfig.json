@@ -16,11 +16,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es6",
-    "baseUrl": "./",
-    "rootDir": "./src",
-    "allowImportingTSExtensions": true,
     "paths": {
-      "~/": ["src/"]
+      "~/": ["./src/"]
     }
   },
   "exclude": ["./dist"]
