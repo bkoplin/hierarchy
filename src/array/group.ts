@@ -74,7 +74,7 @@ function unique(values) {
   return uniq(values)[0]
 }
 
-export type KeyFn<T extends JsonObject> = (obj: T, idx: number, objs: T[]) => ValueOf<T>
+export type KeyFn<T> = (obj: T, idx: number, objs: T[]) => ValueOf<T>
 export type NestedMap<
   T,
   Len extends LiteralUnion<0 | 1 | 2 | 3 | 4 | 5 | 6, number> = 6,
