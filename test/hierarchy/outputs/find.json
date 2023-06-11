@@ -1,0 +1,17 @@
+Node {
+  "data": [
+    "Esma",
+    [
+      {
+        "email": "egormann@sciencedaily.com",
+        "first_name": "Esma",
+        "gender": "Female",
+        "id": 24,
+        "ip_address": "133.61.161.149",
+        "last_name": "Gorman",
+      },
+    ],
+  ],
+  "depth": 2,
+  "height": 1,
+}

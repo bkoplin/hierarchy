@@ -23,6 +23,7 @@ specifiers:
   '@types/valid-url': ^1.0.4
   '@typescript-eslint/eslint-plugin': ^5.59.9
   '@typescript-eslint/parser': ^5.59.9
+  '@vitest/ui': ^0.32.0
   ap-style-title-case: ^2.0.0
   bumpp: ^9.1.1
   changelogithub: ^0.12.11
@@ -83,6 +84,7 @@ devDependencies:
   '@types/valid-url': 1.0.4
   '@typescript-eslint/eslint-plugin': 5.59.9_3cembfv4vokiyn6g4ljynjc5d4
   '@typescript-eslint/parser': 5.59.9_tizxnkcvjrb4cldxgwq5h3lj5u
+  '@vitest/ui': 0.32.0_vitest@0.32.0
   ap-style-title-case: 2.0.0
   bumpp: 9.1.1
   changelogithub: 0.12.11
@@ -110,7 +112,7 @@ devDependencies:
   typescript: 5.1.3
   underscore.string: 3.3.6
   valid-url: 1.0.9
-  vitest: 0.32.0
+  vitest: 0.32.0_@vitest+ui@0.32.0
   yaml: 2.3.1
   zod: 3.21.4
 
@@ -725,6 +727,10 @@ packages:
     dev: true
     optional: true
 
+  /@polka/url/1.0.0-next.21:
+    resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
+    dev: true
+
   /@rollup/plugin-typescript/11.1.1_typescript@5.1.3:
     resolution: {integrity: sha512-Ioir+x5Bejv72Lx2Zbz3/qGg7tvGbxQZALCLoJaGrkNXak/19+vKgKYJYM3i/fJxvsb23I9FuFQ8CUBEfsmBRg==}
     engines: {node: '>=14.0.0'}
@@ -1201,6 +1207,21 @@ packages:
     resolution: {integrity: sha512-MruAPlM0uyiq3d53BkwTeShXY0rYEfhNGQzVO5GHBmmX3clsxcWp79mMnkOVcV244sNTeDcHbcPFWIjOI4tZvw==}
     dependencies:
       tinyspy: 2.1.1
+    dev: true
+
+  /@vitest/ui/0.32.0_vitest@0.32.0:
+    resolution: {integrity: sha512-55gugh6+owrOqW83RCgLm9q+o3SlzvFVgl1lyfnr0WB8ABxLoM+3pgusEjosscgEYGzTjTXaZY6xLd4qlfH/RQ==}
+    peerDependencies:
+      vitest: '>=0.30.1 <1'
+    dependencies:
+      '@vitest/utils': 0.32.0
+      fast-glob: 3.2.12
+      fflate: 0.7.4
+      flatted: 3.2.7
+      pathe: 1.1.1
+      picocolors: 1.0.0
+      sirv: 2.0.3
+      vitest: 0.32.0_@vitest+ui@0.32.0
     dev: true
 
   /@vitest/utils/0.32.0:
@@ -2734,6 +2755,10 @@ packages:
     dependencies:
       reusify: 1.0.4
 
+  /fflate/0.7.4:
+    resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
+    dev: true
+
   /file-entry-cache/6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -3803,6 +3828,11 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
+  /mrmime/1.0.1:
+    resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
+    engines: {node: '>=10'}
+    dev: true
+
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
@@ -4592,6 +4622,15 @@ packages:
       - supports-color
     dev: true
 
+  /sirv/2.0.3:
+    resolution: {integrity: sha512-O9jm9BsID1P+0HOi81VpXPoDxYP374pkOLzACAoyUQ/3OUVndNpsz6wMnY2z+yOxzbllCKZrM+9QrWsv4THnyA==}
+    engines: {node: '>= 10'}
+    dependencies:
+      '@polka/url': 1.0.0-next.21
+      mrmime: 1.0.1
+      totalist: 3.0.1
+    dev: true
+
   /sisteransi/1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
     dev: true
@@ -4918,6 +4957,11 @@ packages:
     dependencies:
       is-number: 7.0.0
 
+  /totalist/3.0.1:
+    resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
+    engines: {node: '>=6'}
+    dev: true
+
   /tr46/1.0.1:
     resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
     dependencies:
@@ -5217,7 +5261,7 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest/0.32.0:
+  /vitest/0.32.0_@vitest+ui@0.32.0:
     resolution: {integrity: sha512-SW83o629gCqnV3BqBnTxhB10DAwzwEx3z+rqYZESehUB+eWsJxwcBQx7CKy0otuGMJTYh7qCVuUX23HkftGl/Q==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -5255,6 +5299,7 @@ packages:
       '@vitest/runner': 0.32.0
       '@vitest/snapshot': 0.32.0
       '@vitest/spy': 0.32.0
+      '@vitest/ui': 0.32.0_vitest@0.32.0
       '@vitest/utils': 0.32.0
       acorn: 8.8.2
       acorn-walk: 8.2.0
