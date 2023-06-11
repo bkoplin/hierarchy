@@ -4,7 +4,7 @@ import {
 import yaml from 'yaml'
 import safeStableStringify from 'safe-stable-stringify'
 
-import { omit, } from 'lodash-es'
+import { last, omit, } from 'lodash-es'
 import { hierarchy, } from '../../src/hierarchy/index'
 
 import data from '../data/MOCK_DATA.json'
@@ -104,7 +104,7 @@ describe(
         test(
           'descendants',
           () => {
-            expect(safelyYaml(nested.descendants().map(d => d.data))).toMatchFileSnapshot('./outputs/descendants.yaml')
+            expect(safelyYaml(nested.descendants().map(d => omit(d, 'children')))).toMatchFileSnapshot('./outputs/descendants.yaml')
           }
         )
         test(
@@ -114,9 +114,9 @@ describe(
           }
         )
         test(
-          'find',
+          'path',
           () => {
-            expect(nested.find(d => d.id === 'South')).toMatchFileSnapshot('./outputs/find.json')
+            expect(nested.leaves()[0].path(nested.leaves()[10]).map(d => d.idPath)).toMatchFileSnapshot('./outputs/path.json')
           }
         )
       }
