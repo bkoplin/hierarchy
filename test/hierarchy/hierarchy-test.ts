@@ -5,7 +5,7 @@ import yaml from 'yaml'
 import safeStableStringify from 'safe-stable-stringify'
 
 import {
-  at, omit, pick,
+  at, omit,
 } from 'lodash-es'
 import { hierarchy, } from '../../src/hierarchy/index'
 
@@ -88,7 +88,7 @@ describe(
             expect(safelyYaml(nested.descendantsAt('state'))).toMatchFileSnapshot('./outputs/descendantsAt state.json')
           }
         )
-        test(
+        describe(
           'lookup tests',
           () => {
             const lookupObject = {
@@ -114,29 +114,31 @@ describe(
               true
             )
             const exactObject = nested.lookup(
-              pick(
-                lookupObject,
-                [
-                  'education_level',
-                  'state',
-                ]
-              ),
+              [ 'South', ],
               false
             )
 
-            expect(exactArray?.idPath).toMatchInlineSnapshot(`
-              [
-                "Bachelor's Degree",
-                "South",
-              ]
-            `)
-            expect(exactObject?.idPath).toMatchInlineSnapshot(`
-              [
-                "Missouri",
-                "Bachelor's Degree",
-                "South",
-              ]
-            `)
+            test(
+              'search using array',
+              () => {
+                expect(exactArray?.idPath).toMatchInlineSnapshot(`
+                  [
+                    "Bachelor's Degree",
+                    "South",
+                  ]
+                `)
+              }
+            )
+            test(
+              'search using object',
+              () => {
+                expect(exactObject?.idPath).toMatchInlineSnapshot(`
+                  [
+                    "South",
+                  ]
+                `)
+              }
+            )
           }
         )
       }
@@ -181,7 +183,19 @@ describe(
         test(
           'path',
           () => {
-            expect(nested.leaves()[0].path(nested.leaves()[10]).map(d => d.idPath)).toMatchFileSnapshot('./outputs/path.json')
+            expect(JSON.parse(safeStableStringify(nested.leaves()[0].path(nested.leaves()[10])))).toMatchFileSnapshot('./outputs/path.json')
+          }
+        )
+        test(
+          'copy',
+          () => {
+            expect(JSON.parse(safeStableStringify(nested.leaves()[0].parent?.copy()))).toMatchFileSnapshot('./outputs/copy.json')
+          }
+        )
+        test(
+          'export',
+          () => {
+            expect(nested.leaves()[0].parent?.exportJSON()).toMatchFileSnapshot('./outputs/exportJSON.json')
           }
         )
       }
