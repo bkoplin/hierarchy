@@ -1,36 +1,38 @@
-import type {
-  FixedLengthArray, ValueOf,
-} from 'type-fest'
+import type { FixedLengthArray, } from 'type-fest'
 import type {
   L, N,
 } from 'ts-toolbelt'
 
 import {
   identity,
-  uniq as unique,
+  uniq,
 } from 'lodash-es'
 import { flatten, } from './flatten'
 import type {
-  KeyFn, NestedArray, NestedMap, NestedRollups,
+  KeyFn, NestedArray, NestedRollups,
 } from './types'
+import { InternMap, } from './internmap'
 
-export function group<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...keys: KeyFns) {
-  return nest<T, KeyFns>(
+function unique<T>(values: T[]) {
+  return uniq(values)[0]
+}
+export function group(values, ...keys) {
+  return nest(
     values,
     identity,
     identity,
     keys
   )
 }
-export function rollup<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
-  return nest(
+export function rollup<T>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>) {
+  return nest<T, typeof keys>(
     values,
     identity,
     reduce,
     keys
   )
 }
-export function rollups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: (acc: T[]) => number, ...keys: KeyFns) {
+export function rollups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
@@ -72,60 +74,48 @@ export function indexes<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 |
     keys
   )
 }
-export function nest<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], mapFn: typeof identity, reduceFn: typeof identity, keyFns: KeyFns): NestedMap<T, L.Length<KeyFns>>
-export function nest<Levels extends number, T, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: ArrayConstructor['from'], reduceFn: typeof identity, keyFns: KeyFns): NestedArray<T, Levels>
-export function nest<Levels extends number, T, KeyFns extends FixedLengthArray<KeyFn<T>, Levels>>(values: T[], mapFn: {
-  <R>(map: Map<ValueOf<R>, R[]>): Array<[ValueOf<R>, R[]]>
-} | typeof identity, reduceFn: typeof identity | {
-  (acc: T[]): number
-}, keyFns: KeyFns) {
-  return (function regroup(groupValues: T[], i) {
-    if (i >= keyFns.length)
-      return reduceFn(groupValues)
-    const firstValue = groupValues.shift() as T
-    const keyof = keyFns[i++]
-    const firstKey = keyof(
-      firstValue,
-      0,
-      groupValues
-    )
-    const subGroups = new Map([ [
-      firstKey,
-      [ firstValue, ],
-    ], ])
 
-    groupValues.forEach((value, subIndex) => {
+function nest(values, map, reduce, keys) {
+  return (function regroup(values, i) {
+    if (i >= keys.length)
+      return reduce(values)
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const groups = new InternMap()
+    const keyof = keys[i++]
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    let index = -1
+    // eslint-disable-next-line padding-line-between-statements
+    for (const value of values) {
       const key = keyof(
         value,
-        ++subIndex,
-        groupValues
+        ++index,
+        values
       )
-      const subGroup = subGroups.get(key)
-
-      if (subGroup) { subGroup.push(value) }
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const group = groups.get(key)
+      // eslint-disable-next-line padding-line-between-statements
+      if (group) { group.push(value) }
       else {
-        subGroups.set(
+        groups.set(
           key,
           [ value, ]
         )
       }
-    })
-    for (const [
-      key,
-      mapValues,
-    ] of subGroups) {
-      subGroups.set(
-        key,
-        regroup(
-          mapValues,
-          i
-        ) as T[]
-      )
     }
 
-    return mapFn(subGroups)
-  })(
-    values,
-    0
-  )
+    for (const [
+      key,
+      values,
+    ] of groups) {
+      groups.set(
+        key,
+        regroup(
+          values,
+          i
+        )
+      )
+    }
+    return map(groups)
+  // eslint-disable-next-line function-call-argument-newline
+  })(values, 0)
 }

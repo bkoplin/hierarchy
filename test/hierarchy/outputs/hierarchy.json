@@ -1,13 +1,12 @@
-Node {
+{
   "children": [
-    Node {
+    {
       "children": [
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 998.33,
                     "education_level": "Bachelor's Degree",
@@ -21,18 +20,14 @@ Node {
                     "unemployment_rate": 43.28,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Missouri",
                 [
@@ -52,6 +47,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -59,31 +59,23 @@ Node {
               ],
               "height": 1,
               "id": "Missouri",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Bachelor's Degree",
-            Map {
-              "Missouri" => [
-                {
-                  "crime_rate": 998.33,
-                  "education_level": "Bachelor's Degree",
-                  "ethnicity": "Two or More Races",
-                  "median_age": 16,
-                  "median_income": 15379,
-                  "population": 6909596,
-                  "poverty_rate": 79.28,
-                  "region": "South",
-                  "state": "Missouri",
-                  "unemployment_rate": 43.28,
-                },
+              "idPath": [
+                "Missouri",
+                "Bachelor's Degree",
+                "South",
               ],
             },
           ],
+          "data": [
+            "Bachelor's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -91,14 +83,16 @@ Node {
           ],
           "height": 2,
           "id": "Bachelor's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Bachelor's Degree",
+            "South",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 922.47,
                     "education_level": "Doctorate Degree",
@@ -112,18 +106,14 @@ Node {
                     "unemployment_rate": 54.88,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Massachusetts",
                 [
@@ -143,6 +133,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -150,31 +145,23 @@ Node {
               ],
               "height": 1,
               "id": "Massachusetts",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Doctorate Degree",
-            Map {
-              "Massachusetts" => [
-                {
-                  "crime_rate": 922.47,
-                  "education_level": "Doctorate Degree",
-                  "ethnicity": "Asian",
-                  "median_age": 27,
-                  "median_income": 147731,
-                  "population": 939695,
-                  "poverty_rate": 24.99,
-                  "region": "South",
-                  "state": "Massachusetts",
-                  "unemployment_rate": 54.88,
-                },
+              "idPath": [
+                "Massachusetts",
+                "Doctorate Degree",
+                "South",
               ],
             },
           ],
+          "data": [
+            "Doctorate Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -182,14 +169,16 @@ Node {
           ],
           "height": 2,
           "id": "Doctorate Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Doctorate Degree",
+            "South",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 15.13,
                     "education_level": "High School",
@@ -203,18 +192,14 @@ Node {
                     "unemployment_rate": 20.9,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Tennessee",
                 [
@@ -234,6 +219,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -241,31 +231,23 @@ Node {
               ],
               "height": 1,
               "id": "Tennessee",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "High School",
-            Map {
-              "Tennessee" => [
-                {
-                  "crime_rate": 15.13,
-                  "education_level": "High School",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 5,
-                  "median_income": 471292,
-                  "population": 5383096,
-                  "poverty_rate": 0.66,
-                  "region": "South",
-                  "state": "Tennessee",
-                  "unemployment_rate": 20.9,
-                },
+              "idPath": [
+                "Tennessee",
+                "High School",
+                "South",
               ],
             },
           ],
+          "data": [
+            "High School",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -273,14 +255,16 @@ Node {
           ],
           "height": 2,
           "id": "High School",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "High School",
+            "South",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 697.82,
                     "education_level": "Master's Degree",
@@ -294,18 +278,14 @@ Node {
                     "unemployment_rate": 19.34,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "New Mexico",
                 [
@@ -325,6 +305,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -332,31 +317,23 @@ Node {
               ],
               "height": 1,
               "id": "New Mexico",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Master's Degree",
-            Map {
-              "New Mexico" => [
-                {
-                  "crime_rate": 697.82,
-                  "education_level": "Master's Degree",
-                  "ethnicity": "Two or More Races",
-                  "median_age": 65,
-                  "median_income": 983716,
-                  "population": 3191576,
-                  "poverty_rate": 80.65,
-                  "region": "South",
-                  "state": "New Mexico",
-                  "unemployment_rate": 19.34,
-                },
+              "idPath": [
+                "New Mexico",
+                "Master's Degree",
+                "South",
               ],
             },
           ],
+          "data": [
+            "Master's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -364,14 +341,16 @@ Node {
           ],
           "height": 2,
           "id": "Master's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Master's Degree",
+            "South",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 677.97,
                     "education_level": "Associate's Degree",
@@ -385,18 +364,14 @@ Node {
                     "unemployment_rate": 75.17,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "New Mexico",
                 [
@@ -416,6 +391,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -423,31 +403,23 @@ Node {
               ],
               "height": 1,
               "id": "New Mexico",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Associate's Degree",
-            Map {
-              "New Mexico" => [
-                {
-                  "crime_rate": 677.97,
-                  "education_level": "Associate's Degree",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 68,
-                  "median_income": 739550,
-                  "population": 3247922,
-                  "poverty_rate": 69.02,
-                  "region": "South",
-                  "state": "New Mexico",
-                  "unemployment_rate": 75.17,
-                },
+              "idPath": [
+                "New Mexico",
+                "Associate's Degree",
+                "South",
               ],
             },
           ],
+          "data": [
+            "Associate's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -455,97 +427,21 @@ Node {
           ],
           "height": 2,
           "id": "Associate's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Associate's Degree",
+            "South",
+          ],
         },
       ],
-      "count": [Function],
       "data": [
         "South",
-        Map {
-          "Bachelor's Degree" => Map {
-            "Missouri" => [
-              {
-                "crime_rate": 998.33,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "Two or More Races",
-                "median_age": 16,
-                "median_income": 15379,
-                "population": 6909596,
-                "poverty_rate": 79.28,
-                "region": "South",
-                "state": "Missouri",
-                "unemployment_rate": 43.28,
-              },
-            ],
-          },
-          "Doctorate Degree" => Map {
-            "Massachusetts" => [
-              {
-                "crime_rate": 922.47,
-                "education_level": "Doctorate Degree",
-                "ethnicity": "Asian",
-                "median_age": 27,
-                "median_income": 147731,
-                "population": 939695,
-                "poverty_rate": 24.99,
-                "region": "South",
-                "state": "Massachusetts",
-                "unemployment_rate": 54.88,
-              },
-            ],
-          },
-          "High School" => Map {
-            "Tennessee" => [
-              {
-                "crime_rate": 15.13,
-                "education_level": "High School",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 5,
-                "median_income": 471292,
-                "population": 5383096,
-                "poverty_rate": 0.66,
-                "region": "South",
-                "state": "Tennessee",
-                "unemployment_rate": 20.9,
-              },
-            ],
-          },
-          "Master's Degree" => Map {
-            "New Mexico" => [
-              {
-                "crime_rate": 697.82,
-                "education_level": "Master's Degree",
-                "ethnicity": "Two or More Races",
-                "median_age": 65,
-                "median_income": 983716,
-                "population": 3191576,
-                "poverty_rate": 80.65,
-                "region": "South",
-                "state": "New Mexico",
-                "unemployment_rate": 19.34,
-              },
-            ],
-          },
-          "Associate's Degree" => Map {
-            "New Mexico" => [
-              {
-                "crime_rate": 677.97,
-                "education_level": "Associate's Degree",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 68,
-                "median_income": 739550,
-                "population": 3247922,
-                "poverty_rate": 69.02,
-                "region": "South",
-                "state": "New Mexico",
-                "unemployment_rate": 75.17,
-              },
-            ],
-          },
-        },
+        {},
       ],
       "depth": 1,
       "dim": "region",
+      "dimPath": [
+        "region",
+      ],
       "dims": [
         "region",
         "education_level",
@@ -553,16 +449,17 @@ Node {
       ],
       "height": 3,
       "id": "South",
-      Symbol(Symbol.iterator): [Function],
+      "idPath": [
+        "South",
+      ],
     },
-    Node {
+    {
       "children": [
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 774.78,
                     "education_level": "High School",
@@ -576,18 +473,14 @@ Node {
                     "unemployment_rate": 85.21,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Louisiana",
                 [
@@ -607,6 +500,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -614,12 +512,15 @@ Node {
               ],
               "height": 1,
               "id": "Louisiana",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Louisiana",
+                "High School",
+                "Northeast",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 989.46,
                     "education_level": "High School",
@@ -633,18 +534,14 @@ Node {
                     "unemployment_rate": 79.45,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "New Jersey",
                 [
@@ -664,6 +561,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -671,12 +573,15 @@ Node {
               ],
               "height": 1,
               "id": "New Jersey",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "New Jersey",
+                "High School",
+                "Northeast",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 829.65,
                     "education_level": "High School",
@@ -690,18 +595,14 @@ Node {
                     "unemployment_rate": 1.14,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Rhode Island",
                 [
@@ -721,6 +622,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -728,12 +634,15 @@ Node {
               ],
               "height": 1,
               "id": "Rhode Island",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Rhode Island",
+                "High School",
+                "Northeast",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 982.58,
                     "education_level": "High School",
@@ -747,18 +656,14 @@ Node {
                     "unemployment_rate": 62.07,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Pennsylvania",
                 [
@@ -778,6 +683,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -785,73 +695,23 @@ Node {
               ],
               "height": 1,
               "id": "Pennsylvania",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Pennsylvania",
+                "High School",
+                "Northeast",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "High School",
-            Map {
-              "Louisiana" => [
-                {
-                  "crime_rate": 774.78,
-                  "education_level": "High School",
-                  "ethnicity": "Hispanic or Latino",
-                  "median_age": 56,
-                  "median_income": 500661,
-                  "population": 6844380,
-                  "poverty_rate": 95.83,
-                  "region": "Northeast",
-                  "state": "Louisiana",
-                  "unemployment_rate": 85.21,
-                },
-              ],
-              "New Jersey" => [
-                {
-                  "crime_rate": 989.46,
-                  "education_level": "High School",
-                  "ethnicity": "American Indian or Alaska Native",
-                  "median_age": 77,
-                  "median_income": 244006,
-                  "population": 9164766,
-                  "poverty_rate": 23.36,
-                  "region": "Northeast",
-                  "state": "New Jersey",
-                  "unemployment_rate": 79.45,
-                },
-              ],
-              "Rhode Island" => [
-                {
-                  "crime_rate": 829.65,
-                  "education_level": "High School",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 58,
-                  "median_income": 245094,
-                  "population": 8105564,
-                  "poverty_rate": 83.1,
-                  "region": "Northeast",
-                  "state": "Rhode Island",
-                  "unemployment_rate": 1.14,
-                },
-              ],
-              "Pennsylvania" => [
-                {
-                  "crime_rate": 982.58,
-                  "education_level": "High School",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 0,
-                  "median_income": 1227,
-                  "population": 6305889,
-                  "poverty_rate": 99.67,
-                  "region": "Northeast",
-                  "state": "Pennsylvania",
-                  "unemployment_rate": 62.07,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -859,14 +719,16 @@ Node {
           ],
           "height": 2,
           "id": "High School",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "High School",
+            "Northeast",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 974.77,
                     "education_level": "Some College",
@@ -880,18 +742,14 @@ Node {
                     "unemployment_rate": 22.02,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Delaware",
                 [
@@ -911,6 +769,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -918,31 +781,23 @@ Node {
               ],
               "height": 1,
               "id": "Delaware",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Some College",
-            Map {
-              "Delaware" => [
-                {
-                  "crime_rate": 974.77,
-                  "education_level": "Some College",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 71,
-                  "median_income": 325897,
-                  "population": 203753,
-                  "poverty_rate": 45.15,
-                  "region": "Northeast",
-                  "state": "Delaware",
-                  "unemployment_rate": 22.02,
-                },
+              "idPath": [
+                "Delaware",
+                "Some College",
+                "Northeast",
               ],
             },
           ],
+          "data": [
+            "Some College",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -950,14 +805,16 @@ Node {
           ],
           "height": 2,
           "id": "Some College",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Some College",
+            "Northeast",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 312.77,
                     "education_level": "Doctorate Degree",
@@ -971,18 +828,14 @@ Node {
                     "unemployment_rate": 64.42,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Oklahoma",
                 [
@@ -1002,6 +855,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1009,12 +867,15 @@ Node {
               ],
               "height": 1,
               "id": "Oklahoma",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Oklahoma",
+                "Doctorate Degree",
+                "Northeast",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 981.11,
                     "education_level": "Doctorate Degree",
@@ -1028,18 +889,14 @@ Node {
                     "unemployment_rate": 88.16,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Pennsylvania",
                 [
@@ -1059,6 +916,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1066,45 +928,23 @@ Node {
               ],
               "height": 1,
               "id": "Pennsylvania",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Pennsylvania",
+                "Doctorate Degree",
+                "Northeast",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "Doctorate Degree",
-            Map {
-              "Oklahoma" => [
-                {
-                  "crime_rate": 312.77,
-                  "education_level": "Doctorate Degree",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 39,
-                  "median_income": 633004,
-                  "population": 7137587,
-                  "poverty_rate": 12.63,
-                  "region": "Northeast",
-                  "state": "Oklahoma",
-                  "unemployment_rate": 64.42,
-                },
-              ],
-              "Pennsylvania" => [
-                {
-                  "crime_rate": 981.11,
-                  "education_level": "Doctorate Degree",
-                  "ethnicity": "White",
-                  "median_age": 42,
-                  "median_income": 519850,
-                  "population": 6665701,
-                  "poverty_rate": 66.26,
-                  "region": "Northeast",
-                  "state": "Pennsylvania",
-                  "unemployment_rate": 88.16,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1112,14 +952,16 @@ Node {
           ],
           "height": 2,
           "id": "Doctorate Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Doctorate Degree",
+            "Northeast",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 472.47,
                     "education_level": "Bachelor's Degree",
@@ -1133,18 +975,14 @@ Node {
                     "unemployment_rate": 81.97,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Colorado",
                 [
@@ -1164,6 +1002,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1171,12 +1014,15 @@ Node {
               ],
               "height": 1,
               "id": "Colorado",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Colorado",
+                "Bachelor's Degree",
+                "Northeast",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 577.4,
                     "education_level": "Bachelor's Degree",
@@ -1190,18 +1036,14 @@ Node {
                     "unemployment_rate": 28.84,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "California",
                 [
@@ -1221,6 +1063,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1228,45 +1075,23 @@ Node {
               ],
               "height": 1,
               "id": "California",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "California",
+                "Bachelor's Degree",
+                "Northeast",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "Bachelor's Degree",
-            Map {
-              "Colorado" => [
-                {
-                  "crime_rate": 472.47,
-                  "education_level": "Bachelor's Degree",
-                  "ethnicity": "White",
-                  "median_age": 32,
-                  "median_income": 380617,
-                  "population": 9724695,
-                  "poverty_rate": 30.23,
-                  "region": "Northeast",
-                  "state": "Colorado",
-                  "unemployment_rate": 81.97,
-                },
-              ],
-              "California" => [
-                {
-                  "crime_rate": 577.4,
-                  "education_level": "Bachelor's Degree",
-                  "ethnicity": "Asian",
-                  "median_age": 85,
-                  "median_income": 859673,
-                  "population": 8699437,
-                  "poverty_rate": 54.98,
-                  "region": "Northeast",
-                  "state": "California",
-                  "unemployment_rate": 28.84,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1274,14 +1099,16 @@ Node {
           ],
           "height": 2,
           "id": "Bachelor's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Bachelor's Degree",
+            "Northeast",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 580.89,
                     "education_level": "Associate's Degree",
@@ -1295,18 +1122,14 @@ Node {
                     "unemployment_rate": 53.77,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Illinois",
                 [
@@ -1326,6 +1149,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1333,31 +1161,23 @@ Node {
               ],
               "height": 1,
               "id": "Illinois",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Associate's Degree",
-            Map {
-              "Illinois" => [
-                {
-                  "crime_rate": 580.89,
-                  "education_level": "Associate's Degree",
-                  "ethnicity": "American Indian or Alaska Native",
-                  "median_age": 56,
-                  "median_income": 779975,
-                  "population": 6121317,
-                  "poverty_rate": 78.96,
-                  "region": "Northeast",
-                  "state": "Illinois",
-                  "unemployment_rate": 53.77,
-                },
+              "idPath": [
+                "Illinois",
+                "Associate's Degree",
+                "Northeast",
               ],
             },
           ],
+          "data": [
+            "Associate's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1365,14 +1185,16 @@ Node {
           ],
           "height": 2,
           "id": "Associate's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Associate's Degree",
+            "Northeast",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 601.82,
                     "education_level": "Master's Degree",
@@ -1386,18 +1208,14 @@ Node {
                     "unemployment_rate": 40.55,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Arizona",
                 [
@@ -1417,6 +1235,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1424,31 +1247,23 @@ Node {
               ],
               "height": 1,
               "id": "Arizona",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Master's Degree",
-            Map {
-              "Arizona" => [
-                {
-                  "crime_rate": 601.82,
-                  "education_level": "Master's Degree",
-                  "ethnicity": "Hispanic or Latino",
-                  "median_age": 68,
-                  "median_income": 588072,
-                  "population": 787771,
-                  "poverty_rate": 85.75,
-                  "region": "Northeast",
-                  "state": "Arizona",
-                  "unemployment_rate": 40.55,
-                },
+              "idPath": [
+                "Arizona",
+                "Master's Degree",
+                "Northeast",
               ],
             },
           ],
+          "data": [
+            "Master's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1456,183 +1271,21 @@ Node {
           ],
           "height": 2,
           "id": "Master's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Master's Degree",
+            "Northeast",
+          ],
         },
       ],
-      "count": [Function],
       "data": [
         "Northeast",
-        Map {
-          "High School" => Map {
-            "Louisiana" => [
-              {
-                "crime_rate": 774.78,
-                "education_level": "High School",
-                "ethnicity": "Hispanic or Latino",
-                "median_age": 56,
-                "median_income": 500661,
-                "population": 6844380,
-                "poverty_rate": 95.83,
-                "region": "Northeast",
-                "state": "Louisiana",
-                "unemployment_rate": 85.21,
-              },
-            ],
-            "New Jersey" => [
-              {
-                "crime_rate": 989.46,
-                "education_level": "High School",
-                "ethnicity": "American Indian or Alaska Native",
-                "median_age": 77,
-                "median_income": 244006,
-                "population": 9164766,
-                "poverty_rate": 23.36,
-                "region": "Northeast",
-                "state": "New Jersey",
-                "unemployment_rate": 79.45,
-              },
-            ],
-            "Rhode Island" => [
-              {
-                "crime_rate": 829.65,
-                "education_level": "High School",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 58,
-                "median_income": 245094,
-                "population": 8105564,
-                "poverty_rate": 83.1,
-                "region": "Northeast",
-                "state": "Rhode Island",
-                "unemployment_rate": 1.14,
-              },
-            ],
-            "Pennsylvania" => [
-              {
-                "crime_rate": 982.58,
-                "education_level": "High School",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 0,
-                "median_income": 1227,
-                "population": 6305889,
-                "poverty_rate": 99.67,
-                "region": "Northeast",
-                "state": "Pennsylvania",
-                "unemployment_rate": 62.07,
-              },
-            ],
-          },
-          "Some College" => Map {
-            "Delaware" => [
-              {
-                "crime_rate": 974.77,
-                "education_level": "Some College",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 71,
-                "median_income": 325897,
-                "population": 203753,
-                "poverty_rate": 45.15,
-                "region": "Northeast",
-                "state": "Delaware",
-                "unemployment_rate": 22.02,
-              },
-            ],
-          },
-          "Doctorate Degree" => Map {
-            "Oklahoma" => [
-              {
-                "crime_rate": 312.77,
-                "education_level": "Doctorate Degree",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 39,
-                "median_income": 633004,
-                "population": 7137587,
-                "poverty_rate": 12.63,
-                "region": "Northeast",
-                "state": "Oklahoma",
-                "unemployment_rate": 64.42,
-              },
-            ],
-            "Pennsylvania" => [
-              {
-                "crime_rate": 981.11,
-                "education_level": "Doctorate Degree",
-                "ethnicity": "White",
-                "median_age": 42,
-                "median_income": 519850,
-                "population": 6665701,
-                "poverty_rate": 66.26,
-                "region": "Northeast",
-                "state": "Pennsylvania",
-                "unemployment_rate": 88.16,
-              },
-            ],
-          },
-          "Bachelor's Degree" => Map {
-            "Colorado" => [
-              {
-                "crime_rate": 472.47,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "White",
-                "median_age": 32,
-                "median_income": 380617,
-                "population": 9724695,
-                "poverty_rate": 30.23,
-                "region": "Northeast",
-                "state": "Colorado",
-                "unemployment_rate": 81.97,
-              },
-            ],
-            "California" => [
-              {
-                "crime_rate": 577.4,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "Asian",
-                "median_age": 85,
-                "median_income": 859673,
-                "population": 8699437,
-                "poverty_rate": 54.98,
-                "region": "Northeast",
-                "state": "California",
-                "unemployment_rate": 28.84,
-              },
-            ],
-          },
-          "Associate's Degree" => Map {
-            "Illinois" => [
-              {
-                "crime_rate": 580.89,
-                "education_level": "Associate's Degree",
-                "ethnicity": "American Indian or Alaska Native",
-                "median_age": 56,
-                "median_income": 779975,
-                "population": 6121317,
-                "poverty_rate": 78.96,
-                "region": "Northeast",
-                "state": "Illinois",
-                "unemployment_rate": 53.77,
-              },
-            ],
-          },
-          "Master's Degree" => Map {
-            "Arizona" => [
-              {
-                "crime_rate": 601.82,
-                "education_level": "Master's Degree",
-                "ethnicity": "Hispanic or Latino",
-                "median_age": 68,
-                "median_income": 588072,
-                "population": 787771,
-                "poverty_rate": 85.75,
-                "region": "Northeast",
-                "state": "Arizona",
-                "unemployment_rate": 40.55,
-              },
-            ],
-          },
-        },
+        {},
       ],
       "depth": 1,
       "dim": "region",
+      "dimPath": [
+        "region",
+      ],
       "dims": [
         "region",
         "education_level",
@@ -1640,16 +1293,17 @@ Node {
       ],
       "height": 3,
       "id": "Northeast",
-      Symbol(Symbol.iterator): [Function],
+      "idPath": [
+        "Northeast",
+      ],
     },
-    Node {
+    {
       "children": [
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 506.81,
                     "education_level": "Some College",
@@ -1663,18 +1317,14 @@ Node {
                     "unemployment_rate": 86.43,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Wyoming",
                 [
@@ -1694,6 +1344,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1701,12 +1356,15 @@ Node {
               ],
               "height": 1,
               "id": "Wyoming",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Wyoming",
+                "Some College",
+                "West",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 62.68,
                     "education_level": "Some College",
@@ -1720,18 +1378,14 @@ Node {
                     "unemployment_rate": 40.89,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Utah",
                 [
@@ -1751,6 +1405,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1758,45 +1417,23 @@ Node {
               ],
               "height": 1,
               "id": "Utah",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Utah",
+                "Some College",
+                "West",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "Some College",
-            Map {
-              "Wyoming" => [
-                {
-                  "crime_rate": 506.81,
-                  "education_level": "Some College",
-                  "ethnicity": "White",
-                  "median_age": 10,
-                  "median_income": 290897,
-                  "population": 4865392,
-                  "poverty_rate": 82.3,
-                  "region": "West",
-                  "state": "Wyoming",
-                  "unemployment_rate": 86.43,
-                },
-              ],
-              "Utah" => [
-                {
-                  "crime_rate": 62.68,
-                  "education_level": "Some College",
-                  "ethnicity": "White",
-                  "median_age": 74,
-                  "median_income": 524056,
-                  "population": 1006842,
-                  "poverty_rate": 71.71,
-                  "region": "West",
-                  "state": "Utah",
-                  "unemployment_rate": 40.89,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1804,14 +1441,16 @@ Node {
           ],
           "height": 2,
           "id": "Some College",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Some College",
+            "West",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 718.57,
                     "education_level": "Bachelor's Degree",
@@ -1825,18 +1464,14 @@ Node {
                     "unemployment_rate": 42.05,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Arkansas",
                 [
@@ -1856,6 +1491,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1863,31 +1503,23 @@ Node {
               ],
               "height": 1,
               "id": "Arkansas",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Bachelor's Degree",
-            Map {
-              "Arkansas" => [
-                {
-                  "crime_rate": 718.57,
-                  "education_level": "Bachelor's Degree",
-                  "ethnicity": "Asian",
-                  "median_age": 34,
-                  "median_income": 243034,
-                  "population": 3167642,
-                  "poverty_rate": 97.83,
-                  "region": "West",
-                  "state": "Arkansas",
-                  "unemployment_rate": 42.05,
-                },
+              "idPath": [
+                "Arkansas",
+                "Bachelor's Degree",
+                "West",
               ],
             },
           ],
+          "data": [
+            "Bachelor's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1895,14 +1527,16 @@ Node {
           ],
           "height": 2,
           "id": "Bachelor's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Bachelor's Degree",
+            "West",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 693.4,
                     "education_level": "Doctorate Degree",
@@ -1916,18 +1550,14 @@ Node {
                     "unemployment_rate": 61.83,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Arkansas",
                 [
@@ -1947,6 +1577,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -1954,31 +1589,23 @@ Node {
               ],
               "height": 1,
               "id": "Arkansas",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Doctorate Degree",
-            Map {
-              "Arkansas" => [
-                {
-                  "crime_rate": 693.4,
-                  "education_level": "Doctorate Degree",
-                  "ethnicity": "Asian",
-                  "median_age": 52,
-                  "median_income": 51904,
-                  "population": 5577524,
-                  "poverty_rate": 5.63,
-                  "region": "West",
-                  "state": "Arkansas",
-                  "unemployment_rate": 61.83,
-                },
+              "idPath": [
+                "Arkansas",
+                "Doctorate Degree",
+                "West",
               ],
             },
           ],
+          "data": [
+            "Doctorate Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -1986,14 +1613,16 @@ Node {
           ],
           "height": 2,
           "id": "Doctorate Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Doctorate Degree",
+            "West",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 871.71,
                     "education_level": "Master's Degree",
@@ -2007,18 +1636,14 @@ Node {
                     "unemployment_rate": 41.79,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Hawaii",
                 [
@@ -2038,6 +1663,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2045,31 +1675,23 @@ Node {
               ],
               "height": 1,
               "id": "Hawaii",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Master's Degree",
-            Map {
-              "Hawaii" => [
-                {
-                  "crime_rate": 871.71,
-                  "education_level": "Master's Degree",
-                  "ethnicity": "White",
-                  "median_age": 21,
-                  "median_income": 189775,
-                  "population": 9502876,
-                  "poverty_rate": 7.54,
-                  "region": "West",
-                  "state": "Hawaii",
-                  "unemployment_rate": 41.79,
-                },
+              "idPath": [
+                "Hawaii",
+                "Master's Degree",
+                "West",
               ],
             },
           ],
+          "data": [
+            "Master's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -2077,14 +1699,16 @@ Node {
           ],
           "height": 2,
           "id": "Master's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Master's Degree",
+            "West",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 356.88,
                     "education_level": "Associate's Degree",
@@ -2098,18 +1722,14 @@ Node {
                     "unemployment_rate": 35.29,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Oregon",
                 [
@@ -2129,6 +1749,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2136,31 +1761,23 @@ Node {
               ],
               "height": 1,
               "id": "Oregon",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Associate's Degree",
-            Map {
-              "Oregon" => [
-                {
-                  "crime_rate": 356.88,
-                  "education_level": "Associate's Degree",
-                  "ethnicity": "Two or More Races",
-                  "median_age": 84,
-                  "median_income": 268965,
-                  "population": 688818,
-                  "poverty_rate": 38.73,
-                  "region": "West",
-                  "state": "Oregon",
-                  "unemployment_rate": 35.29,
-                },
+              "idPath": [
+                "Oregon",
+                "Associate's Degree",
+                "West",
               ],
             },
           ],
+          "data": [
+            "Associate's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -2168,111 +1785,21 @@ Node {
           ],
           "height": 2,
           "id": "Associate's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Associate's Degree",
+            "West",
+          ],
         },
       ],
-      "count": [Function],
       "data": [
         "West",
-        Map {
-          "Some College" => Map {
-            "Wyoming" => [
-              {
-                "crime_rate": 506.81,
-                "education_level": "Some College",
-                "ethnicity": "White",
-                "median_age": 10,
-                "median_income": 290897,
-                "population": 4865392,
-                "poverty_rate": 82.3,
-                "region": "West",
-                "state": "Wyoming",
-                "unemployment_rate": 86.43,
-              },
-            ],
-            "Utah" => [
-              {
-                "crime_rate": 62.68,
-                "education_level": "Some College",
-                "ethnicity": "White",
-                "median_age": 74,
-                "median_income": 524056,
-                "population": 1006842,
-                "poverty_rate": 71.71,
-                "region": "West",
-                "state": "Utah",
-                "unemployment_rate": 40.89,
-              },
-            ],
-          },
-          "Bachelor's Degree" => Map {
-            "Arkansas" => [
-              {
-                "crime_rate": 718.57,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "Asian",
-                "median_age": 34,
-                "median_income": 243034,
-                "population": 3167642,
-                "poverty_rate": 97.83,
-                "region": "West",
-                "state": "Arkansas",
-                "unemployment_rate": 42.05,
-              },
-            ],
-          },
-          "Doctorate Degree" => Map {
-            "Arkansas" => [
-              {
-                "crime_rate": 693.4,
-                "education_level": "Doctorate Degree",
-                "ethnicity": "Asian",
-                "median_age": 52,
-                "median_income": 51904,
-                "population": 5577524,
-                "poverty_rate": 5.63,
-                "region": "West",
-                "state": "Arkansas",
-                "unemployment_rate": 61.83,
-              },
-            ],
-          },
-          "Master's Degree" => Map {
-            "Hawaii" => [
-              {
-                "crime_rate": 871.71,
-                "education_level": "Master's Degree",
-                "ethnicity": "White",
-                "median_age": 21,
-                "median_income": 189775,
-                "population": 9502876,
-                "poverty_rate": 7.54,
-                "region": "West",
-                "state": "Hawaii",
-                "unemployment_rate": 41.79,
-              },
-            ],
-          },
-          "Associate's Degree" => Map {
-            "Oregon" => [
-              {
-                "crime_rate": 356.88,
-                "education_level": "Associate's Degree",
-                "ethnicity": "Two or More Races",
-                "median_age": 84,
-                "median_income": 268965,
-                "population": 688818,
-                "poverty_rate": 38.73,
-                "region": "West",
-                "state": "Oregon",
-                "unemployment_rate": 35.29,
-              },
-            ],
-          },
-        },
+        {},
       ],
       "depth": 1,
       "dim": "region",
+      "dimPath": [
+        "region",
+      ],
       "dims": [
         "region",
         "education_level",
@@ -2280,16 +1807,17 @@ Node {
       ],
       "height": 3,
       "id": "West",
-      Symbol(Symbol.iterator): [Function],
+      "idPath": [
+        "West",
+      ],
     },
-    Node {
+    {
       "children": [
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 784.69,
                     "education_level": "Some College",
@@ -2303,18 +1831,14 @@ Node {
                     "unemployment_rate": 48.93,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Minnesota",
                 [
@@ -2334,6 +1858,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2341,12 +1870,15 @@ Node {
               ],
               "height": 1,
               "id": "Minnesota",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Minnesota",
+                "Some College",
+                "Midwest",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 568.42,
                     "education_level": "Some College",
@@ -2360,18 +1892,14 @@ Node {
                     "unemployment_rate": 34.94,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Maryland",
                 [
@@ -2391,6 +1919,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2398,45 +1931,23 @@ Node {
               ],
               "height": 1,
               "id": "Maryland",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Maryland",
+                "Some College",
+                "Midwest",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "Some College",
-            Map {
-              "Minnesota" => [
-                {
-                  "crime_rate": 784.69,
-                  "education_level": "Some College",
-                  "ethnicity": "Asian",
-                  "median_age": 90,
-                  "median_income": 738982,
-                  "population": 2031470,
-                  "poverty_rate": 20.42,
-                  "region": "Midwest",
-                  "state": "Minnesota",
-                  "unemployment_rate": 48.93,
-                },
-              ],
-              "Maryland" => [
-                {
-                  "crime_rate": 568.42,
-                  "education_level": "Some College",
-                  "ethnicity": "Black or African American",
-                  "median_age": 24,
-                  "median_income": 376235,
-                  "population": 9807563,
-                  "poverty_rate": 85.17,
-                  "region": "Midwest",
-                  "state": "Maryland",
-                  "unemployment_rate": 34.94,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -2444,14 +1955,16 @@ Node {
           ],
           "height": 2,
           "id": "Some College",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Some College",
+            "Midwest",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 514.82,
                     "education_level": "Associate's Degree",
@@ -2465,18 +1978,14 @@ Node {
                     "unemployment_rate": 37.03,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Wisconsin",
                 [
@@ -2496,6 +2005,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2503,12 +2017,15 @@ Node {
               ],
               "height": 1,
               "id": "Wisconsin",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Wisconsin",
+                "Associate's Degree",
+                "Midwest",
+              ],
             },
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 421.59,
                     "education_level": "Associate's Degree",
@@ -2522,18 +2039,14 @@ Node {
                     "unemployment_rate": 85.54,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "Idaho",
                 [
@@ -2553,6 +2066,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2560,45 +2078,23 @@ Node {
               ],
               "height": 1,
               "id": "Idaho",
-              Symbol(Symbol.iterator): [Function],
+              "idPath": [
+                "Idaho",
+                "Associate's Degree",
+                "Midwest",
+              ],
             },
           ],
-          "count": [Function],
           "data": [
             "Associate's Degree",
-            Map {
-              "Wisconsin" => [
-                {
-                  "crime_rate": 514.82,
-                  "education_level": "Associate's Degree",
-                  "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                  "median_age": 38,
-                  "median_income": 647118,
-                  "population": 9513805,
-                  "poverty_rate": 74.32,
-                  "region": "Midwest",
-                  "state": "Wisconsin",
-                  "unemployment_rate": 37.03,
-                },
-              ],
-              "Idaho" => [
-                {
-                  "crime_rate": 421.59,
-                  "education_level": "Associate's Degree",
-                  "ethnicity": "American Indian or Alaska Native",
-                  "median_age": 86,
-                  "median_income": 646092,
-                  "population": 6898905,
-                  "poverty_rate": 75.32,
-                  "region": "Midwest",
-                  "state": "Idaho",
-                  "unemployment_rate": 85.54,
-                },
-              ],
-            },
+            {},
           ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -2606,14 +2102,16 @@ Node {
           ],
           "height": 2,
           "id": "Associate's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Associate's Degree",
+            "Midwest",
+          ],
         },
-        Node {
+        {
           "children": [
-            Node {
+            {
               "children": [
-                Node {
-                  "count": [Function],
+                {
                   "data": {
                     "crime_rate": 715.31,
                     "education_level": "Bachelor's Degree",
@@ -2627,18 +2125,14 @@ Node {
                     "unemployment_rate": 20.11,
                   },
                   "depth": 4,
-                  "dim": undefined,
                   "dims": [
                     "region",
                     "education_level",
                     "state",
                   ],
                   "height": 0,
-                  "id": undefined,
-                  Symbol(Symbol.iterator): [Function],
                 },
               ],
-              "count": [Function],
               "data": [
                 "New Hampshire",
                 [
@@ -2658,6 +2152,11 @@ Node {
               ],
               "depth": 3,
               "dim": "state",
+              "dimPath": [
+                "state",
+                "education_level",
+                "region",
+              ],
               "dims": [
                 "region",
                 "education_level",
@@ -2665,31 +2164,23 @@ Node {
               ],
               "height": 1,
               "id": "New Hampshire",
-              Symbol(Symbol.iterator): [Function],
-            },
-          ],
-          "count": [Function],
-          "data": [
-            "Bachelor's Degree",
-            Map {
-              "New Hampshire" => [
-                {
-                  "crime_rate": 715.31,
-                  "education_level": "Bachelor's Degree",
-                  "ethnicity": "Black or African American",
-                  "median_age": 47,
-                  "median_income": 827929,
-                  "population": 38434,
-                  "poverty_rate": 68.91,
-                  "region": "Midwest",
-                  "state": "New Hampshire",
-                  "unemployment_rate": 20.11,
-                },
+              "idPath": [
+                "New Hampshire",
+                "Bachelor's Degree",
+                "Midwest",
               ],
             },
           ],
+          "data": [
+            "Bachelor's Degree",
+            {},
+          ],
           "depth": 2,
           "dim": "education_level",
+          "dimPath": [
+            "education_level",
+            "region",
+          ],
           "dims": [
             "region",
             "education_level",
@@ -2697,93 +2188,21 @@ Node {
           ],
           "height": 2,
           "id": "Bachelor's Degree",
-          Symbol(Symbol.iterator): [Function],
+          "idPath": [
+            "Bachelor's Degree",
+            "Midwest",
+          ],
         },
       ],
-      "count": [Function],
       "data": [
         "Midwest",
-        Map {
-          "Some College" => Map {
-            "Minnesota" => [
-              {
-                "crime_rate": 784.69,
-                "education_level": "Some College",
-                "ethnicity": "Asian",
-                "median_age": 90,
-                "median_income": 738982,
-                "population": 2031470,
-                "poverty_rate": 20.42,
-                "region": "Midwest",
-                "state": "Minnesota",
-                "unemployment_rate": 48.93,
-              },
-            ],
-            "Maryland" => [
-              {
-                "crime_rate": 568.42,
-                "education_level": "Some College",
-                "ethnicity": "Black or African American",
-                "median_age": 24,
-                "median_income": 376235,
-                "population": 9807563,
-                "poverty_rate": 85.17,
-                "region": "Midwest",
-                "state": "Maryland",
-                "unemployment_rate": 34.94,
-              },
-            ],
-          },
-          "Associate's Degree" => Map {
-            "Wisconsin" => [
-              {
-                "crime_rate": 514.82,
-                "education_level": "Associate's Degree",
-                "ethnicity": "Native Hawaiian or Other Pacific Islander",
-                "median_age": 38,
-                "median_income": 647118,
-                "population": 9513805,
-                "poverty_rate": 74.32,
-                "region": "Midwest",
-                "state": "Wisconsin",
-                "unemployment_rate": 37.03,
-              },
-            ],
-            "Idaho" => [
-              {
-                "crime_rate": 421.59,
-                "education_level": "Associate's Degree",
-                "ethnicity": "American Indian or Alaska Native",
-                "median_age": 86,
-                "median_income": 646092,
-                "population": 6898905,
-                "poverty_rate": 75.32,
-                "region": "Midwest",
-                "state": "Idaho",
-                "unemployment_rate": 85.54,
-              },
-            ],
-          },
-          "Bachelor's Degree" => Map {
-            "New Hampshire" => [
-              {
-                "crime_rate": 715.31,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "Black or African American",
-                "median_age": 47,
-                "median_income": 827929,
-                "population": 38434,
-                "poverty_rate": 68.91,
-                "region": "Midwest",
-                "state": "New Hampshire",
-                "unemployment_rate": 20.11,
-              },
-            ],
-          },
-        },
+        {},
       ],
       "depth": 1,
       "dim": "region",
+      "dimPath": [
+        "region",
+      ],
       "dims": [
         "region",
         "education_level",
@@ -2791,447 +2210,20 @@ Node {
       ],
       "height": 3,
       "id": "Midwest",
-      Symbol(Symbol.iterator): [Function],
+      "idPath": [
+        "Midwest",
+      ],
     },
   ],
-  "count": [Function],
   "data": [
-    undefined,
-    Map {
-      "South" => Map {
-        "Bachelor's Degree" => Map {
-          "Missouri" => [
-            {
-              "crime_rate": 998.33,
-              "education_level": "Bachelor's Degree",
-              "ethnicity": "Two or More Races",
-              "median_age": 16,
-              "median_income": 15379,
-              "population": 6909596,
-              "poverty_rate": 79.28,
-              "region": "South",
-              "state": "Missouri",
-              "unemployment_rate": 43.28,
-            },
-          ],
-        },
-        "Doctorate Degree" => Map {
-          "Massachusetts" => [
-            {
-              "crime_rate": 922.47,
-              "education_level": "Doctorate Degree",
-              "ethnicity": "Asian",
-              "median_age": 27,
-              "median_income": 147731,
-              "population": 939695,
-              "poverty_rate": 24.99,
-              "region": "South",
-              "state": "Massachusetts",
-              "unemployment_rate": 54.88,
-            },
-          ],
-        },
-        "High School" => Map {
-          "Tennessee" => [
-            {
-              "crime_rate": 15.13,
-              "education_level": "High School",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 5,
-              "median_income": 471292,
-              "population": 5383096,
-              "poverty_rate": 0.66,
-              "region": "South",
-              "state": "Tennessee",
-              "unemployment_rate": 20.9,
-            },
-          ],
-        },
-        "Master's Degree" => Map {
-          "New Mexico" => [
-            {
-              "crime_rate": 697.82,
-              "education_level": "Master's Degree",
-              "ethnicity": "Two or More Races",
-              "median_age": 65,
-              "median_income": 983716,
-              "population": 3191576,
-              "poverty_rate": 80.65,
-              "region": "South",
-              "state": "New Mexico",
-              "unemployment_rate": 19.34,
-            },
-          ],
-        },
-        "Associate's Degree" => Map {
-          "New Mexico" => [
-            {
-              "crime_rate": 677.97,
-              "education_level": "Associate's Degree",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 68,
-              "median_income": 739550,
-              "population": 3247922,
-              "poverty_rate": 69.02,
-              "region": "South",
-              "state": "New Mexico",
-              "unemployment_rate": 75.17,
-            },
-          ],
-        },
-      },
-      "Northeast" => Map {
-        "High School" => Map {
-          "Louisiana" => [
-            {
-              "crime_rate": 774.78,
-              "education_level": "High School",
-              "ethnicity": "Hispanic or Latino",
-              "median_age": 56,
-              "median_income": 500661,
-              "population": 6844380,
-              "poverty_rate": 95.83,
-              "region": "Northeast",
-              "state": "Louisiana",
-              "unemployment_rate": 85.21,
-            },
-          ],
-          "New Jersey" => [
-            {
-              "crime_rate": 989.46,
-              "education_level": "High School",
-              "ethnicity": "American Indian or Alaska Native",
-              "median_age": 77,
-              "median_income": 244006,
-              "population": 9164766,
-              "poverty_rate": 23.36,
-              "region": "Northeast",
-              "state": "New Jersey",
-              "unemployment_rate": 79.45,
-            },
-          ],
-          "Rhode Island" => [
-            {
-              "crime_rate": 829.65,
-              "education_level": "High School",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 58,
-              "median_income": 245094,
-              "population": 8105564,
-              "poverty_rate": 83.1,
-              "region": "Northeast",
-              "state": "Rhode Island",
-              "unemployment_rate": 1.14,
-            },
-          ],
-          "Pennsylvania" => [
-            {
-              "crime_rate": 982.58,
-              "education_level": "High School",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 0,
-              "median_income": 1227,
-              "population": 6305889,
-              "poverty_rate": 99.67,
-              "region": "Northeast",
-              "state": "Pennsylvania",
-              "unemployment_rate": 62.07,
-            },
-          ],
-        },
-        "Some College" => Map {
-          "Delaware" => [
-            {
-              "crime_rate": 974.77,
-              "education_level": "Some College",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 71,
-              "median_income": 325897,
-              "population": 203753,
-              "poverty_rate": 45.15,
-              "region": "Northeast",
-              "state": "Delaware",
-              "unemployment_rate": 22.02,
-            },
-          ],
-        },
-        "Doctorate Degree" => Map {
-          "Oklahoma" => [
-            {
-              "crime_rate": 312.77,
-              "education_level": "Doctorate Degree",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 39,
-              "median_income": 633004,
-              "population": 7137587,
-              "poverty_rate": 12.63,
-              "region": "Northeast",
-              "state": "Oklahoma",
-              "unemployment_rate": 64.42,
-            },
-          ],
-          "Pennsylvania" => [
-            {
-              "crime_rate": 981.11,
-              "education_level": "Doctorate Degree",
-              "ethnicity": "White",
-              "median_age": 42,
-              "median_income": 519850,
-              "population": 6665701,
-              "poverty_rate": 66.26,
-              "region": "Northeast",
-              "state": "Pennsylvania",
-              "unemployment_rate": 88.16,
-            },
-          ],
-        },
-        "Bachelor's Degree" => Map {
-          "Colorado" => [
-            {
-              "crime_rate": 472.47,
-              "education_level": "Bachelor's Degree",
-              "ethnicity": "White",
-              "median_age": 32,
-              "median_income": 380617,
-              "population": 9724695,
-              "poverty_rate": 30.23,
-              "region": "Northeast",
-              "state": "Colorado",
-              "unemployment_rate": 81.97,
-            },
-          ],
-          "California" => [
-            {
-              "crime_rate": 577.4,
-              "education_level": "Bachelor's Degree",
-              "ethnicity": "Asian",
-              "median_age": 85,
-              "median_income": 859673,
-              "population": 8699437,
-              "poverty_rate": 54.98,
-              "region": "Northeast",
-              "state": "California",
-              "unemployment_rate": 28.84,
-            },
-          ],
-        },
-        "Associate's Degree" => Map {
-          "Illinois" => [
-            {
-              "crime_rate": 580.89,
-              "education_level": "Associate's Degree",
-              "ethnicity": "American Indian or Alaska Native",
-              "median_age": 56,
-              "median_income": 779975,
-              "population": 6121317,
-              "poverty_rate": 78.96,
-              "region": "Northeast",
-              "state": "Illinois",
-              "unemployment_rate": 53.77,
-            },
-          ],
-        },
-        "Master's Degree" => Map {
-          "Arizona" => [
-            {
-              "crime_rate": 601.82,
-              "education_level": "Master's Degree",
-              "ethnicity": "Hispanic or Latino",
-              "median_age": 68,
-              "median_income": 588072,
-              "population": 787771,
-              "poverty_rate": 85.75,
-              "region": "Northeast",
-              "state": "Arizona",
-              "unemployment_rate": 40.55,
-            },
-          ],
-        },
-      },
-      "West" => Map {
-        "Some College" => Map {
-          "Wyoming" => [
-            {
-              "crime_rate": 506.81,
-              "education_level": "Some College",
-              "ethnicity": "White",
-              "median_age": 10,
-              "median_income": 290897,
-              "population": 4865392,
-              "poverty_rate": 82.3,
-              "region": "West",
-              "state": "Wyoming",
-              "unemployment_rate": 86.43,
-            },
-          ],
-          "Utah" => [
-            {
-              "crime_rate": 62.68,
-              "education_level": "Some College",
-              "ethnicity": "White",
-              "median_age": 74,
-              "median_income": 524056,
-              "population": 1006842,
-              "poverty_rate": 71.71,
-              "region": "West",
-              "state": "Utah",
-              "unemployment_rate": 40.89,
-            },
-          ],
-        },
-        "Bachelor's Degree" => Map {
-          "Arkansas" => [
-            {
-              "crime_rate": 718.57,
-              "education_level": "Bachelor's Degree",
-              "ethnicity": "Asian",
-              "median_age": 34,
-              "median_income": 243034,
-              "population": 3167642,
-              "poverty_rate": 97.83,
-              "region": "West",
-              "state": "Arkansas",
-              "unemployment_rate": 42.05,
-            },
-          ],
-        },
-        "Doctorate Degree" => Map {
-          "Arkansas" => [
-            {
-              "crime_rate": 693.4,
-              "education_level": "Doctorate Degree",
-              "ethnicity": "Asian",
-              "median_age": 52,
-              "median_income": 51904,
-              "population": 5577524,
-              "poverty_rate": 5.63,
-              "region": "West",
-              "state": "Arkansas",
-              "unemployment_rate": 61.83,
-            },
-          ],
-        },
-        "Master's Degree" => Map {
-          "Hawaii" => [
-            {
-              "crime_rate": 871.71,
-              "education_level": "Master's Degree",
-              "ethnicity": "White",
-              "median_age": 21,
-              "median_income": 189775,
-              "population": 9502876,
-              "poverty_rate": 7.54,
-              "region": "West",
-              "state": "Hawaii",
-              "unemployment_rate": 41.79,
-            },
-          ],
-        },
-        "Associate's Degree" => Map {
-          "Oregon" => [
-            {
-              "crime_rate": 356.88,
-              "education_level": "Associate's Degree",
-              "ethnicity": "Two or More Races",
-              "median_age": 84,
-              "median_income": 268965,
-              "population": 688818,
-              "poverty_rate": 38.73,
-              "region": "West",
-              "state": "Oregon",
-              "unemployment_rate": 35.29,
-            },
-          ],
-        },
-      },
-      "Midwest" => Map {
-        "Some College" => Map {
-          "Minnesota" => [
-            {
-              "crime_rate": 784.69,
-              "education_level": "Some College",
-              "ethnicity": "Asian",
-              "median_age": 90,
-              "median_income": 738982,
-              "population": 2031470,
-              "poverty_rate": 20.42,
-              "region": "Midwest",
-              "state": "Minnesota",
-              "unemployment_rate": 48.93,
-            },
-          ],
-          "Maryland" => [
-            {
-              "crime_rate": 568.42,
-              "education_level": "Some College",
-              "ethnicity": "Black or African American",
-              "median_age": 24,
-              "median_income": 376235,
-              "population": 9807563,
-              "poverty_rate": 85.17,
-              "region": "Midwest",
-              "state": "Maryland",
-              "unemployment_rate": 34.94,
-            },
-          ],
-        },
-        "Associate's Degree" => Map {
-          "Wisconsin" => [
-            {
-              "crime_rate": 514.82,
-              "education_level": "Associate's Degree",
-              "ethnicity": "Native Hawaiian or Other Pacific Islander",
-              "median_age": 38,
-              "median_income": 647118,
-              "population": 9513805,
-              "poverty_rate": 74.32,
-              "region": "Midwest",
-              "state": "Wisconsin",
-              "unemployment_rate": 37.03,
-            },
-          ],
-          "Idaho" => [
-            {
-              "crime_rate": 421.59,
-              "education_level": "Associate's Degree",
-              "ethnicity": "American Indian or Alaska Native",
-              "median_age": 86,
-              "median_income": 646092,
-              "population": 6898905,
-              "poverty_rate": 75.32,
-              "region": "Midwest",
-              "state": "Idaho",
-              "unemployment_rate": 85.54,
-            },
-          ],
-        },
-        "Bachelor's Degree" => Map {
-          "New Hampshire" => [
-            {
-              "crime_rate": 715.31,
-              "education_level": "Bachelor's Degree",
-              "ethnicity": "Black or African American",
-              "median_age": 47,
-              "median_income": 827929,
-              "population": 38434,
-              "poverty_rate": 68.91,
-              "region": "Midwest",
-              "state": "New Hampshire",
-              "unemployment_rate": 20.11,
-            },
-          ],
-        },
-      },
-    },
+    null,
+    {},
   ],
   "depth": 0,
-  "dim": undefined,
   "dims": [
     "region",
     "education_level",
     "state",
   ],
   "height": 4,
-  "id": undefined,
-  Symbol(Symbol.iterator): [Function],
 }

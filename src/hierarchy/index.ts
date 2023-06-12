@@ -2,11 +2,17 @@ import type {
   FixedLengthArray, JsonObject, JsonPrimitive, StringKeyOf,
 } from 'type-fest'
 import {
+  difference,
+  isEqual,
+  isObjectLike,
   uniq, zipObject,
 } from 'lodash-es'
 import chroma from 'chroma-js'
 import type { L, } from 'ts-toolbelt'
-import { prop, } from 'rambdax'
+import {
+  contains,
+  intersection, prop,
+} from 'rambdax'
 import type {
   KeyFn, NestedMap,
 } from '../array/types'
@@ -83,20 +89,23 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>]
     }
   }
 
-  return root.eachAfter((node) => {
-    if (typeof node.children === 'undefined')
-      delete node.children
-  }).eachBefore((node) => {
-    let height = 0
+  return root.each((node) => {
+    const thisNodeDim = node.dims?.[node.depth - 1]
 
-    do node.height = height
-    while ((node = node.parent) && (node.height < ++height))
+    if (typeof thisNodeDim !== 'undefined') {
+      node.dim = thisNodeDim
+      node.id = node.data[0]
+    }
   })
+    .eachBefore((node) => {
+      let height = 0
+
+      do node.height = height
+      while ((node = node.parent) && (node.height < ++height))
+    })
     .each((node) => {
-      if (typeof node.data === 'undefined')
-        return
-      node.dim = node.dims?.[node.depth - 1]
-      node.id = Array.isArray(node.data) ? node.data[0] : node.data[node.dim]
+      node.records = node.leaves().map(leaf => leaf.data as T)
+      node.setIds()
     }) as unknown as Node<[undefined, NestedMap<T, number & L.Length<KeyFns>>], KeyFns, T>
 }
 
@@ -109,6 +118,8 @@ function computeHeight(node: Node<any>) {
 export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>, RecType = JsonObject> {
   [Symbol.iterator] = node_iterator
   id: JsonPrimitive | undefined
+  idPath: JsonPrimitive[]
+  dimPath: Array<keyof RecType>
   dim: StringKeyOf<RecType> | undefined
   data: T
   depth: number
@@ -117,15 +128,13 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
   children?: Array<Node<T, KeyFns>>
   #keyFns: KeyFns
   dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>
+  #records: RecType[] = []
   constructor(data: T, keyFns: KeyFns, dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>) {
     this.data = data
     this.depth = 0
     this.height = 0
-    this.#parent = null
     this.#keyFns = keyFns
     this.dims = dims
-    this.dim = undefined
-    this.id = undefined
   }
 
   count = node_count
@@ -150,7 +159,95 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
     )
   }
 
-  find(callback: (node: this) => this, that?: this): this {
+  lookup(id: Exclude<this['id'], undefined> | Array<Exclude<this['id'], undefined>> | Record<string | number | symbol, Exclude<this['id'], undefined>>, exact = true) {
+    const desc = this.descendants()
+
+    if (Array.isArray(id)) {
+      if (exact) {
+        return desc.find(node => difference(
+          node.idPath,
+          id
+        ).length === 0 && difference(
+          id,
+          node.idPath
+        ).length === 0)
+      }
+      else {
+        return desc.find(node => intersection(
+          node.idPath,
+          id
+        ).length > 0)
+      }
+    }
+    else if (isObjectLike(id)) {
+      if (exact) {
+        return desc.find(node => isEqual(
+          zipObject(
+            node.dimPath,
+            node.idPath
+          ),
+          id
+        ))
+      }
+
+      else {
+        return desc.find(node => contains(
+          id,
+          zipObject(
+            node.dimPath,
+            node.idPath
+          )
+        ))
+      }
+    }
+    return desc.find(node => node.id === id)
+  }
+
+  lookupMany(id: Exclude<this['id'], undefined> | Array<Exclude<this['id'], undefined>> | Record<string | number | symbol, Exclude<this['id'], undefined>>, exact = true) {
+    const desc = this.descendants()
+
+    if (Array.isArray(id)) {
+      if (exact) {
+        return desc.filter(node => difference(
+          node.idPath,
+          id
+        ).length === 0 && difference(
+          id,
+          node.idPath
+        ).length === 0)
+      }
+      else {
+        return desc.filter(node => intersection(
+          node.idPath,
+          id
+        ).length > 0)
+      }
+    }
+    else if (isObjectLike(id)) {
+      if (exact) {
+        return desc.filter(node => isEqual(
+          zipObject(
+            node.dimPath,
+            node.idPath
+          ),
+          id
+        ))
+      }
+
+      else {
+        return desc.filter(node => contains(
+          id,
+          zipObject(
+            node.dimPath,
+            node.idPath
+          )
+        ))
+      }
+    }
+    return desc.filter(node => node.id === id)
+  }
+
+  find(callback: (node: this) => boolean, that?: this): this {
     return node_find.bind(this)(
       callback,
       that
@@ -161,7 +258,17 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
   sort(...args: Parameters<typeof node_sort>) { return node_sort.bind(this)(...args) }
   path(end: this): this[] { return node_path.bind(this)(end) }
   ancestors(...args: Parameters<typeof node_ancestors>) { return node_ancestors.bind(this)(...args) as this[] }
-  descendants(...args: Parameters<typeof node_descendants>) { return node_descendants.bind(this)(...args) }
+  descendants(...args: Parameters<typeof node_descendants>) { return node_descendants.bind(this)(...args) as this[] }
+  descendantsAt(depthOrDim: number | keyof RecType, ...args: Parameters<typeof node_descendants>) {
+    return node_descendants.bind(this)(...args).filter((node) => {
+      if (typeof depthOrDim === 'number')
+        return node.depth === depthOrDim
+
+      else
+        return node.dim === depthOrDim
+    }) as this[]
+  }
+
   leaves() { return node_leaves.bind(this)() as this[] }
   links(...args: Parameters<typeof node_links>) { return node_links.bind(this)(...args) }
   color(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
@@ -177,18 +284,23 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
     return colorObject[this.id as string]
   }
 
-  get idPath() {
-    return this.ancestors().map(ancestor => ancestor.id)
+  setIds() {
+    this.idPath = this.ancestors().map(ancestor => ancestor.id)
       .filter(v => v !== undefined) as unknown as JsonPrimitive[]
-  }
-
-  get dimPath() {
-    return this.ancestors().map(ancestor => ancestor.dim)
-      .filter(v => v !== undefined) as unknown as JsonPrimitive[]
+    this.dimPath = this.ancestors().map(ancestor => ancestor.dim)
+      .filter(v => v !== undefined) as unknown as Array<keyof RecType>
+    if (typeof this.children === 'undefined' || !this.parent) {
+      delete this.idPath
+      delete this.dimPath
+    }
   }
 
   get records() {
-    return this.leaves().map(leaf => leaf.data) as RecType[]
+    return this.#records
+  }
+
+  set records(records: RecType[]) {
+    this.#records = records
   }
 
   get keyFn() {

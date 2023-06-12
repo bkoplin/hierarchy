@@ -12,254 +12,384 @@
     - {}
   depth: 1
   dim: region
+  dimPath:
+    - region
   dims:
     - region
     - education_level
     - state
   height: 3
   id: South
+  idPath:
+    - South
 - data:
     - Northeast
     - {}
   depth: 1
   dim: region
+  dimPath:
+    - region
   dims:
     - region
     - education_level
     - state
   height: 3
   id: Northeast
+  idPath:
+    - Northeast
 - data:
     - West
     - {}
   depth: 1
   dim: region
+  dimPath:
+    - region
   dims:
     - region
     - education_level
     - state
   height: 3
   id: West
+  idPath:
+    - West
 - data:
     - Midwest
     - {}
   depth: 1
   dim: region
+  dimPath:
+    - region
   dims:
     - region
     - education_level
     - state
   height: 3
   id: Midwest
+  idPath:
+    - Midwest
 - data:
     - Bachelor's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Bachelor's Degree
+  idPath:
+    - Bachelor's Degree
+    - South
 - data:
     - Doctorate Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Doctorate Degree
+  idPath:
+    - Doctorate Degree
+    - South
 - data:
     - High School
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: High School
+  idPath:
+    - High School
+    - South
 - data:
     - Master's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Master's Degree
+  idPath:
+    - Master's Degree
+    - South
 - data:
     - Associate's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Associate's Degree
+  idPath:
+    - Associate's Degree
+    - South
 - data:
     - High School
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: High School
+  idPath:
+    - High School
+    - Northeast
 - data:
     - Some College
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Some College
+  idPath:
+    - Some College
+    - Northeast
 - data:
     - Doctorate Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Doctorate Degree
+  idPath:
+    - Doctorate Degree
+    - Northeast
 - data:
     - Bachelor's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Bachelor's Degree
+  idPath:
+    - Bachelor's Degree
+    - Northeast
 - data:
     - Associate's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Associate's Degree
+  idPath:
+    - Associate's Degree
+    - Northeast
 - data:
     - Master's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Master's Degree
+  idPath:
+    - Master's Degree
+    - Northeast
 - data:
     - Some College
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Some College
+  idPath:
+    - Some College
+    - West
 - data:
     - Bachelor's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Bachelor's Degree
+  idPath:
+    - Bachelor's Degree
+    - West
 - data:
     - Doctorate Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Doctorate Degree
+  idPath:
+    - Doctorate Degree
+    - West
 - data:
     - Master's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Master's Degree
+  idPath:
+    - Master's Degree
+    - West
 - data:
     - Associate's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Associate's Degree
+  idPath:
+    - Associate's Degree
+    - West
 - data:
     - Some College
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Some College
+  idPath:
+    - Some College
+    - Midwest
 - data:
     - Associate's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Associate's Degree
+  idPath:
+    - Associate's Degree
+    - Midwest
 - data:
     - Bachelor's Degree
     - {}
   depth: 2
   dim: education_level
+  dimPath:
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 2
   id: Bachelor's Degree
+  idPath:
+    - Bachelor's Degree
+    - Midwest
 - data:
     - Missouri
     - - crime_rate: 998.33
@@ -274,12 +404,20 @@
         unemployment_rate: 43.28
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Missouri
+  idPath:
+    - Missouri
+    - Bachelor's Degree
+    - South
 - data:
     - Massachusetts
     - - crime_rate: 922.47
@@ -294,12 +432,20 @@
         unemployment_rate: 54.88
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Massachusetts
+  idPath:
+    - Massachusetts
+    - Doctorate Degree
+    - South
 - data:
     - Tennessee
     - - crime_rate: 15.13
@@ -314,12 +460,20 @@
         unemployment_rate: 20.9
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Tennessee
+  idPath:
+    - Tennessee
+    - High School
+    - South
 - data:
     - New Mexico
     - - crime_rate: 697.82
@@ -334,12 +488,20 @@
         unemployment_rate: 19.34
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: New Mexico
+  idPath:
+    - New Mexico
+    - Master's Degree
+    - South
 - data:
     - New Mexico
     - - crime_rate: 677.97
@@ -354,12 +516,20 @@
         unemployment_rate: 75.17
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: New Mexico
+  idPath:
+    - New Mexico
+    - Associate's Degree
+    - South
 - data:
     - Louisiana
     - - crime_rate: 774.78
@@ -374,12 +544,20 @@
         unemployment_rate: 85.21
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Louisiana
+  idPath:
+    - Louisiana
+    - High School
+    - Northeast
 - data:
     - New Jersey
     - - crime_rate: 989.46
@@ -394,12 +572,20 @@
         unemployment_rate: 79.45
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: New Jersey
+  idPath:
+    - New Jersey
+    - High School
+    - Northeast
 - data:
     - Rhode Island
     - - crime_rate: 829.65
@@ -414,12 +600,20 @@
         unemployment_rate: 1.14
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Rhode Island
+  idPath:
+    - Rhode Island
+    - High School
+    - Northeast
 - data:
     - Pennsylvania
     - - crime_rate: 982.58
@@ -434,12 +628,20 @@
         unemployment_rate: 62.07
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Pennsylvania
+  idPath:
+    - Pennsylvania
+    - High School
+    - Northeast
 - data:
     - Delaware
     - - crime_rate: 974.77
@@ -454,12 +656,20 @@
         unemployment_rate: 22.02
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Delaware
+  idPath:
+    - Delaware
+    - Some College
+    - Northeast
 - data:
     - Oklahoma
     - - crime_rate: 312.77
@@ -474,12 +684,20 @@
         unemployment_rate: 64.42
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Oklahoma
+  idPath:
+    - Oklahoma
+    - Doctorate Degree
+    - Northeast
 - data:
     - Pennsylvania
     - - crime_rate: 981.11
@@ -494,12 +712,20 @@
         unemployment_rate: 88.16
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Pennsylvania
+  idPath:
+    - Pennsylvania
+    - Doctorate Degree
+    - Northeast
 - data:
     - Colorado
     - - crime_rate: 472.47
@@ -514,12 +740,20 @@
         unemployment_rate: 81.97
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Colorado
+  idPath:
+    - Colorado
+    - Bachelor's Degree
+    - Northeast
 - data:
     - California
     - - crime_rate: 577.4
@@ -534,12 +768,20 @@
         unemployment_rate: 28.84
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: California
+  idPath:
+    - California
+    - Bachelor's Degree
+    - Northeast
 - data:
     - Illinois
     - - crime_rate: 580.89
@@ -554,12 +796,20 @@
         unemployment_rate: 53.77
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Illinois
+  idPath:
+    - Illinois
+    - Associate's Degree
+    - Northeast
 - data:
     - Arizona
     - - crime_rate: 601.82
@@ -574,12 +824,20 @@
         unemployment_rate: 40.55
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Arizona
+  idPath:
+    - Arizona
+    - Master's Degree
+    - Northeast
 - data:
     - Wyoming
     - - crime_rate: 506.81
@@ -594,12 +852,20 @@
         unemployment_rate: 86.43
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Wyoming
+  idPath:
+    - Wyoming
+    - Some College
+    - West
 - data:
     - Utah
     - - crime_rate: 62.68
@@ -614,12 +880,20 @@
         unemployment_rate: 40.89
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Utah
+  idPath:
+    - Utah
+    - Some College
+    - West
 - data:
     - Arkansas
     - - crime_rate: 718.57
@@ -634,12 +908,20 @@
         unemployment_rate: 42.05
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Arkansas
+  idPath:
+    - Arkansas
+    - Bachelor's Degree
+    - West
 - data:
     - Arkansas
     - - crime_rate: 693.4
@@ -654,12 +936,20 @@
         unemployment_rate: 61.83
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Arkansas
+  idPath:
+    - Arkansas
+    - Doctorate Degree
+    - West
 - data:
     - Hawaii
     - - crime_rate: 871.71
@@ -674,12 +964,20 @@
         unemployment_rate: 41.79
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Hawaii
+  idPath:
+    - Hawaii
+    - Master's Degree
+    - West
 - data:
     - Oregon
     - - crime_rate: 356.88
@@ -694,12 +992,20 @@
         unemployment_rate: 35.29
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Oregon
+  idPath:
+    - Oregon
+    - Associate's Degree
+    - West
 - data:
     - Minnesota
     - - crime_rate: 784.69
@@ -714,12 +1020,20 @@
         unemployment_rate: 48.93
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Minnesota
+  idPath:
+    - Minnesota
+    - Some College
+    - Midwest
 - data:
     - Maryland
     - - crime_rate: 568.42
@@ -734,12 +1048,20 @@
         unemployment_rate: 34.94
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Maryland
+  idPath:
+    - Maryland
+    - Some College
+    - Midwest
 - data:
     - Wisconsin
     - - crime_rate: 514.82
@@ -754,12 +1076,20 @@
         unemployment_rate: 37.03
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Wisconsin
+  idPath:
+    - Wisconsin
+    - Associate's Degree
+    - Midwest
 - data:
     - Idaho
     - - crime_rate: 421.59
@@ -774,12 +1104,20 @@
         unemployment_rate: 85.54
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: Idaho
+  idPath:
+    - Idaho
+    - Associate's Degree
+    - Midwest
 - data:
     - New Hampshire
     - - crime_rate: 715.31
@@ -794,12 +1132,20 @@
         unemployment_rate: 20.11
   depth: 3
   dim: state
+  dimPath:
+    - state
+    - education_level
+    - region
   dims:
     - region
     - education_level
     - state
   height: 1
   id: New Hampshire
+  idPath:
+    - New Hampshire
+    - Bachelor's Degree
+    - Midwest
 - data:
     crime_rate: 998.33
     education_level: Bachelor's Degree

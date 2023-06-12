@@ -1,22 +1,18 @@
 [
+  undefined,
   [
     "Missouri",
     "Bachelor's Degree",
     "South",
   ],
   [
-    "Missouri",
-    "Bachelor's Degree",
-    "South",
-  ],
-  [
     "Bachelor's Degree",
     "South",
   ],
   [
     "South",
   ],
-  [],
+  undefined,
   [
     "Northeast",
   ],
@@ -29,9 +25,5 @@
     "Doctorate Degree",
     "Northeast",
   ],
-  [
-    "Oklahoma",
-    "Doctorate Degree",
-    "Northeast",
-  ],
+  undefined,
 ]
