@@ -1,29 +1,37 @@
 [
-  undefined,
   [
-    "Missouri",
+    "New Hampshire",
     "Bachelor's Degree",
-    "South",
+    "Midwest",
+  ],
+  [
+    "New Hampshire",
+    "Bachelor's Degree",
+    "Midwest",
   ],
   [
     "Bachelor's Degree",
-    "South",
+    "Midwest",
   ],
   [
-    "South",
+    "Midwest",
   ],
-  undefined,
+  [],
   [
-    "Northeast",
-  ],
-  [
-    "Doctorate Degree",
-    "Northeast",
+    "West",
   ],
   [
-    "Oklahoma",
-    "Doctorate Degree",
-    "Northeast",
+    "Some College",
+    "West",
   ],
-  undefined,
+  [
+    "Wyoming",
+    "Some College",
+    "West",
+  ],
+  [
+    "Wyoming",
+    "Some College",
+    "West",
+  ],
 ]

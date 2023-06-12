@@ -1,5 +1,5 @@
 import type {
-  FixedLengthArray, JsonObject, JsonPrimitive, StringKeyOf,
+  FixedLengthArray, Get, JsonPrimitive, StringKeyOf, ValueOf,
 } from 'type-fest'
 import {
   difference,
@@ -31,18 +31,20 @@ import node_path from './path.js'
 import node_links from './links.js'
 import node_iterator from './iterator'
 
-// export function hierarchy<T>(): Node<>
-export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>] | string, 1 | 2 | 3 | 4 | 5 | 6>>(values: T[], ...childrenFns: KeyFns) {
-  const [ firstChildFn, ] = childrenFns
+export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 1>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 1>], T>
+export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 2>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 2>], T>
+export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 3>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 3>], T>
+export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 4>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 4>], T>
+export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 1 | 2 | 3 | 4>>(values: T[], ...childrenFns: KeyFns) {
   const funcs = childrenFns.map((c) => {
-    if (typeof c === 'string') {
-      return d => prop(
+    if (Array.isArray(c)) {
+      return c[1]
+    }
+    else {
+      return (d: T): Get<T, typeof c> => prop(
         c,
         d
       )
-    }
-    else {
-      return c[1]
     }
   })
   const dims = childrenFns.map((c) => {
@@ -54,12 +56,12 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>]
   })
   const data = [
     undefined,
-    group<T, FixedLengthArray<KeyFn<T>, L.Length<KeyFns>>>(
+    group(
       values,
       ...funcs
     ),
   ] as const
-  const children = (d) => {
+  const children = <Data>(d: [unknown, Data]) => {
     return Array.isArray(d) ? d[1] : null
   }
   const root = new Node(
@@ -67,26 +69,32 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>]
     funcs,
     dims
   )
-  let node
   const nodes = [ root, ]
-  let child
-  let childs
-  let i
-  let n
+  let node: Node<[undefined, NestedMap<T, L.Length<KeyFns>>], T>
 
-  while (node = nodes.pop()) {
-    if ((childs = children(node.data)) && (n = (childs = Array.from(childs)).length)) {
-      node.children = childs
-      for (i = n - 1; i >= 0; --i) {
-        nodes.push(child = childs[i] = new Node(
-          childs[i],
+  node = nodes.pop() as Node<[undefined, NestedMap<T, L.Length<KeyFns>>], T>
+  while (typeof node !== 'undefined') {
+    const childs = children(node.data)
+
+    if (childs) {
+      const childArray = Array.from(childs)
+
+      childArray.reverse().forEach((child, i) => {
+        const nodeChild = new Node(
+          childArray[i],
           funcs,
           dims
-        ))
-        child.parent = node
-        child.depth = node.depth + 1
-      }
+        )
+
+        nodeChild.parent = node
+        nodeChild.depth = node.depth + 1
+        nodes.push(nodeChild)
+        if (typeof node.children === 'undefined')
+          node.children = []
+        node.children.push(nodeChild)
+      })
     }
+    node = nodes.pop()
   }
 
   return root.each((node) => {
@@ -106,7 +114,7 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[keyof T, KeyFn<T>]
     .each((node) => {
       node.records = node.leaves().map(leaf => leaf.data as T)
       node.setIds()
-    }) as unknown as Node<[undefined, NestedMap<T, number & L.Length<KeyFns>>], KeyFns, T>
+    })
 }
 
 function computeHeight(node: Node<any>) {
@@ -115,21 +123,21 @@ function computeHeight(node: Node<any>) {
   do node.height = height
   while ((node = node.parent) && (node.height < ++height))
 }
-export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>, RecType = JsonObject> {
+export class Node<T, RecType> {
   [Symbol.iterator] = node_iterator
   id: JsonPrimitive | undefined
-  idPath: JsonPrimitive[]
-  dimPath: Array<keyof RecType>
+  idPath: Array<ValueOf<RecType>> = []
+  dimPath: Array<keyof RecType> = []
   dim: StringKeyOf<RecType> | undefined
   data: T
   depth: number
   height: number
-  #parent: null | Node<T, KeyFns> = null
-  children?: Array<Node<T, KeyFns>>
-  #keyFns: KeyFns
-  dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>
+  #parent: null | Node<T, RecType> = null
+  children?: Array<Node<T, RecType>>
+  #keyFns: Array<KeyFn<RecType>>
+  dims: Array<keyof RecType>
   #records: RecType[] = []
-  constructor(data: T, keyFns: KeyFns, dims: FixedLengthArray<StringKeyOf<RecType>, L.Length<KeyFns>>) {
+  constructor(data: T, keyFns: Array<KeyFn<RecType>>, dims: Array<keyof RecType>) {
     this.data = data
     this.depth = 0
     this.height = 0
@@ -138,45 +146,43 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
   }
 
   count = node_count
-  each(callback: (node: this) => this, that?: this): this {
+  each(callback: (node: this, index: number) => this, that?: this): this {
     return node_each.bind(this)(
       callback,
       that
     )
   }
 
-  eachBefore(callback: (node: this) => this, that?: this): this {
+  eachBefore(callback: (node: this, index: number) => this, that?: this): this {
     return node_eachBefore.bind(this)(
       callback,
       that
     )
   }
 
-  eachAfter(callback: (node: this) => this, that?: this): this {
+  eachAfter(callback: (node: this, index: number) => this, that?: this): this {
     return node_eachAfter.bind(this)(
       callback,
       that
     )
   }
 
-  lookup(id: Exclude<this['id'], undefined> | Array<Exclude<this['id'], undefined>> | Record<string | number | symbol, Exclude<this['id'], undefined>>, exact = true) {
+  lookup(id: ValueOf<RecType> | Array<ValueOf<RecType>> | Partial<RecType>, exact = true) {
     const desc = this.descendants()
 
     if (Array.isArray(id)) {
       if (exact) {
-        return desc.find(node => difference(
+        return desc.find(node => id.length === node.idPath.length && difference(
           node.idPath,
           id
-        ).length === 0 && difference(
+        ).length === 0)
+      }
+
+      else {
+        return desc.find(node => difference(
           id,
           node.idPath
         ).length === 0)
-      }
-      else {
-        return desc.find(node => intersection(
-          node.idPath,
-          id
-        ).length > 0)
       }
     }
     else if (isObjectLike(id)) {
@@ -289,10 +295,6 @@ export class Node<T, KeyFns extends FixedLengthArray<any, 1 | 2 | 3 | 4 | 5 | 6>
       .filter(v => v !== undefined) as unknown as JsonPrimitive[]
     this.dimPath = this.ancestors().map(ancestor => ancestor.dim)
       .filter(v => v !== undefined) as unknown as Array<keyof RecType>
-    if (typeof this.children === 'undefined' || !this.parent) {
-      delete this.idPath
-      delete this.dimPath
-    }
   }
 
   get records() {

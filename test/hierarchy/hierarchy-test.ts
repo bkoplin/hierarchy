@@ -46,7 +46,7 @@ describe(
         test(
           'id test',
           () => {
-            expect(nested.children?.[0].id).toMatchInlineSnapshot('"South"')
+            expect(nested.children?.[0].id).toMatchInlineSnapshot('"Midwest"')
           }
         )
         test(
@@ -61,13 +61,25 @@ describe(
         test(
           'idPath test',
           () => {
-            expect(nested.leaves()?.[0]?.idPath).toMatchInlineSnapshot('undefined')
+            expect(nested.leaves()?.[0]?.idPath).toMatchInlineSnapshot(`
+              [
+                "New Hampshire",
+                "Bachelor's Degree",
+                "Midwest",
+              ]
+            `)
           }
         )
         test(
           'dimPath test',
           () => {
-            expect(nested.leaves()?.[0]?.dimPath).toMatchInlineSnapshot('undefined')
+            expect(nested.leaves()?.[0]?.dimPath).toMatchInlineSnapshot(`
+              [
+                "state",
+                "education_level",
+                "region",
+              ]
+            `)
           }
         )
         test(
