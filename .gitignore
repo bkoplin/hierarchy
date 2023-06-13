@@ -108,3 +108,13 @@ dist
 .history
 
 .DS_Store
+test/hierarchy/outputs/copy.json
+test/hierarchy/outputs/descendants.yaml
+test/hierarchy/outputs/descendantsAt state.json
+test/hierarchy/outputs/exportJSON.json
+test/hierarchy/outputs/hierarchy.json
+test/hierarchy/outputs/leaves.yaml
+test/hierarchy/outputs/path.json
+test/hierarchy/outputs/pie.json
+
+test/hierarchy/outputs/

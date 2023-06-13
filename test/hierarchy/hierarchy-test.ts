@@ -5,7 +5,7 @@ import yaml from 'yaml'
 import safeStableStringify from 'safe-stable-stringify'
 
 import {
-  at, omit,
+  at, omit, sumBy,
 } from 'lodash-es'
 import { hierarchy, } from '../../src/hierarchy/index'
 
@@ -20,6 +20,11 @@ describe(
       'education_level',
       'state'
     )
+
+    nested.setValues(arr => sumBy(
+      arr,
+      'population'
+    ))
 
     describe(
       'depth and height',
@@ -189,13 +194,54 @@ describe(
         test(
           'copy',
           () => {
-            expect(JSON.parse(safeStableStringify(nested.leaves()[0].parent?.copy()))).toMatchFileSnapshot('./outputs/copy.json')
+            expect(nested.children?.[0]?.copy().exportJSON()).toMatchFileSnapshot('./outputs/copy.json')
           }
         )
         test(
           'export',
           () => {
             expect(nested.leaves()[0].parent?.exportJSON()).toMatchFileSnapshot('./outputs/exportJSON.json')
+          }
+        )
+        test(
+          'makePies',
+          () => {
+            const nestedPie = nested.makePies(
+              Math.PI,
+              Math.PI * 2
+            )
+            expect({parent: nestedPie.children[0].pie, child: nestedPie.children[0].children[0].pie}).toMatchInlineSnapshot(`
+              {
+                "child": {
+                  "degrees": {
+                    "end": 0,
+                    "midPoint": 0,
+                    "padding": 0,
+                    "start": 0,
+                  },
+                  "radians": {
+                    "end": 0,
+                    "midPoint": 0,
+                    "padding": 0,
+                    "start": 0,
+                  },
+                },
+                "parent": {
+                  "degrees": {
+                    "end": 0,
+                    "midPoint": 0,
+                    "padding": 0,
+                    "start": 0,
+                  },
+                  "radians": {
+                    "end": NaN,
+                    "midPoint": NaN,
+                    "padding": NaN,
+                    "start": NaN,
+                  },
+                },
+              }
+            `)
           }
         )
       }

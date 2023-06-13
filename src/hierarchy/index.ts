@@ -1,6 +1,6 @@
 import safeStableStringify from 'safe-stable-stringify'
 import type {
-  FixedLengthArray, Get, IterableElement, JsonPrimitive, Merge, SetRequired, StringKeyOf, ValueOf,
+  FixedLengthArray, Get, JsonPrimitive, SetNonNullable, SetRequired, StringKeyOf, ValueOf,
 } from 'type-fest'
 import {
   difference,
@@ -9,10 +9,13 @@ import {
   uniq, zipObject,
 } from 'lodash-es'
 import chroma from 'chroma-js'
-import type { L, O, } from 'ts-toolbelt'
+import type { L, } from 'ts-toolbelt'
 import {
-  contains, min, prop,
+  contains, length, prop,
 } from 'rambdax'
+import { pie, } from 'd3-shape'
+import { scaleDiverging, } from 'd3-scale'
+import paper from 'paper'
 import type {
   KeyFn, NestedMap,
 } from '../array/types'
@@ -30,8 +33,28 @@ import node_sort from './sort.js'
 import node_path from './path.js'
 import node_links from './links.js'
 import node_iterator from './iterator'
-import { pie } from 'd3-shape'
 
+export const angleConverter = {
+  fromPaper: scaleDiverging()
+    .domain([
+      -180,
+      0,
+      180,
+    ])
+    .range([
+      -0.5 * Math.PI,
+      Math.PI * 0.5,
+      1.5 * Math.PI,
+    ]),
+  toPaper: (radiansRaw: number) => {
+    const pt = new paper.Point({
+      angle: (radiansRaw / Math.PI * 180) + 270,
+      length: 1,
+    })
+
+    return pt.angle
+  },
+}
 export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 1>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 1>], T>
 export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 2>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 2>], T>
 export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 3>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 3>], T>
@@ -127,11 +150,37 @@ export class Node<T, RecType> {
   #parent: null | Node<T, RecType> = null
   children?: Array<Node<T, RecType>>
   #keyFns: Array<KeyFn<RecType>>
+  #valueFn?: (values: RecType[]) => number
   dims: Array<keyof RecType>
-  startAngle: number = 0
-  endAngle: number = 2 * Math.PI
-  padAngle: number = 0
-  value: JsonPrimitive = 0
+  _pie: {
+    radians: {
+      start: number
+      end: number
+      padding: number
+      midPoint: number
+    }
+    degrees: {
+      start: number
+      end: number
+      padding: number
+      midPoint: number
+    }
+  } = {
+      radians: {
+        start: 0,
+        end: 0,
+        padding: 0,
+        midPoint: 0,
+      },
+      degrees: {
+        start: 0,
+        end: 0,
+        padding: 0,
+        midPoint: 0,
+      },
+    }
+
+  value = 0
   _records: RecType[] = []
   constructor(data: T, keyFns: Array<KeyFn<RecType>>, dims: Array<keyof RecType>) {
     this.data = data
@@ -141,23 +190,47 @@ export class Node<T, RecType> {
     this.dims = dims
   }
 
-  setValues(callback: (values: RecType[]) => number) {
-    this.each(node => {
-      node.value = callback(node._records)
+  get pie() {
+    return this._pie
+  }
+
+  set pie(pieDatum) {
+    this._pie = {
+      ...this._pie,
+      ...pieDatum,
+    }
+  }
+
+  get valueFn() {
+    return this.#valueFn ?? length
+  }
+
+  set valueFn(fn: (values: RecType[]) => number) {
+    this.#valueFn = fn
+  }
+
+  setValues(callback?: (values: RecType[]) => number) {
+    return this.each((node) => {
+      if (callback)
+        node.valueFn = callback
+      node.value = node.valueFn(node.records)
     })
   }
 
   copy() {
+    if (this.records.length === 0)
+      this.setRecords()
+    const theseDims = this.dims.slice(this.depth)
+    const theseKeyFns = this.#keyFns.slice(this.depth)
+    const theseRecords = this.records
+
     return hierarchy(
-      this.records,
-      ...this.dims.map((d, i) => [
+      theseRecords,
+      ...theseDims.map((d, i) => [
         d,
-        this.#keyFns[i],
-      ]).slice(
-        0,
-        this.depth - 1
-      )
-    )
+        theseKeyFns[i],
+      ])
+    ).setValues(this.valueFn)
   }
 
   exportJSON() {
@@ -318,7 +391,7 @@ export class Node<T, RecType> {
   }
 
   setRecords() {
-    return this.each(node => node.records = node.leaves().map((leaf): RecType => leaf.data))
+    return this.each(node => node.records = node.leaves().flatMap((leaf): RecType => leaf.data))
   }
 
   setIds() {
@@ -356,94 +429,88 @@ export class Node<T, RecType> {
     this.#parent = parent
   }
 
-  hasChildren(): this is SetRequired<typeof this, 'children'> {
-    return (this.children?? []).length > 0
+  hasChildren(): this is SetRequired<this, 'children'> {
+    return (this.children ?? []).length > 0
+  }
+
+  hasParent(): this is SetNonNullable<this, 'parent'> {
+    return !!this.parent
   }
 
   makePies(
-    pieStart: number,
-    pieEnd: number,
-    piePadding = 0,
-    paddingMaxDepth = 1
+    pieStart?: number,
+    pieEnd?: number,
+    padAngle?: number
   ) {
-  
-    return this.eachBefore((node) => {
-      if (node.height !== 0 && node.depth !== 0) {
-        if (node.parent!.hasChildren()) {
-          const children = node.parent.children
-          const minParentArcWidth = children.map(p => p.endAngle ?? 0 - p.startAngle ?? 0).reduce((a, b) => Math.min(
-            a,
-            b
-          ))
-          const nodePadAngle = node.depth === 1 ?
-            piePadding :
-            node.depth <= paddingMaxDepth ?
-              min(
-                node.parent.padAngle,
-                minParentArcWidth
-              ) / children.length :
-              0
-          const nodePieStart = node.depth === 1 ? (pieStart) : (node.parent.startAngle)
-          const nodePieEnd = node.depth === 1 ? (pieEnd) : (node.parent.endAngle)
-          const pies = pie<IterableElement<typeof node['children']>>()
-            .startAngle(nodePieStart)
-            .endAngle(nodePieEnd)
-            .padAngle(nodePadAngle)
-            .sort((a, b) => {
-            // const sortA = a.leaves()[0]?.data?.[inputs.value.sourceName.value]
-              if ((a.value ?? 0) > (b.value ?? 0))
-                return pieStart > Math.PI ? 1 : -1
-              if ((a.value ?? 0) < (b.value ?? 0))
-                return pieStart > Math.PI ? -1 : 1
-              return 0
-            })
-            .value(d => d.value ?? 1)(children)
-  
-          pies.forEach((p, i) => {
-            if (p.data.id === node.id) {
-              const {
-                startAngle: startAngleIn, endAngle: endAngleIn, padAngle,
-              } = p
-              const startAngle = startAngleIn
-              const endAngle = endAngleIn - padAngle
-  
-              node.padAngle = padAngle
-              node.startAngle = startAngle
-              node.endAngle = endAngle
-              const arcWidthRadians = endAngleIn - startAngleIn - padAngle
-              const halfAngle = arcWidthRadians / 2
-              const rotationsRaw = (halfAngle + startAngle) / 2 / Math.PI
-              const rotations = halfAngle + startAngle < 0 ?
-                rotationsRaw - Math.ceil(rotationsRaw) :
-                rotationsRaw - Math.floor(rotationsRaw)
-              const paperMidPoint = angleConverter.toPaper(halfAngle + startAngle)
-  
-              node.midPointAngle = {
-                radians: halfAngle + startAngle,
-                degrees: ((halfAngle + startAngle) * 180) / Math.PI,
-                paper: paperMidPoint,
-                rotations,
-                side: paperMidPoint < 0 ? paperMidPoint > -90 ? 'right' : 'left' : paperMidPoint > 90 ? 'left' : 'right',
-              }
-              node.nodeArcWidth = {
-                radians: arcWidthRadians,
-                degrees: (arcWidthRadians * 180) / Math.PI,
-              }
-              node.paperAngles = {
-                startAngle: angleConverter.toPaper(node.startAngle),
-                endAngle: angleConverter.toPaper(node.endAngle),
-                padAngle: (node.padAngle * 180) / Math.PI,
-                midPointAngle: paperMidPoint,
-              }
-            }
-          })
-        }
-      }
-    }))
+    this.eachBefore(node => makePie<T, RecType>(
+      this,
+      node,
+      pieStart,
+      pieEnd,
+      padAngle
+    ))
+  }
+
+  // makePies(
+  //   pieStart: number,
+  //   pieEnd: number,
+  //   padAngle = 0
+  // ) {
+  //   this.eachBefore((node) => {
+  //     if (node.depth === this.depth) {
+  //       node.makePie(
+  //         pieStart,
+  //         pieEnd,
+  //         padAngle
+  //       )
+  //     }
+  //     else {
+  //       node.makePie(
+  //         node.parent!.pie.radians.start,
+  //         node.parent!.pie.radians.end,
+  //         node.parent!.pie.radians.padding
+  //       )
+  //     }
+  //   })
+  // }
 }
 
-// Node.prototype = hierarchy.prototype = {
-//   constructor: Node,
+function makePie<T, RecType>(that: Node<T, RecType>, node: Node<T, RecType>, pieStart: number | undefined, pieEnd: number | undefined, padAngle: number | undefined) {
+  if (that.hasChildren()) {
+    const children = that.children!
+    const values = children.map(child => child.value)
+    const pies = pie().startAngle(that.depth === node.depth ? (pieStart ?? that.pie.radians.start) : that.parent?.pie.radians.end)
+      .endAngle(that.depth === node.depth ? (pieEnd ?? that.pie.radians.end) : that.parent?.pie.radians.end)
+      .padAngle(that.depth === node.depth ? (padAngle ?? that.pie.radians.padding) : that.parent?.pie.radians.end)
+      .value(d => d.value)(that.children)
+
+    // .startAngle(pieStart ?? that.pie.radians.start)
+    // .endAngle(pieEnd ?? that.pie.radians.end)
+    // .padAngle(padAngle ?? that.pie.radians.padding)(values)
+    pies.forEach((pieDatum, i) => {
+      const pieObject = {
+        start: pieDatum.startAngle,
+        end: pieDatum.endAngle,
+        padding: pieDatum.padAngle,
+        midPoint: (pieDatum.startAngle + pieDatum.endAngle) / 2,
+      }
+      const radians = pieObject
+      const degrees = {
+        start: angleConverter.toPaper(pieObject.start),
+        end: angleConverter.toPaper(pieObject.end),
+        padding: angleConverter.toPaper(pieObject.padding),
+        midPoint: angleConverter.toPaper(pieObject.midPoint),
+      }
+
+      that.children[i].pie = {
+        radians,
+        degrees,
+      }
+    })
+  }
+}
+// this.prototype = hierarchy.prototype = {
+//   constructor: this,
 //   count: node_count,
 //   each: node_each,
 //   eachAfter: node_eachAfter,
