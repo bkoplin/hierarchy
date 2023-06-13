@@ -3,6 +3,7 @@ import type {
   FixedLengthArray, Get, JsonPrimitive, SetNonNullable, SetRequired, StringKeyOf, ValueOf,
 } from 'type-fest'
 import {
+  clone,
   difference,
   isEqual,
   isObjectLike,
@@ -13,6 +14,7 @@ import type { L, } from 'ts-toolbelt'
 import {
   contains, length, prop,
 } from 'rambdax'
+import type { PieArcDatum, } from 'd3-shape'
 import { pie, } from 'd3-shape'
 import { scaleDiverging, } from 'd3-scale'
 import paper from 'paper'
@@ -115,7 +117,10 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, Ke
         nodes.push(nodeChild)
         if (typeof node.children === 'undefined')
           node.children = []
-        node.children.push(nodeChild)
+        node.children = [
+          ...node.children,
+          nodeChild,
+        ]
       })
     }
     node = nodes.pop()
@@ -130,6 +135,7 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, Ke
     })
     .setIds()
     .setRecords()
+    .setValues()
 }
 
 function computeHeight(node: Node<any>) {
@@ -137,6 +143,28 @@ function computeHeight(node: Node<any>) {
 
   do node.height = height
   while ((node = node.parent) && (node.height < ++height))
+}
+
+class Angle extends Number {
+  constructor(public radians: number) {
+    super(radians)
+    this.radians = radians
+  }
+
+  get degrees() {
+    return angleConverter.toPaper(this.radians)
+  }
+
+  valueOf() {
+    return this.radians
+  }
+
+  toJSON() {
+    return {
+      radians: this.radians,
+      degrees: this.degrees,
+    }
+  }
 }
 export class Node<T, RecType> {
   [Symbol.iterator] = node_iterator
@@ -150,59 +178,55 @@ export class Node<T, RecType> {
   #parent: null | Node<T, RecType> = null
   children?: Array<Node<T, RecType>>
   #keyFns: Array<KeyFn<RecType>>
-  #valueFn?: (values: RecType[]) => number
-  dims: Array<keyof RecType>
-  _pie: {
-    radians: {
-      start: number
-      end: number
-      padding: number
-      midPoint: number
-    }
-    degrees: {
-      start: number
-      end: number
-      padding: number
-      midPoint: number
-    }
-  } = {
-      radians: {
-        start: 0,
-        end: 0,
-        padding: 0,
-        midPoint: 0,
-      },
-      degrees: {
-        start: 0,
-        end: 0,
-        padding: 0,
-        midPoint: 0,
-      },
-    }
+  #valueFn: (values: RecType[]) => number = length
+  #startAngle = new Angle(0)
+  #endAngle = new Angle(2 * Math.PI)
+  #padAngle = {
+    radians: 0,
+    degrees: 0,
+  }
+
+  #dims: Array<keyof RecType>
 
   value = 0
-  _records: RecType[] = []
+  #records: RecType[] = []
   constructor(data: T, keyFns: Array<KeyFn<RecType>>, dims: Array<keyof RecType>) {
     this.data = data
     this.depth = 0
     this.height = 0
     this.#keyFns = keyFns
-    this.dims = dims
+    this.#dims = dims
   }
 
-  get pie() {
-    return this._pie
+  get startAngle(): Angle {
+    return this.#startAngle
   }
 
-  set pie(pieDatum) {
-    this._pie = {
-      ...this._pie,
-      ...pieDatum,
+  set startAngle(radians: number) {
+    this.#startAngle = new Angle(radians)
+  }
+
+  get endAngle(): Angle {
+    return this.#endAngle
+  }
+
+  set endAngle(radians: number) {
+    this.#endAngle = new Angle(radians)
+  }
+
+  get padAngle() {
+    return this.#padAngle
+  }
+
+  set padAngle(radians: { radians: number; degrees: number }) {
+    this.#padAngle = {
+      radians: radians.radians,
+      degrees: radians.radians * 180 / Math.PI,
     }
   }
 
   get valueFn() {
-    return this.#valueFn ?? length
+    return this.#valueFn
   }
 
   set valueFn(fn: (values: RecType[]) => number) {
@@ -210,6 +234,8 @@ export class Node<T, RecType> {
   }
 
   setValues(callback?: (values: RecType[]) => number) {
+    if (callback)
+      this.valueFn = callback
     return this.each((node) => {
       if (callback)
         node.valueFn = callback
@@ -220,17 +246,34 @@ export class Node<T, RecType> {
   copy() {
     if (this.records.length === 0)
       this.setRecords()
-    const theseDims = this.dims.slice(this.depth)
+    const theseDims = this.#dims.slice(this.depth)
     const theseKeyFns = this.#keyFns.slice(this.depth)
     const theseRecords = this.records
-
-    return hierarchy(
+    const newH = hierarchy(
       theseRecords,
       ...theseDims.map((d, i) => [
         d,
         theseKeyFns[i],
       ])
-    ).setValues(this.valueFn)
+    )
+
+    newH.setValues(this.valueFn)
+    return newH
+  }
+
+  toJSON() {
+    return {
+      ...clone(this),
+      children: this.children,
+      id: this.id,
+      dim: this.dim,
+      index: this.indexOf(),
+      dimDepth: this.dimDepth(),
+      startAngle: this.startAngle,
+      endAngle: this.endAngle,
+      padAngle: this.padAngle,
+      minArcAngle: this.getMinArcAngle()
+    }
   }
 
   exportJSON() {
@@ -240,13 +283,25 @@ export class Node<T, RecType> {
   }
 
   count = node_count
-  each(callback: (node: this, index?: number) => this, that?: this): this {
+  /**
+   * @description Invokes the specified function for node and each descendant in breadth-first order, such that a given node is only visited if all nodes of lesser depth have already been visited, as well as all preceding nodes of the same depth. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this contex
+   * t of the callback.
+   * _See_ https://github.com/d3/d3-hierarchy#node_each
+   *
+   */
+  each(callback: (node: this, index?: number) => this, that?: this) {
     return node_each.bind(this)(
       callback,
       that
     )
   }
 
+  /**
+   * @description Invokes the specified function for node and each descendant in pre-order traversal, such that a given node is only visited after all of its ancestors have already been visited. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this context of the callback.
+   *
+   * _See_ https://github.com/d3/d3-hierarchy#node_eachBefore
+   *
+   */
   eachBefore(callback: (node: this, index?: number) => this, that?: this): this {
     return node_eachBefore.bind(this)(
       callback,
@@ -254,6 +309,12 @@ export class Node<T, RecType> {
     )
   }
 
+  /**
+   * @description Invokes the specified function for node and each descendant in post-order traversal, such that a given node is only visited after all of its descendants have already been visited. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this context of the callback.
+   *
+   * _See_ https://github.com/d3/d3-hierarchy#node_eachAfter
+   *
+   */
   eachAfter(callback: (node: this, index?: number) => this, that?: this): this {
     return node_eachAfter.bind(this)(
       callback,
@@ -396,11 +457,11 @@ export class Node<T, RecType> {
 
   setIds() {
     return this.each((node) => {
-      const thisNodeDim = node.dims?.[node.depth - 1]
+      const thisNodeDim = node.#dims?.[node.depth - 1]
 
       if (typeof thisNodeDim !== 'undefined') {
-        node.dim = thisNodeDim
         node.id = node.data[0]
+        node.dim = thisNodeDim
       }
       node.idPath = node.ancestors().map(ancestor => ancestor.id)
         .filter(v => v !== undefined) as unknown as JsonPrimitive[]
@@ -410,11 +471,11 @@ export class Node<T, RecType> {
   }
 
   get records() {
-    return this._records
+    return this.#records
   }
 
   set records(records: RecType[]) {
-    this._records = records
+    this.#records = records
   }
 
   get keyFn() {
@@ -425,8 +486,9 @@ export class Node<T, RecType> {
     return this.#parent
   }
 
-  set parent(parent: Node<T, KeyFns> | null) {
-    this.#parent = parent
+  set parent(parent: Node<T, RecType> | null) {
+    if (parent instanceof Node)
+      this.#parent = parent
   }
 
   hasChildren(): this is SetRequired<this, 'children'> {
@@ -437,92 +499,86 @@ export class Node<T, RecType> {
     return !!this.parent
   }
 
+  parentList() {
+    if (this.hasParent() && this.parent?.hasChildren())
+      return this.parent.children
+    else return []
+  }
+
+  indexOf() {
+    return this.parent?.children?.findIndex(c => c.id === this.id) ?? 0
+  }
+
+  dimDepth() {
+    return this.#dims.indexOf(this.dim ?? '')
+  }
+
+  getMinArcAngle() {
+    if (this.hasParent() && this.parent.hasChildren()) {
+      const minArcAngle = Math.min(...this.parent.children.map(c => c.endAngle.radians - c.startAngle.radians))
+
+      return {
+        radians: minArcAngle,
+        degrees: minArcAngle * 180 / Math.PI,
+      }
+    }
+  }
+
   makePies(
     pieStart?: number,
     pieEnd?: number,
-    padAngle?: number
+    piePadding?: number
   ) {
-    this.eachBefore(node => makePie<T, RecType>(
-      this,
-      node,
-      pieStart,
-      pieEnd,
-      padAngle
-    ))
-  }
+    const rootPieDepth = this.depth
 
-  // makePies(
-  //   pieStart: number,
-  //   pieEnd: number,
-  //   padAngle = 0
-  // ) {
-  //   this.eachBefore((node) => {
-  //     if (node.depth === this.depth) {
-  //       node.makePie(
-  //         pieStart,
-  //         pieEnd,
-  //         padAngle
-  //       )
-  //     }
-  //     else {
-  //       node.makePie(
-  //         node.parent!.pie.radians.start,
-  //         node.parent!.pie.radians.end,
-  //         node.parent!.pie.radians.padding
-  //       )
-  //     }
-  //   })
-  // }
-}
-
-function makePie<T, RecType>(that: Node<T, RecType>, node: Node<T, RecType>, pieStart: number | undefined, pieEnd: number | undefined, padAngle: number | undefined) {
-  if (that.hasChildren()) {
-    const children = that.children!
-    const values = children.map(child => child.value)
-    const pies = pie().startAngle(that.depth === node.depth ? (pieStart ?? that.pie.radians.start) : that.parent?.pie.radians.end)
-      .endAngle(that.depth === node.depth ? (pieEnd ?? that.pie.radians.end) : that.parent?.pie.radians.end)
-      .padAngle(that.depth === node.depth ? (padAngle ?? that.pie.radians.padding) : that.parent?.pie.radians.end)
-      .value(d => d.value)(that.children)
-
-    // .startAngle(pieStart ?? that.pie.radians.start)
-    // .endAngle(pieEnd ?? that.pie.radians.end)
-    // .padAngle(padAngle ?? that.pie.radians.padding)(values)
-    pies.forEach((pieDatum, i) => {
-      const pieObject = {
-        start: pieDatum.startAngle,
-        end: pieDatum.endAngle,
-        padding: pieDatum.padAngle,
-        midPoint: (pieDatum.startAngle + pieDatum.endAngle) / 2,
+    if (pieStart)
+      this.startAngle = pieStart
+    if (pieEnd)
+      this.endAngle = pieEnd
+    if (piePadding) {
+      this.padAngle = {
+        radians: piePadding,
+        degrees: 0,
       }
-      const radians = pieObject
-      const degrees = {
-        start: angleConverter.toPaper(pieObject.start),
-        end: angleConverter.toPaper(pieObject.end),
-        padding: angleConverter.toPaper(pieObject.padding),
-        midPoint: angleConverter.toPaper(pieObject.midPoint),
-      }
+    }
 
-      that.children[i].pie = {
-        radians,
-        degrees,
+    return this.eachBefore((node) => {
+      if (node.depth <= rootPieDepth || !node.hasParent() || !node.parent?.hasChildren())
+        return
+      const startAngle = node.parent.startAngle.radians
+      const endAngle = node.parent.endAngle.radians
+      const padAngle = node.parent.padAngle.radians
+      const children = node.parent.children
+      let pieGen = pie<Node<T, RecType>>().startAngle(startAngle)
+        .endAngle(endAngle)
+        .value(d => d.value)
+
+      if (node.depth === rootPieDepth + 1) {
+        pieGen = pie<Node<T, RecType>>().startAngle(startAngle)
+          .endAngle(endAngle)
+          .padAngle(padAngle)
+          .value(d => d.value)
       }
+      const pies = pieGen(children)
+
+      pies.forEach((pieDatum, i) => {
+        this.setPieAngles(
+          node,
+          i,
+          pieDatum
+        )
+      })
     })
   }
+
+  private setPieAngles(node: SetNonNullable<this, 'parent'>, i: number, pieDatum: PieArcDatum<any>) {
+    if (node.parent.hasChildren()) {
+      node.parent.children[i].startAngle = pieDatum.startAngle
+      node.parent.children[i].endAngle = pieDatum.endAngle
+      node.parent.children[i].padAngle = {
+        radians: pieDatum.padAngle,
+        degrees: 0,
+      }
+    }
+  }
 }
-// this.prototype = hierarchy.prototype = {
-//   constructor: this,
-//   count: node_count,
-//   each: node_each,
-//   eachAfter: node_eachAfter,
-//   eachBefore: node_eachBefore,
-//   find: node_find,
-//   sum: node_sum,
-//   sort: node_sort,
-//   path: node_path,
-//   ancestors: node_ancestors,
-//   descendants: node_descendants,
-//   leaves: node_leaves,
-//   links: node_links,
-//   copy: node_copy,
-//   [Symbol.iterator]: node_iterator,
-// }
