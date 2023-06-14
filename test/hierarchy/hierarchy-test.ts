@@ -26,11 +26,11 @@ describe(
       () => {
         test(
           'depth',
-          () => expect(nested.leaves()?.[0].depth).toMatchInlineSnapshot('4')
+          () => expect(nested.leaves()?.[0].depth).toBe(4)
         )
         test(
           'height',
-          () => expect(nested.height).toMatchInlineSnapshot('4')
+          () => expect(nested.height).toBe(4)
         )
       }
     )
@@ -40,7 +40,7 @@ describe(
         test(
           'dim of first child to equal \'state\'',
           () => {
-            expect(nested.children?.[0].dim).toMatchInlineSnapshot('"region"')
+            expect(nested.children?.[0].dim).toBe('region')
           }
         )
         test(
@@ -52,7 +52,7 @@ describe(
         test(
           'color test',
           () => {
-            expect(nested.leaves()?.map(d => [
+            expect(nested.descendantsAt({depth: 2})?.map(d => [
               d.id,
               d.color('Paired'),
             ])).toMatchFileSnapshot('./outputs/colors.json')
@@ -85,7 +85,7 @@ describe(
         test(
           'descendantsAt test',
           () => {
-            expect(safelyYaml(nested.descendantsAt('state'))).toMatchFileSnapshot('./outputs/descendantsAt state.json')
+            expect(nested.descendantsAt('state')).toMatchFileSnapshot('./outputs/descendantsAt state.json')
           }
         )
         describe(

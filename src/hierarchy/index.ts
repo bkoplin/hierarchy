@@ -242,7 +242,7 @@ export class Node<
    * @type {(StringKeyOf<RecType> | undefined)}
    * @memberof Node
    */
-  dim: StringKeyOf<RecType> | undefined
+  dim: StringKeyOf<RecType> | string | keyof RecType | undefined
   /**
    * @description the `InternMap` resulting from the `d3.group` function at this level. The leaf nodes' `data` is the `RecType` passed to `hierarchy`
    * @type {Datum|RecType}
@@ -590,12 +590,12 @@ export class Node<
 
   /**
    * @description Returns the descendants of this node at the specified `depth` or `dim`.
-   * @param {RequireExactlyOne<{ depth?: number; dim?: JsonPrimitive }, 'depth' | 'dim'>} depthOrDim
+   * @param {RequireExactlyOne<{ depth?: number; dim?: Node<RecType, Datum>['dim'] }, 'depth' | 'dim'>} depthOrDim
    * @param {never[]} args
    * @returns {Node<RecType, Datum>[]}
    */
   descendantsAt(depthOrDim: RequireExactlyOne<
-      { depth?: number; dim?: JsonPrimitive },
+      { depth?: number; dim?: Node<RecType, Datum>['dim'] },
       'depth' | 'dim'
     >) {
     return this.descendants().filter((node) => {
@@ -630,7 +630,7 @@ export class Node<
   }
 
   ancestorAt(depthOrDim: RequireExactlyOne<
-      { depth?: number; dim?: JsonPrimitive },
+      { depth?: number; dim?: Node<RecType, Datum>['dim'] },
       'depth' | 'dim'
     >) {
     return this.ancestors().find((node) => {
