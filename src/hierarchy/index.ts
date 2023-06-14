@@ -58,9 +58,11 @@ export const angleConverter = {
     ]),
   toPaper: (radiansRaw: number) => {
     const pt = new paper.Point({
-      angle: (radiansRaw / Math.PI) * 180 + 270,
+      // angle: (radiansRaw / Math.PI) * 180 + 270,
       length: 1,
     })
+
+    pt.angleInRadians = radiansRaw - Math.PI * 0.5
 
     return pt.angle
   },
