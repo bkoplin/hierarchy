@@ -21,11 +21,6 @@ describe(
       'state'
     )
 
-    nested.setValues(arr => sumBy(
-      arr,
-      'population'
-    ))
-
     describe(
       'depth and height',
       () => {
@@ -154,7 +149,12 @@ describe(
         test(
           'structure',
           () => {
-            expect(JSON.parse(safeStableStringify(nested))).toMatchFileSnapshot('./outputs/hierarchy.json')
+            expect(JSON.parse(JSON.stringify(nested))).toMatchFileSnapshot('./outputs/hierarchy.json')
+            nested.setValues(arr => sumBy(
+              arr,
+              'population'
+            ))
+            expect(JSON.parse(JSON.stringify(nested))).toMatchFileSnapshot('./outputs/hierarchy_summed.json')
           }
         )
 
@@ -194,54 +194,28 @@ describe(
         test(
           'copy',
           () => {
-            expect(nested.children?.[0]?.copy().exportJSON()).toMatchFileSnapshot('./outputs/copy.json')
-          }
-        )
-        test(
-          'export',
-          () => {
-            expect(nested.leaves()[0].parent?.exportJSON()).toMatchFileSnapshot('./outputs/exportJSON.json')
+            expect(nested.children?.[0]?.copy()).toMatchFileSnapshot('./outputs/copy.json')
           }
         )
         test(
           'makePies',
           () => {
-            const nestedPie = nested.makePies(
+            nested.makePies(
               Math.PI,
-              Math.PI * 2
+              Math.PI * 2,
+              0.01
             )
-            expect({parent: nestedPie.children[0].pie, child: nestedPie.children[0].children[0].pie}).toMatchInlineSnapshot(`
-              {
-                "child": {
-                  "degrees": {
-                    "end": 0,
-                    "midPoint": 0,
-                    "padding": 0,
-                    "start": 0,
-                  },
-                  "radians": {
-                    "end": 0,
-                    "midPoint": 0,
-                    "padding": 0,
-                    "start": 0,
-                  },
-                },
-                "parent": {
-                  "degrees": {
-                    "end": 0,
-                    "midPoint": 0,
-                    "padding": 0,
-                    "start": 0,
-                  },
-                  "radians": {
-                    "end": NaN,
-                    "midPoint": NaN,
-                    "padding": NaN,
-                    "start": NaN,
-                  },
-                },
-              }
-            `)
+
+            const pieNodes = nested.descendants().map(d => ({
+              id: d.id,
+              startAngle: d.startAngle,
+              endAngle: d.endAngle,
+              padAngle: d.padAngle,
+              minArcAngle: d.getMinArcAngle(),
+            }))
+              .filter(d => typeof d.id !== 'undefined')
+
+            expect(pieNodes).toMatchFileSnapshot('./outputs/pies.json')
           }
         )
       }
