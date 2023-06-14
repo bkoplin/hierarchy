@@ -262,6 +262,7 @@ export class Node<
    */
   height: number
   #parent: null | Node<RecType, Datum> = null
+  color?: string
   /**
    * @description the child nodes of the node. Leaf nodes have no children
    * @type {Array<Node<RecType, Datum>>|undefined}
@@ -613,7 +614,17 @@ export class Node<
     return node_links.bind(this)(...args)
   }
 
-  color(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
+  setColors(colorScales: Array<keyof chroma.ChromaStatic['brewer']>) {
+    this.each((node) => {
+      const scale = colorScales[node.dimDepth()]
+
+      if (!scale)
+        return
+      node.color = node.getColor(scale)
+    })
+  }
+
+  getColor(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
     if (typeof this.dim === 'undefined')
       return undefined
     const root = this.ancestors().reverse()[0]

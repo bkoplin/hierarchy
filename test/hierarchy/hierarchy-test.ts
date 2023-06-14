@@ -21,6 +21,12 @@ describe(
       'state'
     )
 
+    nested.setColors([
+      'Paired',
+      'Accent',
+      'Spectral',
+    ])
+
     describe(
       'depth and height',
       () => {
@@ -52,9 +58,9 @@ describe(
         test(
           'color test',
           () => {
-            expect(nested.descendantsAt({depth: 2})?.map(d => [
+            expect(nested.descendants()?.map(d => [
               d.id,
-              d.color('Paired'),
+              d.color,
             ])).toMatchFileSnapshot('./outputs/colors.json')
           }
         )
