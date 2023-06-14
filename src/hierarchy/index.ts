@@ -383,7 +383,7 @@ export class Node<
       id: this.id,
       dim: this.dim,
       indexOf: this.indexOf(),
-      dimDepth: this.dimDepth(),
+      dimIndexOf: this.dimIndexOf(),
       startAngle: this.startAngle,
       endAngle: this.endAngle,
       padAngle: this.padAngle,
@@ -618,7 +618,7 @@ export class Node<
     if (!Array.isArray(colorScales)) { this.color = this.getColor(colorScales) }
     else {
       this.each((node) => {
-        const scale = colorScales[node.dimDepth()]
+        const scale = colorScales[node.dimIndexOf()]
 
         if (!scale)
           return
@@ -737,14 +737,14 @@ export class Node<
    * @returns {number} the index of this node in its parent's `children` array
    */
   indexOf() {
-    return this.parent?.children?.findIndex(c => c.id === this.id) ?? 0
+    return this.parent?.children?.findIndex(c => c.id === this.id) ?? -1
   }
 
   /**
    * @description the "depth" of this node according to the `keyFns` originally passed to the `hierarchy` function
    * @returns {number} the index of this node's `dim` in the `dims` array
    */
-  dimDepth() {
+  dimIndexOf() {
     return this.#dims.indexOf(this.dim ?? '')
   }
 
