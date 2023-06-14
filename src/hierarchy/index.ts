@@ -614,10 +614,11 @@ export class Node<
   }
 
   color(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
+    if (typeof this.dim === 'undefined')
+      return undefined
     const root = this.ancestors().reverse()[0]
     const ids = uniq(root
-      .descendants()
-      .filter(d => d.dim === this.dim)
+      .descendantsAt({ dim: this.dim, })
       .map(d => d.id)) as string[]
     const colors = chroma.scale(scale).colors(ids.length)
     const colorObject = zipObject(
