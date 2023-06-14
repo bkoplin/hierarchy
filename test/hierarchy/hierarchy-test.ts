@@ -62,6 +62,13 @@ describe(
               d.id,
               d.color,
             ])).toMatchFileSnapshot('./outputs/colors.json')
+            const descendantNode = nested.descendants()[10]
+            const currentColor = descendantNode?.color
+
+            expect(currentColor).toMatchInlineSnapshot('"#d33741"')
+            descendantNode.setColors('Blues')
+            expect(descendantNode?.color).toMatchInlineSnapshot('"#1764ab"')
+            expect(descendantNode?.color).not.toBe(currentColor)
           }
         )
         test(
@@ -217,7 +224,7 @@ describe(
               startAngle: d.startAngle,
               endAngle: d.endAngle,
               padAngle: d.padAngle,
-              minArcAngle: d.getMinArcAngle(),
+              minArcAngle: d.minArcAngle(),
             }))
               .filter(d => typeof d.id !== 'undefined')
 

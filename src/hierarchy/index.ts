@@ -382,12 +382,12 @@ export class Node<
       children: this.children,
       id: this.id,
       dim: this.dim,
-      index: this.indexOf(),
+      indexOf: this.indexOf(),
       dimDepth: this.dimDepth(),
       startAngle: this.startAngle,
       endAngle: this.endAngle,
       padAngle: this.padAngle,
-      minArcAngle: this.getMinArcAngle(),
+      minArcAngle: this.minArcAngle(),
     }
   }
 
@@ -614,14 +614,17 @@ export class Node<
     return node_links.bind(this)(...args)
   }
 
-  setColors(colorScales: Array<keyof chroma.ChromaStatic['brewer']>) {
-    this.each((node) => {
-      const scale = colorScales[node.dimDepth()]
+  setColors(colorScales: Array<keyof chroma.ChromaStatic['brewer']> | keyof chroma.ChromaStatic['brewer']) {
+    if (!Array.isArray(colorScales)) { this.color = this.getColor(colorScales) }
+    else {
+      this.each((node) => {
+        const scale = colorScales[node.dimDepth()]
 
-      if (!scale)
-        return
-      node.color = node.getColor(scale)
-    })
+        if (!scale)
+          return
+        node.color = node.getColor(scale)
+      })
+    }
   }
 
   getColor(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
@@ -745,7 +748,7 @@ export class Node<
     return this.#dims.indexOf(this.dim ?? '')
   }
 
-  getMinArcAngle() {
+  minArcAngle() {
     if (this.hasParent() && this.parent.hasChildren()) {
       const minArcAngle = Math.min(...this.parent.children.map(c => c.endAngle.radians - c.startAngle.radians))
 
