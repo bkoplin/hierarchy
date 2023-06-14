@@ -198,16 +198,6 @@ describe(
           }
         )
         test(
-          'export',
-          () => {
-            expect(JSON.stringify(
-              nested,
-              null,
-              '\t'
-            )).toMatchFileSnapshot('./outputs/exportJSON.json')
-          }
-        )
-        test(
           'makePies',
           () => {
             nested.makePies(

@@ -1,13 +1,21 @@
-import safeStableStringify from 'safe-stable-stringify'
 import type {
-  FixedLengthArray, Get, JsonPrimitive, SetNonNullable, SetRequired, StringKeyOf, ValueOf,
+  FixedLengthArray,
+  Get,
+  JsonObject,
+  JsonPrimitive,
+  RequireExactlyOne,
+  SetNonNullable,
+  SetRequired,
+  StringKeyOf,
+  ValueOf,
 } from 'type-fest'
 import {
   clone,
   difference,
   isEqual,
   isObjectLike,
-  uniq, zipObject,
+  uniq,
+  zipObject,
 } from 'lodash-es'
 import chroma from 'chroma-js'
 import type { L, } from 'ts-toolbelt'
@@ -50,22 +58,51 @@ export const angleConverter = {
     ]),
   toPaper: (radiansRaw: number) => {
     const pt = new paper.Point({
-      angle: (radiansRaw / Math.PI * 180) + 270,
+      angle: (radiansRaw / Math.PI) * 180 + 270,
       length: 1,
     })
 
     return pt.angle
   },
 }
-export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 1>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 1>], T>
-export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 2>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 2>], T>
-export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 3>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 3>], T>
-export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 4>>(values: T[], ...childrenFns: KeyFns): Node<[undefined, NestedMap<T, 4>], T>
-export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>, 1 | 2 | 3 | 4>>(values: T[], ...childrenFns: KeyFns) {
+export function hierarchy<
+  T,
+  KeyFns extends FixedLengthArray<
+    [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
+    1
+  >
+>(values: T[], ...childrenFns: KeyFns): Node<T, [undefined, NestedMap<T, 1>]>
+export function hierarchy<
+  T,
+  KeyFns extends FixedLengthArray<
+    [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
+    2
+  >
+>(values: T[], ...childrenFns: KeyFns): Node<T, [undefined, NestedMap<T, 2>]>
+export function hierarchy<
+  T,
+  KeyFns extends FixedLengthArray<
+    [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
+    3
+  >
+>(values: T[], ...childrenFns: KeyFns): Node<T, [undefined, NestedMap<T, 3>]>
+export function hierarchy<
+  T,
+  KeyFns extends FixedLengthArray<
+    [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
+    4
+  >
+>(values: T[], ...childrenFns: KeyFns): Node<T, [undefined, NestedMap<T, 4>]>
+export function hierarchy<
+  T,
+  KeyFns extends FixedLengthArray<
+    [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
+    1 | 2 | 3 | 4
+  >
+>(values: T[], ...childrenFns: KeyFns) {
   const funcs = childrenFns.map((c) => {
-    if (Array.isArray(c)) {
-      return c[1]
-    }
+    if (Array.isArray(c)) { return c[1] }
+
     else {
       return (d: T): Get<T, typeof c> => prop(
         c,
@@ -76,9 +113,7 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, Ke
   const dims = childrenFns.map((c) => {
     if (typeof c === 'string')
       return c
-
-    else
-      return c[0]
+    else return c[0]
   })
   const data = [
     undefined,
@@ -96,9 +131,9 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, Ke
     dims
   )
   const nodes = [ root, ]
-  let node: Node<[undefined, NestedMap<T, L.Length<KeyFns>>], T>
+  let node: Node<T, [undefined, NestedMap<T, L.Length<KeyFns>>]>
 
-  node = nodes.pop() as Node<[undefined, NestedMap<T, L.Length<KeyFns>>], T>
+  node = nodes.pop() as Node<T, [undefined, NestedMap<T, L.Length<KeyFns>>]>
   while (typeof node !== 'undefined') {
     const childs = children(node.data)
 
@@ -131,7 +166,7 @@ export function hierarchy<T, KeyFns extends FixedLengthArray<[StringKeyOf<T>, Ke
       let height = 0
 
       do node.height = height
-      while ((node = node.parent) && (node.height < ++height))
+      while ((node = node.parent) && node.height < ++height)
     })
     .setIds()
     .setRecords()
@@ -142,9 +177,20 @@ function computeHeight(node: Node<any>) {
   let height = 0
 
   do node.height = height
-  while ((node = node.parent) && (node.height < ++height))
+  while ((node = node.parent) && node.height < ++height)
 }
 
+/**
+ * @description a class that represents an angle in radians, but can be converted to degrees
+ * @extends {Number}
+ * @class Angle
+ * @example
+ * const angle = new Angle(Math.PI)
+ * angle.degrees // 180
+ * angle.radians // Math.PI
+ * angle.valueOf() // Math.PI
+ * angle.toJSON() // { radians: Math.PI, degrees: 180 }
+ */
 class Angle extends Number {
   constructor(public radians: number) {
     super(radians)
@@ -166,19 +212,65 @@ class Angle extends Number {
     }
   }
 }
-export class Node<T, RecType> {
+export class Node<
+  RecType = JsonObject,
+  Datum = Map<undefined, NestedMap<[keyof RecType, RecType], 2>>
+> {
   [Symbol.iterator] = node_iterator
+  /**
+   * @description the `id` of the node at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has an id of `undefined`. The leaf nodes have an id of `undefined`
+   * @type {(ValueOf<RecType> | undefined)}
+   * @memberof Node
+   */
   id: JsonPrimitive | undefined
+  /**
+   * @description the `id` values of the node's ancestors from the root to this level
+   * @type {ValueOf<RecType>[]}
+   * @memberof Node
+   */
   idPath: Array<ValueOf<RecType>> = []
+  /**
+   * @description the `dim` values of the node's ancestors from the root to this level
+   * @type {ValueOf<RecType>[]}
+   * @memberof Node
+   */
   dimPath: Array<keyof RecType> = []
+  /**
+   * @description the `key` of the `RecType` at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has a `dim` of `undefined`. The leaf nodes have a `dim` of `undefined`
+   * @type {(StringKeyOf<RecType> | undefined)}
+   * @memberof Node
+   */
   dim: StringKeyOf<RecType> | undefined
-  data: T
+  /**
+   * @description the `InternMap` resulting from the `d3.group` function at this level. The leaf nodes' `data` is the `RecType` passed to `hierarchy`
+   * @type {Datum|RecType}
+   * @memberof Node
+   */
+  data: Datum
+  /**
+   * @description the depth of the node in the hierarchy. The root node has a depth of `0`. The leaf nodes have a depth of `dims.length + 1`
+   * @type {number}
+   * @memberof Node
+   */
   depth: number
+  /**
+   * @description the height of the node in the hierarchy. The root node has a height of `dims.length + 1`. The leaf nodes have a depth of `0`
+   * @type {number}
+   * @memberof Node
+   */
   height: number
-  #parent: null | Node<T, RecType> = null
-  children?: Array<Node<T, RecType>>
+  #parent: null | Node<RecType, Datum> = null
+  /**
+   * @description the child nodes of the node. Leaf nodes have no children
+   * @type {Array<Node<RecType, Datum>>|undefined}
+   * @memberof Node
+   */
+  children?: Array<Node<RecType, Datum>>
   #keyFns: Array<KeyFn<RecType>>
   #valueFn: (values: RecType[]) => number = length
+  /**
+   * @description the `Angle` at which the arc of the node starts. If you have not invoked the `makePies` method, the `radians` and `degrees` for this key will be `0`
+   */
   #startAngle = new Angle(0)
   #endAngle = new Angle(2 * Math.PI)
   #padAngle = {
@@ -187,10 +279,19 @@ export class Node<T, RecType> {
   }
 
   #dims: Array<keyof RecType>
-
+  /**
+   * @description the value of the node, as set by the aggregate function passsed to `this.valueFn`
+   * @type {number}
+   * @memberof Node
+   */
   value = 0
   #records: RecType[] = []
-  constructor(data: T, keyFns: Array<KeyFn<RecType>>, dims: Array<keyof RecType>) {
+
+  constructor(
+    data: Datum,
+    keyFns: Array<KeyFn<RecType>>,
+    dims: Array<keyof RecType>
+  ) {
     this.data = data
     this.depth = 0
     this.height = 0
@@ -221,7 +322,7 @@ export class Node<T, RecType> {
   set padAngle(radians: { radians: number; degrees: number }) {
     this.#padAngle = {
       radians: radians.radians,
-      degrees: radians.radians * 180 / Math.PI,
+      degrees: (radians.radians * 180) / Math.PI,
     }
   }
 
@@ -233,6 +334,10 @@ export class Node<T, RecType> {
     this.#valueFn = fn
   }
 
+  /**
+   * @description a function that sets the values of the node and all its children to the result of the callback function. If no callback is passed, the values are set to the length of the node's records at that level
+   * @returns {Node<RecType, Datum>}
+   */
   setValues(callback?: (values: RecType[]) => number) {
     if (callback)
       this.valueFn = callback
@@ -243,6 +348,10 @@ export class Node<T, RecType> {
     })
   }
 
+  /**
+   * @description copies the node and all of its children, setting the records of the new node to the records of the original node. **Note**: This function *re-levels* the node, meaning that it creates new `height` and `depth` values so that *this* node becomes the root node of the new hierarchy
+   * @returns {Node<RecType, Datum>}
+   */
   copy() {
     if (this.records.length === 0)
       this.setRecords()
@@ -261,6 +370,9 @@ export class Node<T, RecType> {
     return newH
   }
 
+  /**
+   * @description supports the `JSON.stringify` function. Not all functions and properties return from this function.
+   */
   toJSON() {
     return {
       ...clone(this),
@@ -272,14 +384,8 @@ export class Node<T, RecType> {
       startAngle: this.startAngle,
       endAngle: this.endAngle,
       padAngle: this.padAngle,
-      minArcAngle: this.getMinArcAngle()
+      minArcAngle: this.getMinArcAngle(),
     }
-  }
-
-  exportJSON() {
-    return JSON.parse(safeStableStringify(this.copy().eachAfter((node) => {
-      delete node.data
-    })))
   }
 
   count = node_count
@@ -289,7 +395,7 @@ export class Node<T, RecType> {
    * _See_ https://github.com/d3/d3-hierarchy#node_each
    *
    */
-  each(callback: (node: this, index?: number) => this, that?: this) {
+  each(callback: (node: Node<RecType, Datum>, index?: number) => void, that?: Node<RecType, Datum>): this {
     return node_each.bind(this)(
       callback,
       that
@@ -302,7 +408,10 @@ export class Node<T, RecType> {
    * _See_ https://github.com/d3/d3-hierarchy#node_eachBefore
    *
    */
-  eachBefore(callback: (node: this, index?: number) => this, that?: this): this {
+  eachBefore(
+    callback: (node: this, index?: number) => this,
+    that?: this
+  ): this {
     return node_eachBefore.bind(this)(
       callback,
       that
@@ -322,17 +431,27 @@ export class Node<T, RecType> {
     )
   }
 
-  lookup(id: ValueOf<RecType> | Array<ValueOf<RecType>> | Partial<RecType>, exact = true) {
+  /**
+   * @description Returns the first `descendant` of this node that matches the `id` passed to the function. The second parameter is a boolean that determines whether the `id` must match exactly or if it can be a subset of the `id` of the node.
+   * @param {ValueOf<RecType> | Array<ValueOf<RecType>> | Partial<RecType>} id An `id` value, a full or partial `idPath` value, or a lookup object
+   * @param {[true]} exact whether to match the `id` parameter exactly, or to return the first node that contains the `id` parameter
+   * @returns {Node<RecType, Datum> | undefined}
+   */
+  lookup(
+    id: ValueOf<RecType> | Array<ValueOf<RecType>> | Partial<RecType>,
+    exact = true
+  ) {
     const desc = this.descendants()
 
     if (Array.isArray(id)) {
       if (exact) {
-        return desc.find(node => id.length === node.idPath.length && difference(
-          node.idPath,
-          id
-        ).length === 0)
+        return desc.find(node =>
+          id.length === node.idPath.length &&
+            difference(
+              node.idPath,
+              id
+            ).length === 0)
       }
-
       else {
         return desc.find(node => difference(
           id,
@@ -342,29 +461,42 @@ export class Node<T, RecType> {
     }
     else if (isObjectLike(id)) {
       if (exact) {
-        return desc.find(node => isEqual(
-          zipObject(
-            node.dimPath,
-            node.idPath
-          ),
-          id
-        ))
+        return desc.find(node =>
+          isEqual(
+            zipObject(
+              node.dimPath,
+              node.idPath
+            ),
+            id
+          ))
       }
-
       else {
-        return desc.find(node => contains(
-          id,
-          zipObject(
-            node.dimPath,
-            node.idPath
-          )
-        ))
+        return desc.find(node =>
+          contains(
+            id,
+            zipObject(
+              node.dimPath,
+              node.idPath
+            )
+          ))
       }
     }
     return desc.find(node => node.id === id)
   }
 
-  lookupMany(ids: Array<ValueOf<RecType>> | Array<Array<ValueOf<RecType>>> | Array<Partial<RecType>>, exact = true) {
+  /**
+   * @description Returns the array of all `descendant` nodes of this node that match the `id` passed to the function. The second parameter is a boolean that determines whether the `id` must match exactly or if it can be a subset of the `id` of the node.
+   * @param {Array<ValueOf<RecType>|string> | Array<Array<ValueOf<RecType>|string>> | Array<Partial<RecType>>} id An `id` value, a full or partial `idPath` value, or a lookup object
+   * @param {[true]} exact whether to match the `id` parameter exactly, or to return the first node that contains the `id` parameter
+   * @returns {Node<RecType, Datum>[]}
+   */
+  lookupMany(
+    id:
+      | Array<ValueOf<RecType> | string>
+      | Array<Array<ValueOf<RecType> | string>>
+      | Array<Partial<RecType>>,
+    exact = true
+  ) {
     const desc = this.descendants()
     const [ firstId, ] = ids
 
@@ -407,6 +539,11 @@ export class Node<T, RecType> {
     return desc.find(node => (ids as Array<ValueOf<RecType>>).includes(node.id as ValueOf<RecType>))
   }
 
+  /**
+   * @description Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
+   * @param callback the filter function
+   * @returns {Node<RecType, Datum> | undefined}
+   */
   find(callback: (node: this) => boolean, that?: this): this {
     return node_find.bind(this)(
       callback,
@@ -414,26 +551,71 @@ export class Node<T, RecType> {
     )
   }
 
-  sum(...args: Parameters<typeof node_sum>) { return node_sum.bind(this)(...args) }
-  sort(...args: Parameters<typeof node_sort>) { return node_sort.bind(this)(...args) }
-  path(end: this): this[] { return node_path.bind(this)(end) }
-  ancestors(...args: Parameters<typeof node_ancestors>) { return node_ancestors.bind(this)(...args) as this[] }
-  descendants(...args: Parameters<typeof node_descendants>) { return node_descendants.bind(this)(...args) as this[] }
-  descendantsAt(depthOrDim: number | keyof RecType, ...args: Parameters<typeof node_descendants>) {
-    return node_descendants.bind(this)(...args).filter((node) => {
-      if (typeof depthOrDim === 'number')
-        return node.depth === depthOrDim
+  sum(...args: Parameters<typeof node_sum>) {
+    return node_sum.bind(this)(...args)
+  }
 
-      else
-        return node.dim === depthOrDim
+  sort(...args: Parameters<typeof node_sort>) {
+    return node_sort.bind(this)(...args)
+  }
+
+  path(end: this): this[] {
+    return node_path.bind(this)(end)
+  }
+
+  /**
+   * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
+   *
+   * _See_ https://github.com/d3/d3-hierarchy#ancestors
+   * @param {never[]} args
+   * @returns {Node<RecType, Datum>[]}
+   * @memberof Node
+   */
+  ancestors(...args: Parameters<typeof node_ancestors>) {
+    return node_ancestors.bind(this)(...args) as this[]
+  }
+
+  /**
+   * @description Returns the array of descendant nodes, starting with this node, then followed by each child in topological order.
+   *
+   * _See_ https://github.com/d3/d3-hierarchy#descendants
+   * @param {never[]} args
+   * @returns {Node<RecType, Datum>[]}
+   */
+  descendants(...args: Parameters<typeof node_descendants>) {
+    return node_descendants.bind(this)(...args) as this[]
+  }
+
+  /**
+   * @description Returns the descendants of this node at the specified `depth` or `dim`.
+   * @param {RequireExactlyOne<{ depth?: number; dim?: JsonPrimitive }, 'depth' | 'dim'>} depthOrDim
+   * @param {never[]} args
+   * @returns {Node<RecType, Datum>[]}
+   */
+  descendantsAt(depthOrDim: RequireExactlyOne<
+      { depth?: number; dim?: JsonPrimitive },
+      'depth' | 'dim'
+    >) {
+    return this.descendants().filter((node) => {
+      if (typeof depthOrDim.depth === 'number')
+        return node.depth === depthOrDim.depth
+      else return node.dim === depthOrDim.dim
     }) as this[]
   }
 
-  leaves() { return node_leaves.bind(this)() as this[] }
-  links(...args: Parameters<typeof node_links>) { return node_links.bind(this)(...args) }
+  leaves() {
+    return node_leaves.bind(this)() as this[]
+  }
+
+  links(...args: Parameters<typeof node_links>) {
+    return node_links.bind(this)(...args)
+  }
+
   color(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
     const root = this.ancestors().reverse()[0]
-    const ids = uniq(root.descendants().filter(d => d.dim === this.dim)
+    const ids = uniq(root
+      .descendants()
+      .filter(d => d.dim === this.dim)
       .map(d => d.id)) as string[]
     const colors = chroma.scale(scale).colors(ids.length)
     const colorObject = zipObject(
@@ -444,17 +626,28 @@ export class Node<T, RecType> {
     return colorObject[this.id as string]
   }
 
-  ancestorAt(filter: string | number) {
-    if (typeof filter === 'number')
-      return this.ancestors().find(d => d.depth === filter)
-    else if (typeof filter === 'string')
-      return this.ancestors().find(d => d.dim === filter)
+  ancestorAt(depthOrDim: RequireExactlyOne<
+      { depth?: number; dim?: JsonPrimitive },
+      'depth' | 'dim'
+    >) {
+    return this.ancestors().find((node) => {
+      if (typeof depthOrDim.depth === 'number')
+        return node.depth === depthOrDim.depth
+      else return node.dim === depthOrDim.dim
+    })
   }
 
+  /**
+   * @description a method that sets the `records` property of each node in the hierarchy to the array of records contained in the leaf nodes for that node
+   */
   setRecords() {
-    return this.each(node => node.records = node.leaves().flatMap((leaf): RecType => leaf.data))
+    return this.each(node =>
+      (node.records = node.leaves().flatMap((leaf): RecType => leaf.data)))
   }
 
+  /**
+   * @description a method that sets the `id` and `dim` properties of each node in the hierarchy using each node's `depth` property and the `dims` property of the hierarchy
+   */
   setIds() {
     return this.each((node) => {
       const thisNodeDim = node.#dims?.[node.depth - 1]
@@ -463,13 +656,21 @@ export class Node<T, RecType> {
         node.id = node.data[0]
         node.dim = thisNodeDim
       }
-      node.idPath = node.ancestors().map(ancestor => ancestor.id)
+      node.idPath = node
+        .ancestors()
+        .map(ancestor => ancestor.id)
         .filter(v => v !== undefined) as unknown as JsonPrimitive[]
-      node.dimPath = node.ancestors().map(ancestor => ancestor.dim)
+      node.dimPath = node
+        .ancestors()
+        .map(ancestor => ancestor.dim)
         .filter(v => v !== undefined) as unknown as Array<keyof RecType>
     })
   }
 
+  /**
+   * @description a getter that returns the `records` of the node at this level
+   * @memberof Node
+   */
   get records() {
     return this.#records
   }
@@ -478,6 +679,11 @@ export class Node<T, RecType> {
     this.#records = records
   }
 
+  /**
+   * @description the `keyFn` for this node, as passed to the `hierarchy` function
+   * @readonly
+   * @memberof Node
+   */
   get keyFn() {
     return this.#keyFns[this.depth - 1]
   }
@@ -486,7 +692,7 @@ export class Node<T, RecType> {
     return this.#parent
   }
 
-  set parent(parent: Node<T, RecType> | null) {
+  set parent(parent: Node<RecType, Datum> | null) {
     if (parent instanceof Node)
       this.#parent = parent
   }
@@ -499,16 +705,28 @@ export class Node<T, RecType> {
     return !!this.parent
   }
 
+  /**
+   * @description the sibling nodes of this node (the `children` associated with this node's `parent`)
+   * @returns {Node<RecType, Datum>[]}
+   */
   parentList() {
     if (this.hasParent() && this.parent?.hasChildren())
       return this.parent.children
     else return []
   }
 
+  /**
+   * @description the index of this node in its parent's `children` array
+   * @returns {number} the index of this node in its parent's `children` array
+   */
   indexOf() {
     return this.parent?.children?.findIndex(c => c.id === this.id) ?? 0
   }
 
+  /**
+   * @description the "depth" of this node according to the `keyFns` originally passed to the `hierarchy` function
+   * @returns {number} the index of this node's `dim` in the `dims` array
+   */
   dimDepth() {
     return this.#dims.indexOf(this.dim ?? '')
   }
@@ -519,16 +737,21 @@ export class Node<T, RecType> {
 
       return {
         radians: minArcAngle,
-        degrees: minArcAngle * 180 / Math.PI,
+        degrees: (minArcAngle * 180) / Math.PI,
       }
     }
   }
 
-  makePies(
-    pieStart?: number,
-    pieEnd?: number,
-    piePadding?: number
-  ) {
+  /**
+   * @description a method that makes pies from the `d3.pie` constructor for this node and its descendants. The `startAngle`, `endAngle`, and `padAngle` properties of the `d3.pie` constructor are set to the `startAngle`, `endAngle`, and `padAngle` properties of this node, respectively.
+   *
+   * **Note:** If you do not invoke the `setValues` method before invoking this method, the `value` property of the `d3.pie` constructor is set to the `records.length` of each node.
+   * @param {[number]} pieStart the start angle in **radians** for the `root` pie
+   * @param {[number]} pieEnd the end angle in **radians** for the `root` pie
+   * @param {[number]} piePadding the padding angle in **radians** for the `root` pie
+   * @returns {Node<RecType, Datum>}
+   */
+  makePies(pieStart?: number, pieEnd?: number, piePadding?: number) {
     const rootPieDepth = this.depth
 
     if (pieStart)
@@ -543,18 +766,24 @@ export class Node<T, RecType> {
     }
 
     return this.eachBefore((node) => {
-      if (node.depth <= rootPieDepth || !node.hasParent() || !node.parent?.hasChildren())
+      if (
+        node.depth <= rootPieDepth ||
+        !node.hasParent() ||
+        !node.parent?.hasChildren()
+      )
         return
       const startAngle = node.parent.startAngle.radians
       const endAngle = node.parent.endAngle.radians
       const padAngle = node.parent.padAngle.radians
       const children = node.parent.children
-      let pieGen = pie<Node<T, RecType>>().startAngle(startAngle)
+      let pieGen = pie<Node<RecType, Datum>>()
+        .startAngle(startAngle)
         .endAngle(endAngle)
         .value(d => d.value)
 
       if (node.depth === rootPieDepth + 1) {
-        pieGen = pie<Node<T, RecType>>().startAngle(startAngle)
+        pieGen = pie<Node<RecType, Datum>>()
+          .startAngle(startAngle)
           .endAngle(endAngle)
           .padAngle(padAngle)
           .value(d => d.value)
@@ -571,7 +800,11 @@ export class Node<T, RecType> {
     })
   }
 
-  private setPieAngles(node: SetNonNullable<this, 'parent'>, i: number, pieDatum: PieArcDatum<any>) {
+  private setPieAngles(
+    node: SetNonNullable<this, 'parent'>,
+    i: number,
+    pieDatum: PieArcDatum<any>
+  ) {
     if (node.parent.hasChildren()) {
       node.parent.children[i].startAngle = pieDatum.startAngle
       node.parent.children[i].endAngle = pieDatum.endAngle
