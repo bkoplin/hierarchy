@@ -99,7 +99,7 @@ export function hierarchy<
   T,
   KeyFns extends FixedLengthArray<
     [StringKeyOf<T>, KeyFn<T>] | StringKeyOf<T>,
-    1 | 2 | 3 | 4
+    LiteralUnion<1 | 2 | 3 | 4, number>
   >
 >(values: T[], ...childrenFns: KeyFns) {
   const funcs = childrenFns.map((c) => {
@@ -173,13 +173,6 @@ export function hierarchy<
     .setIds()
     .setRecords()
     .setValues()
-}
-
-function computeHeight(node: Node<any>) {
-  let height = 0
-
-  do node.height = height
-  while ((node = node.parent) && node.height < ++height)
 }
 
 /**
@@ -494,7 +487,7 @@ export class Node<
    * @returns {Node<RecType, Datum>[]}
    */
   lookupMany(
-    id:
+    ids:
       | Array<ValueOf<RecType> | string>
       | Array<Array<ValueOf<RecType> | string>>
       | Array<Partial<RecType>>,
