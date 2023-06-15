@@ -677,27 +677,27 @@ export class Node<
     return node_links.bind(this)(...args)
   }
 
-  setColors(colorScales: Array<keyof chroma.ChromaStatic['brewer']> | keyof chroma.ChromaStatic['brewer']) {
-    if (!Array.isArray(colorScales)) { this.color = this.getColor(colorScales) }
+  setColors(colorScales: Array<BrewerKeys | Array<string | Color>> | BrewerKeys | Array<string | Color>) {
+    if (isBrewerColor(colorScales)) { this.color = this.getColor(colorScales) }
+    else if (isHexColorScale(colorScales)) { this.color = this.getColor(colorScales) }
     else {
       this.each((node) => {
-        const scale = colorScales[node.dimIndexOf()]
+        const thisLevelScale: BrewerKeys | Array<string | Color> | undefined = colorScales[node.dimIndexOf()]
 
-        if (!scale)
-          return
-        node.color = node.getColor(scale)
+        if (thisLevelScale)
+          node.color = node.getColor(thisLevelScale)
       })
     }
   }
 
-  getColor(scale: keyof chroma.ChromaStatic['brewer'] = 'Spectral') {
+  getColor(scale?: Array<string | Color> | BrewerKeys) {
     if (typeof this.dim === 'undefined')
       return undefined
     const root = this.ancestors().reverse()[0]
     const ids = uniq(root
       .descendantsAt({ dim: this.dim, })
       .map(d => d.id)) as string[]
-    const colors = chroma.scale(scale).colors(ids.length)
+    const colors = chroma.scale(scale ?? chroma.brewer.Spectral).colors(ids.length)
     const colorObject = zipObject(
       ids,
       colors
