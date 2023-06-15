@@ -1,4 +1,5 @@
 export default function (callback, that) {
+  console.log(that)
   let index = -1
   const self = [this]
 

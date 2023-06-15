@@ -3,6 +3,7 @@ import type {
   Get,
   JsonObject,
   JsonPrimitive,
+  LiteralUnion,
   RequireExactlyOne,
   SetNonNullable,
   SetRequired,
@@ -17,6 +18,7 @@ import {
   uniq,
   zipObject,
 } from 'lodash-es'
+import type { Color, } from 'chroma-js'
 import chroma from 'chroma-js'
 import type { L, } from 'ts-toolbelt'
 import {
@@ -30,19 +32,11 @@ import type {
   KeyFn, NestedMap,
 } from '../array/types'
 import { group, } from '../array/group'
-import node_each from './each.js'
-import node_eachAfter from './eachAfter.js'
-import node_eachBefore from './eachBefore.js'
 import node_count from './count.js'
-import node_ancestors from './ancestors.js'
-import node_descendants from './descendants.js'
-import node_find from './find.js'
-import node_leaves from './leaves.js'
 import node_sum from './sum.js'
 import node_sort from './sort.js'
 import node_path from './path.js'
 import node_links from './links.js'
-import node_iterator from './iterator'
 
 export const angleConverter = {
   fromPaper: scaleDiverging()
@@ -207,11 +201,34 @@ class Angle extends Number {
     }
   }
 }
+
+type BrewerKeys = keyof chroma.ChromaStatic[ 'brewer' ]
+
 export class Node<
   RecType = JsonObject,
   Datum = Map<undefined, NestedMap<[keyof RecType, RecType], 2>>
 > {
-  [Symbol.iterator] = node_iterator
+  [Symbol.iterator] = function*(this: Node<RecType, Datum>) {
+    let next = [ this, ]
+    let current = next.reverse()
+
+    do {
+      next = []
+      let node = current.pop()
+
+      while (node) {
+        yield node
+        if (node.children) {
+          node.children.forEach((child) => {
+            next.push(child)
+          })
+        }
+        node = current.pop()
+      }
+      current = next.reverse()
+    } while (next.length)
+  }
+
   /**
    * @description the `id` of the node at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has an id of `undefined`. The leaf nodes have an id of `undefined`
    * @type {(ValueOf<RecType> | undefined)}
@@ -385,17 +402,29 @@ export class Node<
   }
 
   count = node_count
+
   /**
-   * @description Invokes the specified function for node and each descendant in breadth-first order, such that a given node is only visited if all nodes of lesser depth have already been visited, as well as all preceding nodes of the same depth. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this contex
-   * t of the callback.
-   * _See_ https://github.com/d3/d3-hierarchy#node_each
-   *
-   */
-  each(callback: (node: Node<RecType, Datum>, index?: number) => void, that?: Node<RecType, Datum>): this {
-    return node_each.bind(this)(
-      callback,
-      that
-    )
+ * @description Invokes the specified function for node and each descendant in breadth-first order, such that a given node is only visited if all nodes of lesser depth have already been visited, as well as all preceding nodes of the same depth. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this contex
+ * t of the callback.
+ * _See_ https://github.com/d3/d3-hierarchy#node_each
+ *
+ */
+  each(callback: (
+    node: Node<RecType, Datum>,
+    traversalIndex?: number,
+    context?: this,
+  ) => void) {
+    let index = -1
+
+    for (const node of this) {
+      callback(
+        node,
+        ++index,
+        this
+      )
+    }
+
+    return this
   }
 
   /**
@@ -404,14 +433,23 @@ export class Node<
    * _See_ https://github.com/d3/d3-hierarchy#node_eachBefore
    *
    */
-  eachBefore(
-    callback: (node: this, index?: number) => this,
-    that?: this
-  ): this {
-    return node_eachBefore.bind(this)(
-      callback,
-      that
-    )
+  eachBefore(callback: (node: Node<RecType, Datum>, traversalIndex?: number) => void): this {
+    const nodes: Array<Node<RecType, Datum>> = [ this, ]
+    let node: Node<RecType, Datum> | undefined = nodes[0]
+    let index = -1
+
+    while (typeof node !== 'undefined') {
+      callback(
+        node,
+        ++index
+      )
+      if (node.children)
+        node.children.forEach(child => nodes.push(child))
+
+      node = nodes.pop()
+    }
+
+    return this
   }
 
   /**
@@ -420,11 +458,29 @@ export class Node<
    * _See_ https://github.com/d3/d3-hierarchy#node_eachAfter
    *
    */
-  eachAfter(callback: (node: this, index?: number) => this, that?: this): this {
-    return node_eachAfter.bind(this)(
-      callback,
-      that
-    )
+  eachAfter(callback: (node: Node<RecType, Datum>, traversalIndex?: number) => void): this {
+    const nodes: Array<Node<RecType, Datum>> = [ this, ]
+    let node: Node<RecType, Datum> | undefined = nodes[0]
+    const next: Array<Node<RecType, Datum>> = []
+    let index = -1
+
+    while (node) {
+      next.push(node)
+      if (node.children)
+        node.children.forEach(child => nodes.push(child))
+
+      node = nodes.pop()
+    }
+    node = next.pop()
+    while (node) {
+      callback(
+        node,
+        ++index
+      )
+      node = next.pop()
+    }
+
+    return this
   }
 
   /**
@@ -540,11 +596,13 @@ export class Node<
    * @param callback the filter function
    * @returns {Node<RecType, Datum> | undefined}
    */
-  find(callback: (node: this) => boolean, that?: this): this {
-    return node_find.bind(this)(
-      callback,
-      that
-    )
+  find(callback: (node: Node<RecType, Datum>) => boolean) {
+    const index = -1
+
+    for (const node of this) {
+      if (callback(node))
+        return node
+    }
   }
 
   sum(...args: Parameters<typeof node_sum>) {
@@ -563,23 +621,29 @@ export class Node<
    * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
    *
    * _See_ https://github.com/d3/d3-hierarchy#ancestors
-   * @param {never[]} args
    * @returns {Node<RecType, Datum>[]}
    * @memberof Node
    */
-  ancestors(...args: Parameters<typeof node_ancestors>) {
-    return node_ancestors.bind(this)(...args) as this[]
+  ancestors() {
+    const nodes: Array<Node<RecType, Datum>> = [ this, ]
+    let node = nodes[0]
+
+    while (node.parent) {
+      nodes.push(node.parent)
+      node = node.parent
+    }
+
+    return nodes
   }
 
   /**
    * @description Returns the array of descendant nodes, starting with this node, then followed by each child in topological order.
    *
    * _See_ https://github.com/d3/d3-hierarchy#descendants
-   * @param {never[]} args
    * @returns {Node<RecType, Datum>[]}
    */
-  descendants(...args: Parameters<typeof node_descendants>) {
-    return node_descendants.bind(this)(...args) as this[]
+  descendants() {
+    return Array.from(this)
   }
 
   /**
@@ -600,7 +664,13 @@ export class Node<
   }
 
   leaves() {
-    return node_leaves.bind(this)() as this[]
+    const leaves: Array<Node<RecType, Datum>> = []
+
+    this.eachBefore((node) => {
+      if (!node.children)
+        leaves.push(node)
+    })
+    return leaves
   }
 
   links(...args: Parameters<typeof node_links>) {
@@ -652,7 +722,7 @@ export class Node<
    */
   setRecords() {
     return this.each(node =>
-      (node.records = node.leaves().flatMap((leaf): RecType => leaf.data)))
+      (node.records = node.leaves().flatMap((leaf): RecType => leaf.data as unknown as RecType)))
   }
 
   /**
@@ -824,4 +894,12 @@ export class Node<
       }
     }
   }
+}
+
+function isHexColorScale(colorScales: unknown | Array<string | Color>): colorScales is Array<string | Color> {
+  return Array.isArray(colorScales) && colorScales.every(color => typeof color === 'string' && chroma.valid(color))
+}
+
+function isBrewerColor(anyString: unknown | BrewerKeys): anyString is BrewerKeys {
+  return (typeof anyString === 'string') && ((anyString ?? '') in chroma.brewer)
 }
