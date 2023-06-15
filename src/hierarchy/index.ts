@@ -37,7 +37,6 @@ import node_count from './count.js'
 import node_sum from './sum.js'
 import node_sort from './sort.js'
 import node_path from './path.js'
-import node_links from './links.js'
 
 export const angleConverter = {
   fromPaper: scaleDiverging()
@@ -204,7 +203,6 @@ class Angle extends Number {
 }
 
 type BrewerKeys = keyof chroma.ChromaStatic[ 'brewer' ]
-
 
 type ChromaLimitOptions = RequireAtLeastOne<{
   mode?: 'e' | 'q' | 'l' | 'k'
@@ -620,8 +618,15 @@ export class Node<
     return node_sort.bind(this)(...args)
   }
 
-  path(end: this): this[] {
-    return node_path.bind(this)(end)
+  /**
+ * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
+ * @see {@link https://github.com/d3/d3-hierarchy#node_path}
+ * @param {Node<RecType, Datum>} end the target node
+ * @param {boolean} [noRoot=false] whether to exclude the root node from the returned path array
+ * @returns {this[]}
+ */
+  path(end: this, noRoot = false): this[] {
+    return node_path.bind(this)(end).filter(node => !noRoot || node.depth > 0)
   }
 
   /**
@@ -670,24 +675,48 @@ export class Node<
     }) as this[]
   }
 
-  leaves() {
+  /**
+   *
+   * @param {boolean} [onlyNodes = false] return only leaves that are true nodes -- i.e. that have children that are not nodes but still have `id` and `dim` properties
+   * @returns {Node<RecType, Datum>[]}
+   */
+  leaves(onlyNodes = false) {
     const leaves: Array<Node<RecType, Datum>> = []
 
     this.eachBefore((node) => {
-      if (!node.children)
+      if (onlyNodes && !!node.children && !node.children[0].children)
+        leaves.push(node)
+      else if (!node.children && !onlyNodes)
         leaves.push(node)
     })
     return leaves
   }
 
-  links(...args: Parameters<typeof node_links>) {
-    return node_links.bind(this)(...args)
+  /**
+   * @description Returns an array of links for this node and its descendants, where each link is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
+   * @see {@link https://github.com/d3/d3-hierarchy#links}
+   * @param {boolean} [onlyNodes = false] return only leaves that are true nodes -- i.e. that have children that are not nodes but still have `id` and `dim` properties
+   * @return {Array<Record<'source'|'target', Node<RecType, Datum>>>}
+   */
+  links(onlyNodes = false) {
+    const links: Array<{ source: Node<RecType, Datum>; target: Node<RecType, Datum> }> = []
+
+    this.each((node) => {
+      if (onlyNodes && typeof node.id === 'undefined') {}
+      else if (node !== this && node.parent?.id) { // Don't include the root's parent, if any.
+        links.push({
+          source: node.parent,
+          target: node,
+        })
+      }
+    })
+    return links
   }
 
   /**
-   * @description sets the colors for this node and all of its descendants. 
+   * @description sets the colors for this node and all of its descendants.
    * @see {@link setColor}
-   * @param colorScales 
+   * @param colorScales
    */
   setColors(colorScales: Array<[BrewerKeys | Array<string | Color>, ChromaLimitOptions | undefined]>) {
     this.each((node) => {

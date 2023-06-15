@@ -186,7 +186,7 @@ describe(
     test(
       'leaves',
       () => {
-        expect(nested.leaves()).toMatchFileSnapshot('./outputs/leaves.json')
+        expect(nested.leaves(true)).toMatchFileSnapshot('./outputs/leaves.json')
       }
     )
     test(
@@ -196,6 +196,17 @@ describe(
           [ 'children', ],
           d
         ))).toMatchFileSnapshot('./outputs/descendants.json')
+      }
+    )
+    test(
+      'links',
+      () => {
+        expect(nested.links(true).map(({
+          source, target,
+        }) => ({
+          source: source.id,
+          target: target.id,
+        }))).toMatchFileSnapshot('./outputs/links.json')
       }
     )
     test(
@@ -299,7 +310,7 @@ describe(
       'path',
       () => {
         const leafNodes = nested.leaves()
-        const pathArray = leafNodes[0].path(leafNodes[10]).map(node => omit(
+        const pathArray = leafNodes[0].path(leafNodes[10], true).map(node => omit(
           [
             'children',
             'data',
