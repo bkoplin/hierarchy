@@ -4,6 +4,7 @@ import type {
   JsonObject,
   JsonPrimitive,
   LiteralUnion,
+  RequireAtLeastOne,
   RequireExactlyOne,
   SetNonNullable,
   SetRequired,
@@ -203,6 +204,12 @@ class Angle extends Number {
 }
 
 type BrewerKeys = keyof chroma.ChromaStatic[ 'brewer' ]
+
+
+type ChromaLimitOptions = RequireAtLeastOne<{
+  mode?: 'e' | 'q' | 'l' | 'k'
+  num?: number
+}> & { parentListOnly?: true }
 
 export class Node<
   RecType = JsonObject,
@@ -406,7 +413,7 @@ export class Node<
   /**
  * @description Invokes the specified function for node and each descendant in breadth-first order, such that a given node is only visited if all nodes of lesser depth have already been visited, as well as all preceding nodes of the same depth. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this contex
  * t of the callback.
- * _See_ https://github.com/d3/d3-hierarchy#node_each
+ * @see {@link https://github.com/d3/d3-hierarchy#node_each}
  *
  */
   each(callback: (
@@ -430,7 +437,7 @@ export class Node<
   /**
    * @description Invokes the specified function for node and each descendant in pre-order traversal, such that a given node is only visited after all of its ancestors have already been visited. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this context of the callback.
    *
-   * _See_ https://github.com/d3/d3-hierarchy#node_eachBefore
+   * @see {@link https://github.com/d3/d3-hierarchy#node_eachBefore}
    *
    */
   eachBefore(callback: (node: Node<RecType, Datum>, traversalIndex?: number) => void): this {
@@ -455,7 +462,7 @@ export class Node<
   /**
    * @description Invokes the specified function for node and each descendant in post-order traversal, such that a given node is only visited after all of its descendants have already been visited. The specified function is passed the current descendant, the zero-based traversal index, and this node. If that is specified, it is the this context of the callback.
    *
-   * _See_ https://github.com/d3/d3-hierarchy#node_eachAfter
+   * @see {@link https://github.com/d3/d3-hierarchy#node_eachAfter}
    *
    */
   eachAfter(callback: (node: Node<RecType, Datum>, traversalIndex?: number) => void): this {
@@ -620,7 +627,7 @@ export class Node<
   /**
    * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
    *
-   * _See_ https://github.com/d3/d3-hierarchy#ancestors
+   * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
    * @returns {Node<RecType, Datum>[]}
    * @memberof Node
    */
@@ -639,7 +646,7 @@ export class Node<
   /**
    * @description Returns the array of descendant nodes, starting with this node, then followed by each child in topological order.
    *
-   * _See_ https://github.com/d3/d3-hierarchy#descendants
+   * @see {@link https://github.com/d3/d3-hierarchy#descendants}
    * @returns {Node<RecType, Datum>[]}
    */
   descendants() {
@@ -677,33 +684,71 @@ export class Node<
     return node_links.bind(this)(...args)
   }
 
-  setColors(colorScales: Array<BrewerKeys | Array<string | Color>> | BrewerKeys | Array<string | Color>) {
-    if (isBrewerColor(colorScales)) { this.color = this.getColor(colorScales) }
-    else if (isHexColorScale(colorScales)) { this.color = this.getColor(colorScales) }
-    else {
-      this.each((node) => {
-        const thisLevelScale: BrewerKeys | Array<string | Color> | undefined = colorScales[node.dimIndexOf()]
+  /**
+   * @description sets the colors for this node and all of its descendants. 
+   * @see {@link setColor}
+   * @param colorScales 
+   */
+  setColors(colorScales: Array<[BrewerKeys | Array<string | Color>, ChromaLimitOptions | undefined]>) {
+    this.each((node) => {
+      const thisLevelScale = colorScales[node.dimIndexOf()]
 
-        if (thisLevelScale)
-          node.color = node.getColor(thisLevelScale)
-      })
-    }
+      if (thisLevelScale) {
+        node.color = node.getColor(
+          thisLevelScale[0],
+          thisLevelScale[1]
+        )
+      }
+    })
   }
 
-  getColor(scale?: Array<string | Color> | BrewerKeys) {
+  /**
+   * @description sets the color for this node.
+   * @param colorScale a tuple where the first element is either a Brewer key or an array of colors, and the second element is an optional ChromaLimitOptions object
+   */
+  setColor(colorScale: [BrewerKeys | Array<string | Color>, ChromaLimitOptions | undefined]) {
+    this.color = this.getColor(
+      colorScale[0],
+      colorScale[1]
+    )
+  }
+
+  getColor(scale: Array<string | Color> | BrewerKeys = 'Spectral', valueScaleOptions?: ChromaLimitOptions) {
     if (typeof this.dim === 'undefined')
       return undefined
     const root = this.ancestors().reverse()[0]
-    const ids = uniq(root
-      .descendantsAt({ dim: this.dim, })
-      .map(d => d.id)) as string[]
-    const colors = chroma.scale(scale ?? chroma.brewer.Spectral).colors(ids.length)
-    const colorObject = zipObject(
-      ids,
-      colors
-    )
 
-    return colorObject[this.id as string]
+    if (typeof valueScaleOptions === 'undefined') {
+      const ids = uniq(root
+        .descendantsAt({ dim: this.dim, })
+        .map(d => d.id)) as string[]
+      const colors = chroma.scale(scale).colors(ids.length)
+      const colorObject = zipObject(
+        ids,
+        colors
+      )
+
+      return colorObject[this.id as string]
+    }
+    else {
+      let values = root.descendantsAt({ dim: this.dim, }).map(d => d.value)
+        .sort()
+
+      if (valueScaleOptions.parentListOnly === true) {
+        values = this.parentList().map(d => d.value)
+          .sort()
+      }
+      const limitMode = valueScaleOptions.mode ?? 'e'
+      const limitNum = valueScaleOptions.num ?? (limitMode === 'e' ? values.length : 5)
+      const chromaLimits = chroma.limits(
+        values,
+        limitMode,
+        limitNum
+      )
+      const colors = chroma.scale(scale).classes(chromaLimits)
+
+      return colors(this.value).hex()
+    }
   }
 
   ancestorAt(depthOrDim: RequireExactlyOne<

@@ -5,7 +5,7 @@ import yaml from 'yaml'
 import safeStableStringify from 'safe-stable-stringify'
 
 import {
-  at, sumBy,
+  at, pick, sumBy,
 } from 'lodash-es'
 import { omit, } from 'rambdax'
 import { hierarchy, } from '../../src/hierarchy/index'
@@ -20,12 +20,14 @@ const nested = hierarchy(
 )
 
 nested.setColors([
-  'Paired',
-  'Accent',
+  [ 'Paired', ],
+  [ 'Accent', ],
   [
-    'red',
-    'yellow',
-    'green',
+    [
+      'red',
+      'green',
+    ],
+    { mode: 'q', },
   ],
 ])
 describe(
@@ -67,9 +69,28 @@ describe(
         const currentColor = descendantNode?.color
 
         expect(currentColor).toMatchInlineSnapshot('"#d33741"')
-        descendantNode.setColors('Blues')
+        descendantNode.setColor([ 'Blues', ])
         expect(descendantNode?.color).toMatchInlineSnapshot('"#1764ab"')
         expect(descendantNode?.color).not.toBe(currentColor)
+        nested.each((d) => {
+          if (d.dim === 'region') {
+            d.setColor([
+              [
+                'red',
+                'green',
+              ],
+              { mode: 'q', },
+            ])
+          }
+        })
+        expect(nested.descendants()?.map(d => pick(
+          d,
+          [
+            'id',
+            'value',
+            'color',
+          ]
+        ))).toMatchFileSnapshot('./outputs/colors_with_value.json')
       }
     )
     test(
@@ -95,7 +116,7 @@ describe(
     test(
       'descendantsAt test',
       () => {
-        expect(nested.descendantsAt('state')).toMatchFileSnapshot('./outputs/descendantsAt state.json')
+        expect(nested.descendantsAt({ dim: 'state', })).toMatchFileSnapshot('./outputs/descendantsAt state.json')
       }
     )
     describe(
@@ -242,7 +263,7 @@ describe(
               "value": 13819192,
             },
             {
-              "color": "#b15928",
+              "color": "#bf2000",
               "count": [Function],
               "depth": 1,
               "dim": "region",
@@ -334,7 +355,7 @@ describe(
           foundNode
         )).toMatchInlineSnapshot(`
           {
-            "color": "#ff5900",
+            "color": "#008000",
             "count": [Function],
             "depth": 3,
             "dim": "state",
