@@ -6,7 +6,6 @@ import type {
   JsonPrimitive,
   RequireAtLeastOne,
   RequireExactlyOne,
-  SetRequired,
   Simplify,
   StringKeyOf,
   ValueOf,
@@ -282,7 +281,6 @@ export class Node<
    *
    */
   #keyFns: KeyFns
-
   #padAngle = {
     radians: 0,
     degrees: 0,
@@ -846,19 +844,20 @@ export class Node<
             .padAngle(padAngle)
             .value(d => d.value)
         }
+
         const pies = pieGen(children)
 
-        pies.forEach((pieDatum, i) => {
-          const nodePie = node.parentList().find(n => n.id === pieDatum.data.id)
-
-          if (nodePie) {
-            nodePie.startAngle = pieDatum.startAngle
-            nodePie.endAngle = pieDatum.endAngle
-            nodePie.padAngle = {
-              radians: pieDatum.padAngle,
-              degrees: 0,
+        children.forEach((child) => {
+          pies.forEach((pieDatum) => {
+            if (pieDatum.data.id === child.id && pieDatum.data.dim === child.dim) {
+              child.startAngle = pieDatum.startAngle
+              child.endAngle = pieDatum.endAngle
+              child.padAngle = {
+                radians: pieDatum.padAngle,
+                degrees: 0,
+              }
             }
-          }
+          })
         })
       }
     })

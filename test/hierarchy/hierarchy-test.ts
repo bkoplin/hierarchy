@@ -356,31 +356,290 @@ describe(
     test(
       'records',
       () => {
-        const foundNode = nested.find(node => node.id === 'Minnesota')
+        nested.makePies(
+          Math.PI,
+          Math.PI * 2,
+          0.01
+        )
+        const foundNode = nested.find(node => node.id === 'Some College')
 
-        expect(omit(
-          [
-            'data',
-            'children',
-          ],
-          foundNode
-        )).toMatchInlineSnapshot(`
+        expect(foundNode).toMatchInlineSnapshot(`
           {
-            "depth": 3,
-            "dim": "state",
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": undefined,
+                    "data": {
+                      "crime_rate": 568.42,
+                      "education_level": "Some College",
+                      "ethnicity": "Black or African American",
+                      "median_age": 24,
+                      "median_income": 376235,
+                      "population": 9807563,
+                      "poverty_rate": 85.17,
+                      "region": "Midwest",
+                      "state": "Maryland",
+                      "unemployment_rate": 34.94,
+                    },
+                    "depth": 4,
+                    "dim": undefined,
+                    "dimIndexOf": -1,
+                    "dimPath": [
+                      "state",
+                      "education_level",
+                      "region",
+                    ],
+                    "endAngle": {
+                      "degrees": 210.7727664854194,
+                      "radians": 5.249475075502621,
+                    },
+                    "height": 0,
+                    "id": undefined,
+                    "idPath": [
+                      "Maryland",
+                      "Some College",
+                      "Midwest",
+                    ],
+                    "indexOf": 0,
+                    "minArcAngle": {
+                      "degrees": 12.426649506736757,
+                      "radians": 0.21688594888388568,
+                    },
+                    "padAngle": {
+                      "degrees": 0,
+                      "radians": 0,
+                    },
+                    "startAngle": {
+                      "degrees": 198.3461169786826,
+                      "radians": 5.032589126618736,
+                    },
+                    "value": 19615126,
+                    Symbol(Symbol.iterator): [Function],
+                  },
+                ],
+                "data": [
+                  "Maryland",
+                  [
+                    {
+                      "crime_rate": 568.42,
+                      "education_level": "Some College",
+                      "ethnicity": "Black or African American",
+                      "median_age": 24,
+                      "median_income": 376235,
+                      "population": 9807563,
+                      "poverty_rate": 85.17,
+                      "region": "Midwest",
+                      "state": "Maryland",
+                      "unemployment_rate": 34.94,
+                    },
+                  ],
+                ],
+                "depth": 3,
+                "dim": "state",
+                "dimIndexOf": 2,
+                "dimPath": [
+                  "state",
+                  "education_level",
+                  "region",
+                ],
+                "endAngle": {
+                  "degrees": 210.7727664854194,
+                  "radians": 5.249475075502621,
+                },
+                "height": 1,
+                "id": "Maryland",
+                "idPath": [
+                  "Maryland",
+                  "Some College",
+                  "Midwest",
+                ],
+                "indexOf": 0,
+                "minArcAngle": {
+                  "degrees": 2.5739692595857155,
+                  "radians": 0.04492423842489135,
+                },
+                "padAngle": {
+                  "degrees": 0,
+                  "radians": 0,
+                },
+                "startAngle": {
+                  "degrees": 198.3461169786826,
+                  "radians": 5.032589126618736,
+                },
+                "value": 19615126,
+                Symbol(Symbol.iterator): [Function],
+              },
+              {
+                "children": [
+                  {
+                    "children": undefined,
+                    "data": {
+                      "crime_rate": 784.69,
+                      "education_level": "Some College",
+                      "ethnicity": "Asian",
+                      "median_age": 90,
+                      "median_income": 738982,
+                      "population": 2031470,
+                      "poverty_rate": 20.42,
+                      "region": "Midwest",
+                      "state": "Minnesota",
+                      "unemployment_rate": 48.93,
+                    },
+                    "depth": 4,
+                    "dim": undefined,
+                    "dimIndexOf": -1,
+                    "dimPath": [
+                      "state",
+                      "education_level",
+                      "region",
+                    ],
+                    "endAngle": {
+                      "degrees": 213.3467357450051,
+                      "radians": 5.294399313927513,
+                    },
+                    "height": 0,
+                    "id": undefined,
+                    "idPath": [
+                      "Minnesota",
+                      "Some College",
+                      "Midwest",
+                    ],
+                    "indexOf": 0,
+                    "minArcAngle": {
+                      "degrees": 2.5739692595857155,
+                      "radians": 0.04492423842489135,
+                    },
+                    "padAngle": {
+                      "degrees": 0,
+                      "radians": 0,
+                    },
+                    "startAngle": {
+                      "degrees": 210.7727664854194,
+                      "radians": 5.249475075502621,
+                    },
+                    "value": 4062940,
+                    Symbol(Symbol.iterator): [Function],
+                  },
+                ],
+                "data": [
+                  "Minnesota",
+                  [
+                    {
+                      "crime_rate": 784.69,
+                      "education_level": "Some College",
+                      "ethnicity": "Asian",
+                      "median_age": 90,
+                      "median_income": 738982,
+                      "population": 2031470,
+                      "poverty_rate": 20.42,
+                      "region": "Midwest",
+                      "state": "Minnesota",
+                      "unemployment_rate": 48.93,
+                    },
+                  ],
+                ],
+                "depth": 3,
+                "dim": "state",
+                "dimIndexOf": 2,
+                "dimPath": [
+                  "state",
+                  "education_level",
+                  "region",
+                ],
+                "endAngle": {
+                  "degrees": 213.3467357450051,
+                  "radians": 5.294399313927513,
+                },
+                "height": 1,
+                "id": "Minnesota",
+                "idPath": [
+                  "Minnesota",
+                  "Some College",
+                  "Midwest",
+                ],
+                "indexOf": 1,
+                "minArcAngle": {
+                  "degrees": 2.5739692595857155,
+                  "radians": 0.04492423842489135,
+                },
+                "padAngle": {
+                  "degrees": 0,
+                  "radians": 0,
+                },
+                "startAngle": {
+                  "degrees": 210.7727664854194,
+                  "radians": 5.249475075502621,
+                },
+                "value": 4062940,
+                Symbol(Symbol.iterator): [Function],
+              },
+            ],
+            "data": [
+              "Some College",
+              Map {
+                "Minnesota" => [
+                  {
+                    "crime_rate": 784.69,
+                    "education_level": "Some College",
+                    "ethnicity": "Asian",
+                    "median_age": 90,
+                    "median_income": 738982,
+                    "population": 2031470,
+                    "poverty_rate": 20.42,
+                    "region": "Midwest",
+                    "state": "Minnesota",
+                    "unemployment_rate": 48.93,
+                  },
+                ],
+                "Maryland" => [
+                  {
+                    "crime_rate": 568.42,
+                    "education_level": "Some College",
+                    "ethnicity": "Black or African American",
+                    "median_age": 24,
+                    "median_income": 376235,
+                    "population": 9807563,
+                    "poverty_rate": 85.17,
+                    "region": "Midwest",
+                    "state": "Maryland",
+                    "unemployment_rate": 34.94,
+                  },
+                ],
+              },
+            ],
+            "depth": 2,
+            "dim": "education_level",
+            "dimIndexOf": 1,
             "dimPath": [
-              "state",
               "education_level",
               "region",
             ],
-            "height": 1,
-            "id": "Minnesota",
+            "endAngle": {
+              "degrees": 213.3467357450051,
+              "radians": 5.294399313927513,
+            },
+            "height": 2,
+            "id": "Some College",
             "idPath": [
-              "Minnesota",
               "Some College",
               "Midwest",
             ],
-            "value": 4062940,
+            "indexOf": 2,
+            "minArcAngle": {
+              "degrees": 0.048697708813286576,
+              "radians": 0.0008499353569693113,
+            },
+            "padAngle": {
+              "degrees": 0,
+              "radians": 0,
+            },
+            "startAngle": {
+              "degrees": 198.3461169786826,
+              "radians": 5.032589126618736,
+            },
+            "value": 23678066,
+            Symbol(Symbol.iterator): [Function],
           }
         `)
       }
