@@ -20,13 +20,10 @@ const nested = hierarchy(
 )
 
 nested.setColors([
-  [ 'Paired', ],
-  [ 'Accent', ],
+  'Paired',
+  'Accent',
   [
-    [
-      'red',
-      'green',
-    ],
+    'RdYlGn',
     { mode: 'q', },
   ],
 ])
@@ -68,19 +65,19 @@ describe(
         const descendantNode = nested.descendants()[10]
         const currentColor = descendantNode?.color
 
-        expect(currentColor).toMatchInlineSnapshot('"#d33741"')
-        descendantNode.setColor([ 'Blues', ])
-        expect(descendantNode?.color).toMatchInlineSnapshot('"#1764ab"')
+        expect(currentColor).toMatchInlineSnapshot('undefined')
+        descendantNode.setColor('Blues')
+        expect(descendantNode?.color).toMatchInlineSnapshot('"#08306b"')
         expect(descendantNode?.color).not.toBe(currentColor)
         nested.each((d) => {
           if (d.dim === 'region') {
-            d.setColor([
+            d.setColor(
               [
                 'red',
                 'green',
               ],
-              { mode: 'q', },
-            ])
+              { mode: 'q', }
+            )
           }
         })
         expect(nested.descendants()?.map(d => pick(
@@ -222,7 +219,6 @@ describe(
         ))).toMatchInlineSnapshot(`
           [
             {
-              "count": [Function],
               "depth": 4,
               "dimPath": [
                 "state",
@@ -238,8 +234,6 @@ describe(
               "value": 13819192,
             },
             {
-              "color": "#008000",
-              "count": [Function],
               "depth": 3,
               "dim": "state",
               "dimPath": [
@@ -257,8 +251,6 @@ describe(
               "value": 13819192,
             },
             {
-              "color": "#7fc97f",
-              "count": [Function],
               "depth": 2,
               "dim": "education_level",
               "dimPath": [
@@ -275,7 +267,13 @@ describe(
             },
             {
               "color": "#bf2000",
-              "count": [Function],
+              "colorScale": [
+                "red",
+                "green",
+              ],
+              "colorScaleBy": "parentListOnly",
+              "colorScaleMode": "q",
+              "colorScaleNum": 5,
               "depth": 1,
               "dim": "region",
               "dimPath": [
@@ -289,7 +287,6 @@ describe(
               "value": 39343770,
             },
             {
-              "count": [Function],
               "depth": 0,
               "dimPath": [],
               "height": 4,
@@ -310,7 +307,10 @@ describe(
       'path',
       () => {
         const leafNodes = nested.leaves()
-        const pathArray = leafNodes[0].path(leafNodes[10], true).map(node => omit(
+        const pathArray = leafNodes[0].path(
+          leafNodes[10],
+          true
+        ).map(node => omit(
           [
             'children',
             'data',
@@ -366,8 +366,6 @@ describe(
           foundNode
         )).toMatchInlineSnapshot(`
           {
-            "color": "#008000",
-            "count": [Function],
             "depth": 3,
             "dim": "state",
             "dimPath": [

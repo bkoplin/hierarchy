@@ -14,9 +14,9 @@ export type NestedMap<
   Iter extends I.Iteration = I.IterationOf<Len>,
   M extends Map<any, any> = Map<keyof T, T[]>
 > = {
-  0: Map<keyof T, M>
+  0: Map<undefined, M>
   1: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>
-}[ N.GreaterEq<I.Pos<I.Prev<Iter>>, Len> ]
+}[ N.Greater<I.Pos<I.Prev<Iter>>, Len> ]
 export type NestedRollup<
   T,
   Len extends LiteralUnion<1 | 2 | 3 | 4 | 5 | 6, number> = 6,
