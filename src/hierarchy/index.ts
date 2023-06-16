@@ -1,12 +1,13 @@
 import type {
+  Except,
   FixedLengthArray,
   Get,
   JsonObject,
   JsonPrimitive,
   RequireAtLeastOne,
   RequireExactlyOne,
-  SetNonNullable,
   SetRequired,
+  Simplify,
   StringKeyOf,
   ValueOf,
 } from 'type-fest'
@@ -36,7 +37,6 @@ import type {
 } from '../array/types'
 import { group, } from '../array/group'
 import node_sum from './sum.js'
-import node_sort from './sort.js'
 import node_path from './path.js'
 
 export const angleConverter = {
@@ -63,7 +63,7 @@ export const angleConverter = {
   },
 }
 export function hierarchy<
-  T extends JsonObject,
+  T extends JsonObject | string,
   KeyFns extends FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 1 | 2 | 3 | 4> = FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 2>,
   Ret = Node<
     T,
@@ -827,40 +827,48 @@ export class Node<
     }
 
     return this.eachBefore((node) => {
-      if (
-        node.depth <= rootPieDepth ||
-        !node.hasParent() ||
-        !node.parent?.hasChildren()
-      )
-        return
-      const startAngle = node.parent.startAngle.radians
-      const endAngle = node.parent.endAngle.radians
-      const padAngle = node.parent.padAngle.radians
-      const children = node.parent.children
-      let pieGen = pie<Node<RecType, KeyFns, Datum>>()
-        .startAngle(startAngle)
-        .endAngle(endAngle)
-        .value(d => d.value)
-
-      if (node.depth === rootPieDepth + 1) {
-        pieGen = pie<Node<RecType, KeyFns, Datum>>()
+      if (node.depth > rootPieDepth && node.hasParent()) {
+        if (!node.parent.hasChildren())
+          return
+        const startAngle = node.parent.startAngle.radians
+        const endAngle = node.parent.endAngle.radians
+        const padAngle = node.parent.padAngle.radians
+        const children = node.parent.children
+        let pieGen = pie<typeof node>()
           .startAngle(startAngle)
           .endAngle(endAngle)
-          .padAngle(padAngle)
           .value(d => d.value)
-      }
-      const pies = pieGen(children)
 
-      pies.forEach((pieDatum, i) => {
-        this.setPieAngles(
-          node,
-          i,
-          pieDatum
-        )
-      })
+        if (node.depth === rootPieDepth + 1) {
+          pieGen = pie<typeof node>()
+            .startAngle(startAngle)
+            .endAngle(endAngle)
+            .padAngle(padAngle)
+            .value(d => d.value)
+        }
+        const pies = pieGen(children)
+
+        pies.forEach((pieDatum, i) => {
+          const nodePie = node.parentList().find(n => n.id === pieDatum.data.id)
+
+          if (nodePie) {
+            nodePie.startAngle = pieDatum.startAngle
+            nodePie.endAngle = pieDatum.endAngle
+            nodePie.padAngle = {
+              radians: pieDatum.padAngle,
+              degrees: 0,
+            }
+          }
+        })
+      }
     })
   }
 
+  /**
+   * @description return the minimum angle of the arcs of the `children` of this node's `parent`. Useful for arc generation. If this node doens't have a parent or the parent doesn't have children, returns `undefined`.
+   * @returns {InstanceType<Angle>}
+   * @see {@link makePies}
+   */
   minArcAngle() {
     if (this.hasParent() && this.parent.hasChildren()) {
       const minArcAngle = Math.min(...this.parent.children.map(c => c.endAngle.radians - c.startAngle.radians))
@@ -873,8 +881,20 @@ export class Node<
   }
 
   /**
+     * @description the sibling nodes of this node (the `children` associated with this node's `parent`)
+     * @returns {this['id'][]}
+     * @see {@link parentList}
+     * @see {@link id}
+     */
+  parentIdList() {
+    return this.parentList().map(node => node.id)
+  }
+
+  /**
    * @description the sibling nodes of this node (the `children` associated with this node's `parent`)
    * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @see {@link parentIdList}
+   * @see {@link id}
    */
   parentList() {
     if (this.hasParent() && this.parent?.hasChildren())
@@ -993,21 +1013,6 @@ export class Node<
     })
   }
 
-  private setPieAngles(
-    node: SetNonNullable<this, 'parent'>,
-    i: number,
-    pieDatum: PieArcDatum<any>
-  ) {
-    if (node.parent.hasChildren()) {
-      node.parent.children[i].startAngle = pieDatum.startAngle
-      node.parent.children[i].endAngle = pieDatum.endAngle
-      node.parent.children[i].padAngle = {
-        radians: pieDatum.padAngle,
-        degrees: 0,
-      }
-    }
-  }
-
   /**
    * @description a method that sets the `records` property of each node in the hierarchy to the array of records contained in the leaf nodes for that node
    */
@@ -1033,8 +1038,15 @@ export class Node<
     })
   }
 
-  sort(...args: Parameters<typeof node_sort>) {
-    return node_sort.bind(this)(...args)
+  sort() {
+    return this.eachBefore((node) => {
+      if (node.children) {
+        node.children = sortBy(
+          node.children,
+          'value'
+        )
+      }
+    })
   }
 
   sum(...args: Parameters<typeof node_sum>) {
