@@ -225,7 +225,7 @@ export class Node<
    * @memberof Node
    * @see {@link height}
    */
-  depth: L.UnionOf<N.Range<0, L.Length<KeyFns>>> = 0
+  depth: L.UnionOf<N.Range<0, N.Add<L.Length<KeyFns>, 1>>> = 0
   /**
    * @description the `key` of the `RecType` at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has a `dim` of `undefined`. The leaf nodes have a `dim` of `undefined`
    * @type {(StringKeyOf<RecType> | undefined)}
@@ -288,7 +288,7 @@ export class Node<
     degrees: 0,
   }
 
-  #parent: null | Node<RecType, KeyFns, Datum> = null
+  #parent?: Node<RecType, KeyFns, Datum>
 
   #records: RecType[] = []
   /**
@@ -526,12 +526,12 @@ export class Node<
    *
    */
   eachAfter(callback: (
-    node: Node<RecType, KeyFns, Datum>,
+    node: this,
     traversalIndex?: number,
   ) => void): this {
-    const nodes: Array<Node<RecType, KeyFns, Datum>> = [ this, ]
-    let node: Node<RecType, KeyFns, Datum> | undefined = nodes[0]
-    const next: Array<Node<RecType, KeyFns, Datum>> = []
+    const nodes: Array<typeof this> = [ this, ]
+    let node: typeof this | undefined = nodes[0]
+    const next: Array<typeof this> = []
     let index = -1
 
     while (node) {
@@ -560,11 +560,11 @@ export class Node<
    *
    */
   eachBefore(callback: (
-    node: Node<RecType, KeyFns, Datum>,
+    node: this,
     traversalIndex?: number,
   ) => void): this {
-    const nodes: Array<Node<RecType, KeyFns, Datum>> = [ this, ]
-    let node: Node<RecType, KeyFns, Datum> | undefined = nodes[0]
+    const nodes: Array<typeof this> = [ this, ]
+    let node: this | undefined = nodes[0]
     let index = -1
 
     while (typeof node !== 'undefined') {
@@ -627,11 +627,11 @@ export class Node<
     }
   }
 
-  hasChildren(): this is SetRequired<this, 'children'> {
+  hasChildren(): this is Simplify<Except<this, 'children'> & { children: Array<Node<RecType, KeyFns, Datum>> }> {
     return (this.children ?? []).length > 0
   }
 
-  hasParent(): this is SetNonNullable<SetNonNullable<this, 'parent'>, 'children'> {
+  hasParent(): this is Simplify<Except<this, 'parent'> & { parent: Node<RecType, KeyFns, Datum> }> {
     return !!this.parent
   }
 
