@@ -26,7 +26,6 @@ import type {
 import {
   contains, length, prop,
 } from 'rambdax'
-import type { PieArcDatum, } from 'd3-shape'
 import { pie, } from 'd3-shape'
 import { scaleDiverging, } from 'd3-scale'
 import paper from 'paper'
@@ -86,7 +85,7 @@ export function hierarchy<
     if (typeof c === 'string')
       return c
     else return c[0]
-  })
+  }) as unknown as FixedLengthArray<keyof T, L.Length<KeyFns>>
   const data = [
     undefined,
     group(
