@@ -10,7 +10,7 @@ export type KeyFn<T> = {
 }
 export type NestedMap<
   T,
-  Len extends 1|2|3|4,
+  Len extends LiteralUnion<1|2|3|4, number>,
   Iter extends I.Iteration = I.IterationOf<Len>,
   M extends Map<any, any> = Map<keyof T, T[]>
 > = {

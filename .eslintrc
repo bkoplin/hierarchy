@@ -31,6 +31,8 @@
         "prev": "*",
       },
     ],
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/prefer-ts-expect-error": "off",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/array-type": [
       "error",

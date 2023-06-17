@@ -22,9 +22,7 @@ import {
 } from 'lodash-es'
 import type { Color, } from 'chroma-js'
 import chroma from 'chroma-js'
-import type {
-  L, N,
-} from 'ts-toolbelt'
+
 import {
   contains, length, prop,
 } from 'rambdax'
@@ -64,19 +62,19 @@ export const angleConverter = {
   },
 }
 export function hierarchy<
+  Depth extends number,
   T extends JsonObject | string,
-  KeyFns extends FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 1 | 2 | 3 | 4> = FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 2>
+  KeyFns extends FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], Depth>
 >(values: T[], ...childrenFns: KeyFns) {
-  type KeyLength = L.Length<KeyFns>
+  type TheseKeyFunctions = FixedLengthArray<KeyFn<T>, Depth>
 
-  type TheseKeyFunctions = FixedLengthArray<KeyFn<T>, KeyLength>
-
-  type TheseDims = FixedLengthArray<keyof T, L.Length<KeyFns>>
+  type TheseDims = FixedLengthArray<keyof T, Depth>
 
   type ReturnedNode = Node<
+    Depth,
     T,
     TheseKeyFunctions,
-    NestedMap<T, KeyLength>
+    NestedMap<T, Depth>
   >
   const funcs = childrenFns.map((c) => {
     if (Array.isArray(c)) {
@@ -99,7 +97,7 @@ export function hierarchy<
     values,
     ...funcs
   )
-  const data: [undefined, NestedMap<T, KeyLength>] = [
+  const data: [undefined, NestedMap<T, 1>] = [
     undefined,
     groupedData,
   ]
@@ -160,7 +158,7 @@ export function hierarchy<
     .setValues() as unknown as ReturnedNode
 }
 
-function nodeIsNode<T>(node: any): node is Exclude<T, undefined> {
+function nodeIsNode<T>(node: unknown | T): node is Exclude<T, undefined> {
   return node instanceof Node
 }
 
@@ -205,12 +203,16 @@ type ChromaLimitOptions = RequireAtLeastOne<{
 }> & { scaleBy?: 'parentListOnly' | 'allNodesAtDim' }
 
 export class Node<
+  Depth extends LiteralUnion<0, number> = 0,
   RecType extends JsonObject | string = JsonObject,
   KeyFns extends FixedLengthArray<
     KeyFn<RecType>,
-    1 | 2 | 3 | 4
-  > = FixedLengthArray<KeyFn<RecType>, 2>,
-  Datum = NestedMap<[keyof RecType, RecType], L.Length<KeyFns>>
+    Depth
+  > = FixedLengthArray<
+    KeyFn<RecType>,
+    Depth
+  >,
+  Datum = NestedMap<[keyof RecType, RecType], Depth>
 > {
   constructor(
     /**
@@ -220,7 +222,7 @@ export class Node<
      */
     public data: Datum,
     keyFns: KeyFns,
-    dims: FixedLengthArray<keyof RecType, L.Length<KeyFns>>
+    dims: FixedLengthArray<keyof RecType, Depth>
   ) {
     this.#keyFns = keyFns
     this.#dims = dims
@@ -231,7 +233,7 @@ export class Node<
    * @type {Array<Node<RecType, KeyFns, Datum>>|undefined}
    * @memberof Node
    */
-  children?: Array<Node<RecType, KeyFns, Datum>>
+  children?: Array<Node<Depth, RecType, KeyFns, Datum>>
   color?: string
   colorScale?: BrewerKeys | Array<string | Color>
   colorScaleBy?: 'parentListOnly' | 'allNodesAtDim'
@@ -243,7 +245,7 @@ export class Node<
    * @memberof Node
    * @see {@link height}
    */
-  depth: LiteralUnion<L.UnionOf<N.Range<0, N.Add<L.Length<KeyFns> | 2, 1>>>, number> = 0
+  depth = 0
   /**
    * @description the `key` of the `RecType` at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has a `dim` of `undefined`. The leaf nodes have a `dim` of `undefined`
    * @type {(StringKeyOf<RecType> | undefined)}
@@ -267,7 +269,7 @@ export class Node<
    * @see {@link dimPath}
    *
    */
-  #dims: FixedLengthArray<keyof RecType, L.Length<KeyFns>>
+  #dims: FixedLengthArray<keyof RecType, Depth>
   #endAngle = new Angle(2 * Math.PI)
   /**
    * @description the height of the node in the hierarchy. The root node has a height of `dims.length + 1`. The leaf nodes have a depth of `0`
@@ -276,7 +278,7 @@ export class Node<
    *
    * @see {@link depths}
    */
-  height: this['depth'] = 0
+  height = 0
   /**
    * @description the `id` of the node at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has an id of `undefined`. The leaf nodes have an id of `undefined`
    * @type {(ValueOf<RecType> | undefined)}
@@ -341,7 +343,7 @@ export class Node<
    * @memberof Node
    */
   get keyFn() {
-    return this.#keyFns[this.depth - 1]
+    return (this.#keyFns as KeyFns)[this.depth - 1]
   }
 
   get padAngle() {
@@ -400,7 +402,7 @@ export class Node<
     this.#valueFn = fn
   }
 
-  [Symbol.iterator] = function* (this: Node<RecType, KeyFns, Datum>) {
+  [Symbol.iterator] = function* (this: Node<Depth, RecType, KeyFns, Datum>) {
     let next = [ this, ]
     let current = next.reverse()
 
@@ -422,7 +424,7 @@ export class Node<
   }
 
   ancestorAt(depthOrDim: RequireExactlyOne<
-    { depth?: number; dim?: Node<RecType, KeyFns, Datum>['dim'] },
+    { depth?: number; dim?: LiteralUnion<keyof RecType, string> },
     'depth' | 'dim'
   >) {
     return this.ancestors().find((node) => {
@@ -436,11 +438,11 @@ export class Node<
    * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
    *
    * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
-   * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>[]}
    * @memberof Node
    */
   ancestors() {
-    const nodes: Array<Node<RecType, KeyFns, Datum>> = [ this, ]
+    const nodes = [ this, ]
     let node = nodes[0]
 
     while (node.parent) {
@@ -453,7 +455,7 @@ export class Node<
 
   /**
    * @description copies the node and all of its children, setting the records of the new node to the records of the original node. **Note**: This function *re-levels* the node, meaning that it creates new `height` and `depth` values so that *this* node becomes the root node of the new hierarchy
-   * @returns {Node<RecType, KeyFns, Datum>}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>}
    */
   copy() {
     if (this.records.length === 0)
@@ -470,6 +472,7 @@ export class Node<
       ])
     )
 
+    // @ts-ignore
     newH.setValues(this.valueFn)
     return newH
   }
@@ -490,19 +493,21 @@ export class Node<
 
   /**
    * @description Returns the descendants of this node at the specified `depth` or `dim`.
-   * @param {RequireExactlyOne<{ depth?: number; dim?: Node<RecType, KeyFns, Datum>['dim'] }, 'depth' | 'dim'>} depthOrDim
+   * @param {RequireExactlyOne<{ depth?: number; dim?: Node<Depth, RecType, KeyFns, Datum>['dim'] }, 'depth' | 'dim'>} depthOrDim
    * @param {never[]} args
-   * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>[]}
    */
   descendantsAt(depthOrDim: RequireExactlyOne<
-      { depth?: number; dim?: Node<RecType, KeyFns, Datum>['dim'] },
+      { depth?: number; dim?: LiteralUnion<keyof RecType, string> },
       'depth' | 'dim'
     >) {
-    return this.descendants().filter((node) => {
+    const descendants = this.descendants()
+
+    return descendants.filter((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim
-    }) as this[]
+    })
   }
 
   /**
@@ -606,9 +611,9 @@ export class Node<
   /**
    * @description Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
    * @param callback the filter function
-   * @returns {Node<RecType, KeyFns, Datum> | undefined}
+   * @returns {Node<Depth, RecType, KeyFns, Datum> | undefined}
    */
-  find(callback: (node: Node<RecType, KeyFns, Datum>) => boolean) {
+  find(callback: (node: Node<Depth, RecType, KeyFns, Datum>) => boolean) {
     for (const node of this) {
       if (callback(node))
         return node
@@ -647,11 +652,11 @@ export class Node<
     }
   }
 
-  hasChildren(): this is Simplify<Except<typeof this, 'children'> & { children: Array<Node<RecType, KeyFns, Datum>> }> {
+  hasChildren(): this is Simplify<Except<typeof this, 'children'> & { children: Array<Node<Depth, RecType, KeyFns, Datum>> }> {
     return (this.children ?? []).length > 0
   }
 
-  hasParent(): this is Simplify<Except<typeof this, 'parent'> & { parent: Node<RecType, KeyFns, Datum> }> {
+  hasParent(): this is Simplify<Except<typeof this, 'parent'> & { parent: Node<Depth, RecType, KeyFns, Datum> }> {
     return !!this.parent
   }
 
@@ -666,10 +671,10 @@ export class Node<
   /**
    *
    * @param {boolean} [onlyNodes = false] return only leaves that are true nodes -- i.e. that have children that are not nodes but still have `id` and `dim` properties
-   * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>[]}
    */
   leaves(onlyNodes = false) {
-    const leaves: Array<Node<RecType, KeyFns, Datum>> = []
+    const leaves: Array<Node<Depth, RecType, KeyFns, Datum>> = []
 
     this.eachBefore((node) => {
       if (onlyNodes && !!node.children && !node.children[0].children)
@@ -684,12 +689,12 @@ export class Node<
    * @description Returns an array of links for this node and its descendants, where each link is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    * @param {boolean} [onlyNodes = false] return only leaves that are true nodes -- i.e. that have children that are not nodes but still have `id` and `dim` properties
-   * @return {Array<Record<'source'|'target', Node<RecType, KeyFns, Datum>>>}
+   * @return {Array<Record<'source'|'target', Node<Depth, RecType, KeyFns, Datum>>>}
    */
   links(onlyNodes = false) {
     const links: Array<{
-      source: Node<RecType, KeyFns, Datum>
-      target: Node<RecType, KeyFns, Datum>
+      source: Node<Depth, RecType, KeyFns, Datum>
+      target: Node<Depth, RecType, KeyFns, Datum>
     }> = []
 
     this.each((node) => {
@@ -709,7 +714,7 @@ export class Node<
    * @description Returns the first `descendant` of this node that matches the `id` passed to the function. The second parameter is a boolean that determines whether the `id` must match exactly or if it can be a subset of the `id` of the node.
    * @param {ValueOf<RecType> | Array<ValueOf<RecType>> | Partial<RecType>} id An `id` value, a full or partial `idPath` value, or a lookup object
    * @param {[true]} exact whether to match the `id` parameter exactly, or to return the first node that contains the `id` parameter
-   * @returns {Node<RecType, KeyFns, Datum> | undefined}
+   * @returns {Node<Depth, RecType, KeyFns, Datum> | undefined}
    * @see {@link lookupMany}
    */
   lookup(
@@ -763,7 +768,7 @@ export class Node<
    * @description Returns the array of all `descendant` nodes of this node that match the `id` passed to the function. The second parameter is a boolean that determines whether the `id` must match exactly or if it can be a subset of the `id` of the node.
    * @param {Array<ValueOf<RecType>|string> | Array<Array<ValueOf<RecType>|string>> | Array<Partial<RecType>>} id An `id` value, a full or partial `idPath` value, or a lookup object
    * @param {[true]} exact whether to match the `id` parameter exactly, or to return the first node that contains the `id` parameter
-   * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>[]}
    * @see {@link lookup}
    */
   lookupMany(
@@ -829,7 +834,7 @@ export class Node<
    * @param {[number]} pieStart the start angle in **radians** for the `root` pie
    * @param {[number]} pieEnd the end angle in **radians** for the `root` pie
    * @param {[number]} piePadding the padding angle in **radians** for the `root` pie
-   * @returns {Node<RecType, KeyFns, Datum>}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>}
    */
   makePies(pieStart?: number, pieEnd?: number, piePadding?: number) {
     const rootPieDepth = this.depth
@@ -912,13 +917,12 @@ export class Node<
 
   /**
    * @description the sibling nodes of this node (the `children` associated with this node's `parent`)
-   * @returns {Node<RecType, KeyFns, Datum>[]}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>[]}
    * @see {@link parentIdList}
    * @see {@link id}
    */
   parentList() {
     if (this.hasParent() && this.parent?.hasChildren())
-    // @ts-expect-error this is fine
       return this.parent.children
     else return []
   }
@@ -926,7 +930,7 @@ export class Node<
   /**
    * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
-   * @param {Node<RecType, KeyFns, Datum>} end the target node
+   * @param {Node<Depth, RecType, KeyFns, Datum>} end the target node
    * @param {boolean} [noRoot=false] whether to exclude the root node from the returned path array
    * @returns {this[]}
    */
@@ -1049,7 +1053,7 @@ export class Node<
 
   /**
    * @description a function that sets the values of the node and all its children to the result of the callback function. If no callback is passed, the values are set to the length of the node's records at that level
-   * @returns {Node<RecType, KeyFns, Datum>}
+   * @returns {Node<Depth, RecType, KeyFns, Datum>}
    * @see {@link valueFn}
    */
   setValues(callback?: (values: RecType[]) => number) {
