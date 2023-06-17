@@ -4,6 +4,7 @@ import type {
   Get,
   JsonObject,
   JsonPrimitive,
+  LiteralUnion,
   RequireAtLeastOne,
   RequireExactlyOne,
   Simplify,
@@ -15,6 +16,7 @@ import {
   difference,
   isEqual,
   isObjectLike,
+  sortBy,
   uniq,
   zipObject,
 } from 'lodash-es'
@@ -32,6 +34,7 @@ import paper from 'paper'
 import { range, } from 'd3-array'
 import type {
   KeyFn, NestedMap,
+
 } from '../array/types'
 import { group, } from '../array/group'
 import node_sum from './sum.js'
@@ -62,13 +65,19 @@ export const angleConverter = {
 }
 export function hierarchy<
   T extends JsonObject | string,
-  KeyFns extends FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 1 | 2 | 3 | 4> = FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 2>,
-  Ret = Node<
+  KeyFns extends FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 1 | 2 | 3 | 4> = FixedLengthArray<StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>], 2>
+>(values: T[], ...childrenFns: KeyFns) {
+  type KeyLength = L.Length<KeyFns>
+
+  type TheseKeyFunctions = FixedLengthArray<KeyFn<T>, KeyLength>
+
+  type TheseDims = FixedLengthArray<keyof T, L.Length<KeyFns>>
+
+  type ReturnedNode = Node<
     T,
-    FixedLengthArray<KeyFn<T>, L.Length<KeyFns>>,
-    NestedMap<T, L.Length<KeyFns>>
+    TheseKeyFunctions,
+    NestedMap<T, KeyLength>
   >
->(values: T[], ...childrenFns: KeyFns): Ret {
   const funcs = childrenFns.map((c) => {
     if (Array.isArray(c)) {
       return c[1]
@@ -80,20 +89,21 @@ export function hierarchy<
           d
         ) as unknown as Get<T, typeof c>
     }
-  }) as unknown as FixedLengthArray<KeyFn<T>, L.Length<KeyFns>>
+  }) as unknown as TheseKeyFunctions
   const dims = childrenFns.map((c) => {
     if (typeof c === 'string')
       return c
     else return c[0]
-  }) as unknown as FixedLengthArray<keyof T, L.Length<KeyFns>>
-  const data = [
+  }) as unknown as TheseDims
+  const groupedData = group(
+    values,
+    ...funcs
+  )
+  const data: [undefined, NestedMap<T, KeyLength>] = [
     undefined,
-    group(
-      values,
-      ...funcs
-    ),
-  ] as const
-  const childrenFn = (d: typeof Map) => {
+    groupedData,
+  ]
+  const childrenFn = (d: any) => {
     return Array.isArray(d) ? d[1] : null
   }
   const root = new Node(
@@ -102,10 +112,9 @@ export function hierarchy<
     dims
   )
   const nodes = [ root, ]
-  let node: Ret
+  let node: typeof root | undefined = nodes.pop()
 
-  node = nodes.pop() as Ret
-  while (typeof node !== 'undefined') {
+  while (nodeIsNode<typeof root>(node)) {
     const children = childrenFn(node.data)
 
     if (children) {
@@ -118,12 +127,17 @@ export function hierarchy<
           dims
         )
 
-        nodeChild.parent = node
-        nodeChild.depth = node.depth + 1
+        // @ts-expect-error this is fine
+        nodeChild.parent = node as unknown as Exclude<typeof root, undefined>
+        nodeChild.depth = (node?.depth ?? 0) + 1
+        // @ts-expect-error this is fine
         nodes.push(nodeChild)
-        if (typeof node.children === 'undefined')
-          node.children = []
+        if (typeof node?.children === 'undefined')
+          (node as unknown as Exclude<typeof root, undefined>).children = []
+
+        // @ts-expect-error this is fine
         node.children = [
+          // @ts-expect-error this is fine
           ...node.children,
           nodeChild,
         ]
@@ -133,15 +147,21 @@ export function hierarchy<
   }
 
   return root
-    .eachBefore((node) => {
+    .eachBefore((thisNode) => {
       let height = 0
 
-      do node.height = height
-      while ((node = node.parent) && node.height < ++height)
+      do thisNode.height = height
+      // @ts-expect-error this is fine
+      // eslint-disable-next-line no-cond-assign
+      while ((thisNode = thisNode.parent) && thisNode.height < ++height)
     })
     .setIds()
     .setRecords()
-    .setValues()
+    .setValues() as unknown as ReturnedNode
+}
+
+function nodeIsNode<T>(node: any): node is Exclude<T, undefined> {
+  return node instanceof Node
 }
 
 /**
@@ -223,7 +243,7 @@ export class Node<
    * @memberof Node
    * @see {@link height}
    */
-  depth: L.UnionOf<N.Range<0, N.Add<L.Length<KeyFns>, 1>>> = 0
+  depth: LiteralUnion<L.UnionOf<N.Range<0, N.Add<L.Length<KeyFns> | 2, 1>>>, number> = 0
   /**
    * @description the `key` of the `RecType` at this level, which is the result of the `keyFn` passed to `hierarchy` at this level. The root node has a `dim` of `undefined`. The leaf nodes have a `dim` of `undefined`
    * @type {(StringKeyOf<RecType> | undefined)}
@@ -285,7 +305,7 @@ export class Node<
     degrees: 0,
   }
 
-  #parent?: Node<RecType, KeyFns, Datum>
+  #parent?: this
 
   #records: RecType[] = []
   /**
@@ -443,6 +463,7 @@ export class Node<
     const theseRecords = this.records
     const newH = hierarchy(
       theseRecords,
+      // @ts-expect-error this is fine
       ...theseDims.map((d, i) => [
         d,
         theseKeyFns[i],
@@ -489,6 +510,7 @@ export class Node<
    * @returns {number} the index of this node's `dim` in the `dims` array
    */
   dimIndexOf() {
+    // @ts-expect-error this is fine
     return this.#dims.indexOf(this.dim ?? '')
   }
 
@@ -507,6 +529,7 @@ export class Node<
 
     for (const node of this) {
       callback(
+        // @ts-expect-error this is fine
         node,
         ++index,
         this
@@ -534,6 +557,7 @@ export class Node<
     while (node) {
       next.push(node)
       if (node.children)
+      // @ts-expect-error this is fine
         node.children.forEach(child => nodes.push(child))
 
       node = nodes.pop()
@@ -570,6 +594,7 @@ export class Node<
         ++index
       )
       if (node.children)
+      // @ts-expect-error this is fine
         node.children.forEach(child => nodes.push(child))
 
       node = nodes.pop()
@@ -584,8 +609,6 @@ export class Node<
    * @returns {Node<RecType, KeyFns, Datum> | undefined}
    */
   find(callback: (node: Node<RecType, KeyFns, Datum>) => boolean) {
-    const index = -1
-
     for (const node of this) {
       if (callback(node))
         return node
@@ -624,11 +647,11 @@ export class Node<
     }
   }
 
-  hasChildren(): this is Simplify<Except<this, 'children'> & { children: Array<Node<RecType, KeyFns, Datum>> }> {
+  hasChildren(): this is Simplify<Except<typeof this, 'children'> & { children: Array<Node<RecType, KeyFns, Datum>> }> {
     return (this.children ?? []).length > 0
   }
 
-  hasParent(): this is Simplify<Except<this, 'parent'> & { parent: Node<RecType, KeyFns, Datum> }> {
+  hasParent(): this is Simplify<Except<typeof this, 'parent'> & { parent: Node<RecType, KeyFns, Datum> }> {
     return !!this.parent
   }
 
@@ -670,11 +693,10 @@ export class Node<
     }> = []
 
     this.each((node) => {
-      if (onlyNodes && typeof node.id === 'undefined') {
-      }
-      else if (node !== this && node.parent?.id) {
+      if (node !== this && (node.parent?.id || onlyNodes !== true)) {
         // Don't include the root's parent, if any.
         links.push({
+          // @ts-expect-error this is fine
           source: node.parent,
           target: node,
         })
@@ -843,7 +865,7 @@ export class Node<
             .padAngle(padAngle)
             .value(d => d.value)
         }
-
+        // @ts-expect-error this is fine
         const pies = pieGen(children)
 
         children.forEach((child) => {
@@ -896,6 +918,7 @@ export class Node<
    */
   parentList() {
     if (this.hasParent() && this.parent?.hasChildren())
+    // @ts-expect-error this is fine
       return this.parent.children
     else return []
   }
@@ -997,13 +1020,15 @@ export class Node<
       const thisNodeDim = node.#dims?.[node.depth - 1]
 
       if (typeof thisNodeDim !== 'undefined') {
+        // @ts-expect-error this is fine
         node.id = node.data[0]
         node.dim = thisNodeDim
       }
+      // @ts-expect-error this is fine
       node.idPath = node
         .ancestors()
         .map(ancestor => ancestor.id)
-        .filter(v => v !== undefined) as unknown as JsonPrimitive[]
+        .filter(v => v !== undefined)
       node.dimPath = node
         .ancestors()
         .map(ancestor => ancestor.dim)
@@ -1015,10 +1040,11 @@ export class Node<
    * @description a method that sets the `records` property of each node in the hierarchy to the array of records contained in the leaf nodes for that node
    */
   setRecords() {
-    return this.each(node =>
-      (node.records = node
+    return this.each((node) => {
+      node.records = node
         .leaves()
-        .flatMap((leaf): RecType => leaf.data as unknown as RecType)))
+        .flatMap((leaf): RecType => leaf.data as unknown as RecType)
+    })
   }
 
   /**

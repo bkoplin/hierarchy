@@ -12,7 +12,7 @@ export default defineConfig({
     'cjs',
     'esm',
   ],
-  dts: true,
+  dts: { entry: [ 'src/hierarchy/index.ts', ], },
   // footer: { js: '\n\nObject.keys(func).forEach((key) => globalThis[key] = func[key])', },
   shims: true,
   define: { 'import.meta.vitest': 'false', },
