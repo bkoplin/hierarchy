@@ -2,7 +2,7 @@
   "name": "hierarchy",
   "version": "3.1.2",
   "type": "module",
-  "main": "./dist/common.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "packageManager": "pnpm@8.6.1",

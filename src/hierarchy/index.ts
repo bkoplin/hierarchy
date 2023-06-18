@@ -97,11 +97,11 @@ export function hierarchy<
     values,
     ...funcs
   )
-  const data: [undefined, NestedMap<T, 1>] = [
+  const data: [undefined, NestedMap<T, Depth>] = [
     undefined,
     groupedData,
   ]
-  const childrenFn = (d: any) => {
+  const childrenFn = (d: [any, NestedMap<T, 1>]) => {
     return Array.isArray(d) ? d[1] : null
   }
   const root = new Node(
@@ -113,13 +113,15 @@ export function hierarchy<
   let node: typeof root | undefined = nodes.pop()
 
   while (nodeIsNode<typeof root>(node)) {
+    // @ts-ignore
     const children = childrenFn(node.data)
 
-    if (children) {
+    if (children && children instanceof Map) {
       const childArray = Array.from(children)
 
       childArray.reverse().forEach((child, i) => {
-        const nodeChild = new Node(
+        const nodeChild = new Node<Depth, T, TheseKeyFunctions, TheseDims>(
+          // @ts-ignore
           childArray[i],
           funcs,
           dims
@@ -155,7 +157,7 @@ export function hierarchy<
     })
     .setIds()
     .setRecords()
-    .setValues() as unknown as ReturnedNode
+    .setValues()
 }
 
 function nodeIsNode<T>(node: unknown | T): node is Exclude<T, undefined> {
@@ -203,8 +205,8 @@ type ChromaLimitOptions = RequireAtLeastOne<{
 }> & { scaleBy?: 'parentListOnly' | 'allNodesAtDim' }
 
 export class Node<
-  Depth extends LiteralUnion<0, number> = 0,
-  RecType extends JsonObject | string = JsonObject,
+  Depth extends LiteralUnion<0, number>,
+  RecType extends JsonObject | string,
   KeyFns extends FixedLengthArray<
     KeyFn<RecType>,
     Depth

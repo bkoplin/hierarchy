@@ -8,9 +8,13 @@ import {
   at, pick, sumBy,
 } from 'lodash-es'
 import { omit, } from 'rambdax'
+import type { IterableElement, } from 'type-fest'
+
 import { hierarchy, } from '../../src/hierarchy/index'
 
 import data from '../data/MOCK_DATA.json'
+
+type D = IterableElement<typeof data>
 
 const nested = hierarchy(
   data,
