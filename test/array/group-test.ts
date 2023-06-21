@@ -1,14 +1,30 @@
-import { readJSONSync, } from 'fs-extra'
 import { prop, } from 'rambdax'
 import {
   expect, test,
 } from 'vitest'
+import { uniq, } from 'lodash-es'
 import {
-  flatGroup, index, indexes, rollup, rollups,
-} from '../../src/array/group.ts'
-import { uniq } from 'lodash-es'
+  flatGroup, group, index, indexes, rollup, rollups,
+} from '../../src/array/group.js'
 
-const data = readJSONSync('./test/data/MOCK_DATA.json')
+import data from '../data/MOCK_DATA.json'
+
+test(
+  'group',
+  () => {
+    const nested = group(
+      data,
+      d => d.region,
+      d => d.crime_rate,
+      d => d.crime_rate
+    )
+    const p = nested.get('test')?.get('test1')
+      ?.get('test')
+      ?.get('test')
+
+    expect(nested).toMatchInlineSnapshot()
+  }
+)
 
 test(
   'flatGroup',
@@ -433,7 +449,7 @@ test(
       data,
       v => uniq(v).length,
       prop('gender'),
-      (d) => d.first_name?.[0]
+      d => d.first_name?.[0]
     )
 
     expect(nested).toMatchInlineSnapshot(`

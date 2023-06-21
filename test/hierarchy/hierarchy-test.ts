@@ -13,9 +13,16 @@ import type { IterableElement, } from 'type-fest'
 import { hierarchy, } from '../../src/hierarchy/index'
 
 import data from '../data/MOCK_DATA.json'
+import { group, } from '../../src/array/group'
 
 type D = IterableElement<typeof data>
 
+const grouped = group(
+  data,
+  d => d.region,
+  d => d.education_level,
+  d => d.state
+)
 const nested = hierarchy(
   data,
   'region',
@@ -34,9 +41,11 @@ nested.setColors([
 describe(
   'depth and height',
   () => {
+    const leafDepth = nested.leaves()?.[0].depth
+
     test(
       'depth',
-      () => expect(nested.leaves()?.[0].depth).toBe(4)
+      () => expect(leafDepth).toBe(4)
     )
     test(
       'height',

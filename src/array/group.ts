@@ -1,22 +1,34 @@
-import type { FixedLengthArray, } from 'type-fest'
+import type { JsonObject, ReadOnlyTuple, } from 'type-fest'
 import type {
-  L, N,
+  type L, type N,
 } from 'ts-toolbelt'
 
 import {
   identity,
   uniq,
 } from 'lodash-es'
-import { flatten, } from './flatten'
 import type {
-  KeyFn, NestedArray, NestedRollups,
-} from './types'
+  GroupArguments,
+  KeyFn, NestedArray, NestedMap, NestedRollups,
+} from '../types'
+import { flatten, } from './flatten'
 import { InternMap, } from './internmap'
 
 function unique<T>(values: T[]) {
   return uniq(values)[0]
 }
-export function group(values, ...keys) {
+
+export function group<T extends JsonObject, Args extends GroupArguments<T>>(...args: Args): NestedMap<T, N.Sub<L.Length<Args>, 1>> {
+  const [
+    values,
+    ...keys
+  ] = args
+
+  // export function group<T>(values: T[], ...keys: [KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>]): NestedMap<T, 5>
+  // export function group<T>(values: T[], ...keys: [KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>]): NestedMap<T, 4>
+  // export function group<T>(values: T[], ...keys: [KeyFn<T>, KeyFn<T>, KeyFn<T>]): NestedMap<T, 3>
+  // export function group<T>(values: T[], ...keys: [KeyFn<T>, KeyFn<T>]): NestedMap<T, 2>
+  // export function group<T>(values: T[], ...keys: [KeyFn<T>]): NestedMap<T, 1> {
   return nest(
     values,
     identity,
@@ -24,7 +36,7 @@ export function group(values, ...keys) {
     keys
   )
 }
-export function rollup<T>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>) {
+export function rollup<T>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>) {
   return nest<T, typeof keys>(
     values,
     identity,
@@ -32,7 +44,7 @@ export function rollup<T>(values: T[], reduce: <R = number>(acc: T[]) => R, ...k
     keys
   )
 }
-export function rollups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: KeyFns) {
+export function rollups<T, KeyFns extends ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = ReadOnlyTuple<KeyFn<T>, 2>>(values: T[], reduce: <R = number>(acc: T[]) => R, ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
@@ -41,7 +53,7 @@ export function rollups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 |
   ) as unknown as NestedRollups<T, N.Sub<L.Length<KeyFns>, 1>>
 }
 export { group as default, }
-export function groups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
+export function groups<T, KeyFns extends ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = ReadOnlyTuple<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest(
     values,
     Array.from,
@@ -49,7 +61,7 @@ export function groups<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 
     keys
   ) as unknown as NestedArray<T, N.Sub<L.Length<KeyFns>, 1>>
 }
-export function flatGroup<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
+export function flatGroup<T, KeyFns extends ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = ReadOnlyTuple<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return flatten(
     groups<T, KeyFns>(
       values,
@@ -58,7 +70,7 @@ export function flatGroup<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3
     keys
   )
 }
-export function index<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
+export function index<T, KeyFns extends ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = ReadOnlyTuple<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     identity,
@@ -66,7 +78,7 @@ export function index<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4
     keys
   )
 }
-export function indexes<T, KeyFns extends FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = FixedLengthArray<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
+export function indexes<T, KeyFns extends ReadOnlyTuple<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6> = ReadOnlyTuple<KeyFn<T>, 2>>(values: T[], ...keys: KeyFns) {
   return nest<L.Length<KeyFns>, T, KeyFns>(
     values,
     Array.from,
