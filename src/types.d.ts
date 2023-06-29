@@ -6,59 +6,30 @@ import type {
   LiteralUnion,
   ValueOf,
   StringKeyOf,
+  Simplify,
 } from 'type-fest';
 import type { F, I, L, N, O, S } from 'ts-toolbelt';
-import { InternMap } from 'd3-array'
+import { InternMap } from 'd3-array';
 
-export type GroupArguments<T> =
-  | readonly [T[], KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>]
-  | readonly [T[], KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>]
-  | readonly [T[], KeyFn<T>, KeyFn<T>, KeyFn<T>, KeyFn<T>]
-  | readonly [T[], KeyFn<T>, KeyFn<T>, KeyFn<T>]
-  | readonly [T[], KeyFn<T>, KeyFn<T>]
-  | readonly [T[], KeyFn<T>];
+export type GroupArguments<
+  T,
+  Length extends number = 1 | 2 | 3 | 4 | 5 | 6,
+> = FixedLengthArray<KeyFn<T>, Length>;
 
-export type GroupArgumentsByLength<Len extends LiteralUnion<2|3|4|5|6|7, number>, T> = ReadOnlyTuple<KeyFn<T>, N.Sub<Len, 1>>
-export type HierarchyArguments<T> =
-  | readonly [
-      T[],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-    ]
-  | readonly [
-      T[],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-    ]
-  | readonly [
-      T[],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-    ]
-  | readonly [
-      T[],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-    ]
-  | readonly [
-      T[],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-      StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],
-    ]
-  | readonly [T[], StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>]];
+export type HierarchyKeyArguments<
+  T,
+  Length extends number = 1 | 2 | 3 | 4 | 5 | 6,
+> = FixedLengthArray<StringKeyOf<T>, Length>;
+
+export type HierarchyFnArguments<
+  T,
+  Length extends number = 1 | 2 | 3 | 4 | 5 | 6,
+> = FixedLengthArray<readonly [StringKeyOf<T>, KeyFn<T>], Length>;
+
+export type KeyFns<T> = FixedLengthArray<KeyFn<T>, 1 | 2 | 3 | 4 | 5 | 6>;
 
 export type KeyFn<T> = {
-  (obj: T, idx?: number, objs?: T[]): ValueOf<T>|undefined;
+  (value: T, idx?: number, objs?: T[]): ValueOf<T>;
 };
 
 export type KeyFns<
@@ -84,39 +55,78 @@ export type KeyOptions<
   1: L.UnionOf<[...KeyList, ReadOnlyTuple<StringKeyOf<T>, I.Pos<Iter>>]>;
 }[N.IsZero<I.Pos<Iter>>];
 
-export type NestedMap<
+export type NestedArray<
   T,
   Len extends number,
   Iter extends I.Iteration = I.IterationOf<Len>,
-  M extends Map<any, any> = Map<ValueOf<T>, T[]>
+  M extends Array = Array<T>,
+> = {
+  1: Array<[ValueOf<T>, M]>;
+  0: NestedArray<T, Len, I.Prev<Iter>, Array<[ValueOf<T>, M]>>;
+}[N.IsZero<I.Pos<I.Prev<Iter>>>];
+export type NestedMap<
+  T,
+  Len extends number,
+  Iter extends I.Iteration = I.IterationOf<0>,
+  M extends Map = Map<ValueOf<T>, T[]>,
 > = {
   0: Map<ValueOf<T>, M>;
-  1: NestedMap<T, Len, I.Prev<Iter>, Map<ValueOf<T>, M>>;
-}[N.Greater<I.Pos<I.Prev<Iter>>, 1>];
+  1: NestedMap<T, Len, I.Next<Iter>, Map<ValueOf<T>, M>>;
+}[Len extends I.Pos<I.Next<Iter>> ? 0 : 1];
+type Family = {name: string, children: Family[]};
+export type NestedFamlies<
+  T,
+  Len extends number,
+  Iter extends I.Iteration = I.IterationOf<Len>,
+  M extends Family = {name: ValueOf<T>, children: T[]},
+> = {
+  1: M;
+  0: NestedFamlies<T, Len, I.Prev<Iter>, M<{name: ValueOf<T>, children: M[]}>>;
+}[N.IsZero<I.Pos<I.Prev<Iter>>>];
 export type NestedRollup<
   T,
-  Len extends LiteralUnion<1 | 2 | 3 | 4 | 5 | 6, number> = 6,
+  Len extends number,
   Iter extends I.Iteration = I.IterationOf<Len>,
-  M extends Map<any, any> = Map<keyof T, number>,
+  M extends InternMap<ValueOf<T>, any> = InternMap<ValueOf<T>, number>,
 > = {
-  0: NestedMap<T, Len, I.Prev<Iter>, Map<keyof T, M>>;
-  1: Map<keyof T, M>;
-}[N.IsZero<I.Pos<Iter>>];
-export type NestedArray<
-  T,
-  Len extends LiteralUnion<1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M = [keyof T, T[]],
-> = {
-  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>;
-  1: [keyof T, M[]];
-}[N.IsZero<I.Pos<Iter>>];
-export type NestedRollups<
-  T,
-  Len extends LiteralUnion<1 | 2 | 3 | 4 | 5 | 6, number> = 6,
-  Iter extends I.Iteration = I.IterationOf<Len>,
-  M = [keyof T, number],
-> = {
-  0: NestedArray<T, Len, I.Prev<Iter>, [keyof T, M[]]>;
-  1: [keyof T, M[]];
-}[N.IsZero<I.Pos<Iter>>];
+  1: M;
+  0: NestedRollup<T, Len, I.Prev<Iter>, InternMap<ValueOf<T>, M>>;
+}[N.IsZero<I.Pos<I.Prev<Iter>>>];
+
+/**
+Methods to exclude.
+*/
+type ArrayLengthMutationKeys = 'splice' | 'push' | 'pop' | 'shift' | 'unshift';
+
+/**
+Create a type that represents an array of the given type and length. The array's length and the `Array` prototype methods that manipulate its length are excluded in the resulting type.
+
+@example
+```
+import type {FixedLengthArray} from 'type-fest';
+
+type FencingTeam = FixedLengthArray<string, 3>;
+
+const guestFencingTeam: FencingTeam = ['Josh', 'Michael', 'Robert'];
+
+const homeFencingTeam: FencingTeam = ['George', 'John'];
+//=> error TS2322: Type string[] is not assignable to type 'FencingTeam'
+
+guestFencingTeam.push('Sam');
+//=> error TS2339: Property 'push' does not exist on type 'FencingTeam'
+```
+
+@category Array
+@see ReadonlyTuple
+*/
+export type FixedLengthArray<
+  Element,
+  Length extends number,
+  ArrayPrototype = [Element, ...Element[]],
+> = Simplify<
+  ArrayPrototype & {
+    [index: number]: Element;
+    [Symbol.iterator]: () => IterableIterator<Element>;
+    readonly length: Length;
+  }
+>;

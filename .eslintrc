@@ -19,7 +19,7 @@
         "exceptAfterSingleLine": true,
       },
     ],
-    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/no-shadow": ["error", { "ignoreFunctionTypeParameterNameValueShadow": true }],
     "@typescript-eslint/padding-line-between-statements": [
       "error",
       {
