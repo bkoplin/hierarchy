@@ -1,7 +1,8 @@
-import type { Node } from './Nodes'
+import type { Node, } from './Nodes'
 
-export function* iterator<IteratorNode extends Node<any, number, number>>(this: IteratorNode) {
-  let node = this as unknown as IteratorNode & Exclude<IteratorNode[ 'children' ], undefined>[ number ]
+export function* iterator<Input>(this: Node<Input, number, number>) {
+  type IteratorNode = Node<Input, number, number>
+  let node = this as unknown as IteratorNode | Exclude<IteratorNode[ 'children' ], undefined>[ number ] | undefined
   let current
   let next = [ node, ] as unknown as [ IteratorNode, ...Exclude<IteratorNode[ 'children' ], undefined> ]
   let children: IteratorNode[ 'children' ]

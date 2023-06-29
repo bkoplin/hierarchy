@@ -18,7 +18,7 @@ export abstract class Node<T, Depth extends number, Height extends number> {
   ) {
   }
 
-  [Symbol.iterator] = iterator
+  [Symbol.iterator] = iterator<T>
   children = [] as unknown as Height extends 0 ? undefined : Array<Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>>
   parent = undefined as undefined | Node<T, N.Sub<Depth, 1>, N.Add<Height, 1>>
 
