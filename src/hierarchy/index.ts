@@ -25,8 +25,6 @@ import {
   contains, length,
 } from 'rambdax'
 import { pie, } from 'd3-shape'
-import { scaleDiverging, } from 'd3-scale'
-import paper from 'paper'
 import { range, } from 'd3-array'
 
 import type {
@@ -41,30 +39,8 @@ import type {
 import { group, } from '../array'
 import node_sum from './sum.js'
 import node_path from './path.js'
+import { angleConverter } from './angleConverter'
 
-export const angleConverter = {
-  fromPaper: scaleDiverging()
-    .domain([
-      -180,
-      0,
-      180,
-    ])
-    .range([
-      -0.5 * Math.PI,
-      Math.PI * 0.5,
-      1.5 * Math.PI,
-    ]),
-  toPaper: (radiansRaw: number) => {
-    const pt = new paper.Point({
-      // angle: (radiansRaw / Math.PI) * 180 + 270,
-      length: 1,
-    })
-
-    pt.angleInRadians = radiansRaw - Math.PI * 0.5
-
-    return pt.angle
-  },
-}
 export function hierarchy<
   T extends JsonObject,
   KeyFn1 extends StringKeyOf<T> | [StringKeyOf<T>, KeyFn<T>],

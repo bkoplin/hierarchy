@@ -88,7 +88,7 @@ export function group<
 }
 
 function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, LiteralUnion<DepthAndHeight, number>, LiteralUnion<DepthAndHeight, number>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
-  const depth = (node.depth + 1) as unknown as N.Add<NodeType[ 'depth' ], 1>
+  const depth = (node.depth + 1) as unknown as Exclude<DepthAndHeight, 0>
   const height = (node.height - 1) as unknown as N.Sub<NodeType[ 'height' ], 1>
   let keyFn: (d: Input) => ValueOf<Input>
 
@@ -114,9 +114,10 @@ function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, 
     ] = vals
 
     if (node.height > 1) {
+      type ThisNodeType = HierarchyNode<Input, Exclude<DepthAndHeight, 0 | 8>, Exclude<DepthAndHeight, 0 | 8>>
       const child = new HierarchyNode(
-        depth,
-        height,
+        depth as unknown as ThisNodeType[ 'depth' ],
+        height as unknown as ThisNodeType[ 'height' ],
         records,
         key as ValueOf<Input>,
         dim

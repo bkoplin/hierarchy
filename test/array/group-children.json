@@ -20,6 +20,8 @@
           "unemployment_rate": 43.28,
         },
       ],
+      "value": 1,
+      "valueFunction": [Function],
     },
     {
       "depth": 2,
@@ -41,6 +43,8 @@
           "unemployment_rate": 42.05,
         },
       ],
+      "value": 1,
+      "valueFunction": [Function],
     },
     {
       "depth": 2,
@@ -62,6 +66,8 @@
           "unemployment_rate": 81.97,
         },
       ],
+      "value": 1,
+      "valueFunction": [Function],
     },
     {
       "depth": 2,
@@ -83,6 +89,8 @@
           "unemployment_rate": 28.84,
         },
       ],
+      "value": 1,
+      "valueFunction": [Function],
     },
     {
       "depth": 2,
@@ -104,6 +112,8 @@
           "unemployment_rate": 20.11,
         },
       ],
+      "value": 1,
+      "valueFunction": [Function],
     },
   ],
   "depth": 1,
@@ -173,4 +183,6 @@
       "unemployment_rate": 20.11,
     },
   ],
+  "value": 5,
+  "valueFunction": [Function],
 }

@@ -1,0 +1,134 @@
+[
+  {
+    "source": undefined,
+    "target": "Bachelor's Degree",
+  },
+  {
+    "source": undefined,
+    "target": "High School",
+  },
+  {
+    "source": undefined,
+    "target": "Some College",
+  },
+  {
+    "source": undefined,
+    "target": "Doctorate Degree",
+  },
+  {
+    "source": undefined,
+    "target": "Master's Degree",
+  },
+  {
+    "source": undefined,
+    "target": "Associate's Degree",
+  },
+  {
+    "source": "Bachelor's Degree",
+    "target": "Missouri",
+  },
+  {
+    "source": "Bachelor's Degree",
+    "target": "Arkansas",
+  },
+  {
+    "source": "Bachelor's Degree",
+    "target": "Colorado",
+  },
+  {
+    "source": "Bachelor's Degree",
+    "target": "California",
+  },
+  {
+    "source": "Bachelor's Degree",
+    "target": "New Hampshire",
+  },
+  {
+    "source": "High School",
+    "target": "Louisiana",
+  },
+  {
+    "source": "High School",
+    "target": "New Jersey",
+  },
+  {
+    "source": "High School",
+    "target": "Rhode Island",
+  },
+  {
+    "source": "High School",
+    "target": "Tennessee",
+  },
+  {
+    "source": "High School",
+    "target": "Pennsylvania",
+  },
+  {
+    "source": "Some College",
+    "target": "Delaware",
+  },
+  {
+    "source": "Some College",
+    "target": "Wyoming",
+  },
+  {
+    "source": "Some College",
+    "target": "Minnesota",
+  },
+  {
+    "source": "Some College",
+    "target": "Utah",
+  },
+  {
+    "source": "Some College",
+    "target": "Maryland",
+  },
+  {
+    "source": "Doctorate Degree",
+    "target": "Oklahoma",
+  },
+  {
+    "source": "Doctorate Degree",
+    "target": "Arkansas",
+  },
+  {
+    "source": "Doctorate Degree",
+    "target": "Pennsylvania",
+  },
+  {
+    "source": "Doctorate Degree",
+    "target": "Massachusetts",
+  },
+  {
+    "source": "Master's Degree",
+    "target": "Hawaii",
+  },
+  {
+    "source": "Master's Degree",
+    "target": "New Mexico",
+  },
+  {
+    "source": "Master's Degree",
+    "target": "Arizona",
+  },
+  {
+    "source": "Associate's Degree",
+    "target": "Wisconsin",
+  },
+  {
+    "source": "Associate's Degree",
+    "target": "Oregon",
+  },
+  {
+    "source": "Associate's Degree",
+    "target": "Idaho",
+  },
+  {
+    "source": "Associate's Degree",
+    "target": "Illinois",
+  },
+  {
+    "source": "Associate's Degree",
+    "target": "New Mexico",
+  },
+]

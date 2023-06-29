@@ -11,7 +11,7 @@ const groupByAge = group(
 )
 
 describe(
-  'group',
+  'group function',
   () => {
     test(
       'root dim is undefined',
@@ -62,6 +62,79 @@ describe(
         }))
 
         expect(newRoot).toMatchFileSnapshot('./group-each.json')
+      }
+    )
+  }
+)
+
+describe(
+  'ancestor tests',
+  () => {
+    test(
+      'ancestors of first level child has length of 2',
+      () => {
+        const ancestors = groupByAge.children[0].ancestors()
+
+        expect(ancestors.length).toBe(2)
+      }
+    )
+    test(
+      'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
+      () => {
+        const ancestors = groupByAge.children[0].children[0].ancestorAt({ depth: 1, })
+
+        expect(ancestors?.dim).toBe('education_level')
+      }
+    )
+  }
+)
+describe(
+  'leaf node tests',
+  () => {
+    const [ leaf, ] = groupByAge.leaves()
+
+    test(
+      'first leaf node of root has depth of 2',
+      () => {
+        expect(leaf.depth).toBe(2)
+      }
+    )
+    test(
+      'first leaf node of root has dim of \'state\'',
+      () => {
+        expect(leaf?.dim).toBe('state')
+      }
+    )
+  }
+)
+describe(
+  'links tests',
+  () => {
+    test(
+      'root generates a links json',
+      () => {
+        expect(groupByAge.links().map(({
+          source, target,
+        }) => ({
+          source: source.id,
+          target: target.id,
+        }))).toMatchFileSnapshot('./group-links.json')
+      }
+    )
+  }
+)
+describe(
+  'path tests',
+  () => {
+    test(
+      'root generates a path json',
+      () => {
+        const [
+          first,
+          last,
+        ] = groupByAge.children
+
+        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.id)).toMatchFileSnapshot('./group-path.json')
       }
     )
   }
