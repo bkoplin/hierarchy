@@ -16,18 +16,16 @@ export abstract class Node<T, Depth extends number, Height extends number> {
     public id: Depth extends 0 ? undefined : ValueOf<T>,
     public dim: Depth extends 0 ? undefined : StringKeyOf<T>
   ) {
+    this.name = id
   }
 
   [Symbol.iterator] = iterator<T>
   children = [] as unknown as Height extends 0 ? undefined : Array<Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>>
+  name: this['id'] = undefined as unknown as this['id']
   parent = undefined as undefined | Node<T, N.Sub<Depth, 1>, N.Add<Height, 1>>
 
   addChild(child: Height extends 0 ? never : Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>) {
     this.children?.push(child)
-  }
-
-  addParent(parent: Exclude<this['parent'], undefined>) {
-    this.parent = parent
   }
 
   /**
@@ -147,6 +145,7 @@ export class RootNode<T, Height extends LiteralUnion<Exclude<DepthAndHeight, 0>,
     )
     delete this.parent
     delete this.id
+    delete this.name
     delete this.dim
   }
 }

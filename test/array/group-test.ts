@@ -56,10 +56,12 @@ describe(
     test(
       'each method to assign name',
       () => {
-        groupByAge.each(d => {
-          d.name = d.id
-        })
-        expect(groupByAge).toMatchFileSnapshot('./group-each.json')
+        const newRoot = groupByAge.each(d => ({
+          ...d,
+          name: d.id,
+        }))
+
+        expect(newRoot).toMatchFileSnapshot('./group-each.json')
       }
     )
   }
