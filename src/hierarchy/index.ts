@@ -38,7 +38,7 @@ import type {
   KeyFn,
   NestedMap,
 } from '../types'
-import { group, } from '../array/group'
+import { group, } from '../array'
 import node_sum from './sum.js'
 import node_path from './path.js'
 
