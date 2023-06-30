@@ -126,7 +126,7 @@ describe(
         expect(groupByAge.links().map(({
           source, target,
         }) => ({
-          source: source.id,
+          source: source?.id,
           target: target.id,
         }))).toMatchFileSnapshot('./group-links.json')
       }

@@ -3,11 +3,10 @@ import { groupBy, } from 'rambdax'
 import type { N, } from 'ts-toolbelt'
 import type {
   JsonPrimitive,
-  LiteralUnion,
   ValueOf,
 } from 'type-fest'
 import type {
-  KeyFn, KeyFns, KeyFnsLength,
+  KeyFn, KeyFns, KeyFnsLength, MaxDepth,
 } from './index.d'
 import type { Node, } from './Nodes'
 import {
@@ -87,8 +86,8 @@ export function group<
   })
 }
 
-function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, LiteralUnion<KeyFnsLength, number>, LiteralUnion<KeyFnsLength, number>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
-  const depth = (node.depth + 1) as unknown as Exclude<KeyFnsLength, 0>
+function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, Exclude<KeyFnsLength, MaxDepth>, Exclude<KeyFnsLength, 0 | MaxDepth>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
+  const depth = (node.depth + 1) as unknown as N.Add<NodeType[ 'depth' ], 1>
   const height = (node.height - 1) as unknown as N.Sub<NodeType[ 'height' ], 1>
   let keyFn: (d: Input) => ValueOf<Input>
 
@@ -113,11 +112,11 @@ function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, 
       records,
     ] = vals
 
-    if (node.height > 1) {
-      type ThisNodeType = HierarchyNode<Input, Exclude<KeyFnsLength, 0 | 8>, Exclude<KeyFnsLength, 0 | 8>>
+    type ThisNodeType = HierarchyNode<Input, Exclude<KeyFnsLength, 0 | MaxDepth>, Exclude<KeyFnsLength, 0 | MaxDepth>>
+    if (height > 0 && depth !== 0) {
       const child = new HierarchyNode(
-        depth as unknown as ThisNodeType[ 'depth' ],
-        height as unknown as ThisNodeType[ 'height' ],
+        depth,
+        height,
         records,
         key as ValueOf<Input>,
         dim

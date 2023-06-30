@@ -15,7 +15,7 @@ import type {
   KeyFnsLength, MaxDepth,
 } from './index.d'
 
-export abstract class Node<T, Depth extends number = 0, Height extends number = 1> {
+export abstract class Node<T, Depth extends LiteralUnion<KeyFnsLength, number> = number, Height extends LiteralUnion<KeyFnsLength, number> = number> {
   constructor(
     public depth: Depth,
     public height: Height,
@@ -46,7 +46,7 @@ export abstract class Node<T, Depth extends number = 0, Height extends number = 
     length
   )
 
-  addChild(child: Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>) {
+  addChild(child: Node<T, number, number>) {
     if (this.hasChildren() && child)
       this.children?.push(child)
   }
@@ -210,7 +210,7 @@ export abstract class Node<T, Depth extends number = 0, Height extends number = 
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @param {this} end the target node
    */
-  path(end: this) {
+  path(end: Node<T, KeyFnsLength, KeyFnsLength>) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -293,7 +293,7 @@ export class HierarchyNode<
   }
 }
 
-function leastCommonAncestor<A extends Node<any, number, number>, B extends Node<any, number, number>>(a: A, b: B): A | null {
+function leastCommonAncestor<A extends Node<any, KeyFnsLength, KeyFnsLength>, B extends Node<any, KeyFnsLength, KeyFnsLength> | A>(a: A, b: B): A | null {
   if (a === b)
     return a
   const aNodes = a.ancestors()
