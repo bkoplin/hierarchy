@@ -7,7 +7,7 @@ import type {
   ValueOf,
 } from 'type-fest'
 import type {
-  DepthAndHeight, KeyFn, KeyFns,
+  KeyFn, KeyFns, KeyFnsLength,
 } from './index.d'
 import type { Node, } from './Nodes'
 import {
@@ -87,8 +87,8 @@ export function group<
   })
 }
 
-function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, LiteralUnion<DepthAndHeight, number>, LiteralUnion<DepthAndHeight, number>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
-  const depth = (node.depth + 1) as unknown as Exclude<DepthAndHeight, 0>
+function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, LiteralUnion<KeyFnsLength, number>, LiteralUnion<KeyFnsLength, number>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
+  const depth = (node.depth + 1) as unknown as Exclude<KeyFnsLength, 0>
   const height = (node.height - 1) as unknown as N.Sub<NodeType[ 'height' ], 1>
   let keyFn: (d: Input) => ValueOf<Input>
 
@@ -114,7 +114,7 @@ function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, 
     ] = vals
 
     if (node.height > 1) {
-      type ThisNodeType = HierarchyNode<Input, Exclude<DepthAndHeight, 0 | 8>, Exclude<DepthAndHeight, 0 | 8>>
+      type ThisNodeType = HierarchyNode<Input, Exclude<KeyFnsLength, 0 | 8>, Exclude<KeyFnsLength, 0 | 8>>
       const child = new HierarchyNode(
         depth as unknown as ThisNodeType[ 'depth' ],
         height as unknown as ThisNodeType[ 'height' ],

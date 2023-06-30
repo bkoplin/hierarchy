@@ -11,7 +11,9 @@ import type {
   ChromaStatic, Color,
 } from 'chroma-js'
 import { iterator, } from './iterator'
-import type { DepthAndHeight, } from './index.d'
+import type {
+  KeyFnsLength, MaxDepth,
+} from './index.d'
 
 export abstract class Node<T, Depth extends number = 0, Height extends number = 1> {
   constructor(
@@ -253,7 +255,7 @@ export abstract class Node<T, Depth extends number = 0, Height extends number = 
     return node
   }
 }
-export class LeafNode<T, Depth extends LiteralUnion<Exclude<DepthAndHeight, 0>, number>> extends Node<T, Depth, 0> {
+export class LeafNode<T, Depth extends LiteralUnion<Exclude<KeyFnsLength, 0>, number>> extends Node<T, Depth, 0> {
   constructor(depth: Depth, records: T[], id: Depth extends 0 ? undefined : ValueOf<T>, dim: Depth extends 0 ? undefined : StringKeyOf<T>) {
     super(
       depth,
@@ -266,7 +268,7 @@ export class LeafNode<T, Depth extends LiteralUnion<Exclude<DepthAndHeight, 0>, 
     delete this.children
   }
 }
-export class RootNode<T, Height extends LiteralUnion<Exclude<DepthAndHeight, 0>, number>> extends Node<T, 0, Height> {
+export class RootNode<T, Height extends LiteralUnion<Exclude<KeyFnsLength, 0>, number>> extends Node<T, 0, Height> {
   constructor(height: Height, records: T[]) {
     super(
       0,
@@ -283,8 +285,8 @@ export class RootNode<T, Height extends LiteralUnion<Exclude<DepthAndHeight, 0>,
 }
 export class HierarchyNode<
   T,
-  Depth extends Exclude<DepthAndHeight, 0 | 8>,
-  Height extends Exclude<DepthAndHeight, 0 | 8>
+  Depth extends Exclude<KeyFnsLength, 0 | MaxDepth>,
+  Height extends Exclude<KeyFnsLength, 0 | MaxDepth>
 > extends Node<T, Depth, Height> {
   constructor(...args: ConstructorParameters<typeof Node<T, Depth, Height>>) {
     super(...args)

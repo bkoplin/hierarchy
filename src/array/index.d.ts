@@ -33,5 +33,16 @@ export type KeyFns<T> = readonly [ KeyFn<T> ] |
     KeyFn<T>,
     KeyFn<T>,
     KeyFn<T>
+  ] |
+  readonly [
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>,
+    KeyFn<T>
   ]
-export type DepthAndHeight = L.Length<KeyFns<JsonObject>> | 0
+export type KeyFnsLength = L.Length<KeyFns<JsonObject>> | 0
