@@ -13,7 +13,7 @@ import type {
 import { iterator, } from './iterator'
 import type { DepthAndHeight, } from './index.d'
 
-export abstract class Node<T, Depth extends number, Height extends number> {
+export abstract class Node<T, Depth extends number = 0, Height extends number = 1> {
   constructor(
     public depth: Depth,
     public height: Height,
@@ -44,8 +44,9 @@ export abstract class Node<T, Depth extends number, Height extends number> {
     length
   )
 
-  addChild(child: Height extends 0 ? never : Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>) {
-    this.children?.push(child)
+  addChild(child: Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>) {
+    if (this.hasChildren() && child)
+      this.children?.push(child)
   }
 
   /**
@@ -157,12 +158,12 @@ export abstract class Node<T, Depth extends number, Height extends number> {
     return this
   }
 
-  hasChildren<Child extends Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>>(this: this | unknown): this is Simplify<Node<T, Depth, Exclude<Height, 0>> & { children: Child[] } > {
-    return (this as Simplify<Node<T, Depth, Exclude<Height, 0>> & { children: Child[] } >)?.height > 0 && typeof (this as Simplify<Node<T, Depth, Exclude<Height, 0>> & { children: Child[] } >)?.children !== 'undefined'
+  hasChildren<Child extends Node<T, N.Add<Depth, 1>, N.Sub<Height, 1>>>(): this is Simplify<this & { children: Child[] } > {
+    return (this as Simplify<this & { children: Child[] } >)?.height > 0 && typeof (this as Simplify<this & { children: Child[] } >)?.children !== 'undefined'
   }
 
-  hasParent<Parent extends Node<T, N.Sub<Depth, 1>, N.Add<Height, 1>>>(this: this | unknown): this is Simplify<Node<T, Exclude<Depth, 0>, Height> & { parent: Parent } > {
-    return (this as Simplify<Node<T, Exclude<Depth, 0>, Height> & { parent: Parent } >)?.depth > 0 && typeof (this as Simplify<Node<T, Exclude<Depth, 0>, Height> & { parent: Parent } >)?.parent !== 'undefined'
+  hasParent<Parent extends Node<T, N.Sub<Depth, 1>, N.Add<Height, 1>>>(): this is Simplify<this & { parent: Parent } > {
+    return (this as Simplify<this & { parent: Parent } >)?.depth > 0 && typeof (this as Simplify<this & { parent: Parent } >)?.parent !== 'undefined'
   }
 
   /**
@@ -170,7 +171,7 @@ export abstract class Node<T, Depth extends number, Height extends number> {
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves() {
+  leaves(): Array<Node<T, Height, 0>> {
     const leaves: Array<Node<T, Height, 0>> = []
 
     this.eachBefore((node) => {
@@ -290,7 +291,7 @@ export class HierarchyNode<
   }
 }
 
-function leastCommonAncestor(a: Node<JsonObject, number, number>, b: Node<JsonObject, number, number>) {
+function leastCommonAncestor<A extends Node<any, number, number>, B extends Node<any, number, number>>(a: A, b: B): A | null {
   if (a === b)
     return a
   const aNodes = a.ancestors()
