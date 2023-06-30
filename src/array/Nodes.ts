@@ -232,13 +232,17 @@ export abstract class Node<T, Depth extends number, Height extends number> {
     return nodes
   }
 
+  setValueFunction(valueFn: this['valueFunction']) {
+    this.each(node => node.valueFunction = valueFn)
+  }
+
   setValues() {
-    this.value = this.valueFunction(this)
+    this.each(node => node.value = node.valueFunction(node))
   }
 
   toJSON(this: Simplify<Node<T, Depth, Height> & { parent?: Node<T, Depth, Height>; children?: Array<Node<T, Depth, Height>> } >) {
     const node = filterObject(
-      v => v !== undefined,
+      v => v !== undefined && typeof v !== 'function',
       this
     )
 
