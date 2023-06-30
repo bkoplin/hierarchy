@@ -22,8 +22,7 @@
               "unemployment_rate": 43.28,
             },
           ],
-          "value": 1,
-          "valueFunction": [Function],
+          "value": 998.33,
         },
         {
           "depth": 2,
@@ -45,8 +44,7 @@
               "unemployment_rate": 42.05,
             },
           ],
-          "value": 1,
-          "valueFunction": [Function],
+          "value": 718.57,
         },
         {
           "depth": 2,
@@ -68,8 +66,7 @@
               "unemployment_rate": 81.97,
             },
           ],
-          "value": 1,
-          "valueFunction": [Function],
+          "value": 472.47,
         },
         {
           "depth": 2,
@@ -91,8 +88,7 @@
               "unemployment_rate": 28.84,
             },
           ],
-          "value": 1,
-          "valueFunction": [Function],
+          "value": 577.4,
         },
         {
           "depth": 2,
@@ -114,8 +110,7 @@
               "unemployment_rate": 20.11,
             },
           ],
-          "value": 1,
-          "valueFunction": [Function],
+          "value": 715.31,
         },
       ],
       "depth": 1,
@@ -185,8 +180,7 @@
           "unemployment_rate": 20.11,
         },
       ],
-      "value": 5,
-      "valueFunction": [Function],
+      "value": 696.4159999999999,
     },
     {
       "children": [
@@ -211,7 +205,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -234,7 +227,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -257,7 +249,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -280,7 +271,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -303,7 +293,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
       ],
       "depth": 1,
@@ -374,7 +363,6 @@
         },
       ],
       "value": 5,
-      "valueFunction": [Function],
     },
     {
       "children": [
@@ -399,7 +387,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -422,7 +409,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -445,7 +431,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -468,7 +453,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -491,7 +475,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
       ],
       "depth": 1,
@@ -562,7 +545,6 @@
         },
       ],
       "value": 5,
-      "valueFunction": [Function],
     },
     {
       "children": [
@@ -587,7 +569,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -610,7 +591,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -633,7 +613,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -656,7 +635,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
       ],
       "depth": 1,
@@ -715,7 +693,6 @@
         },
       ],
       "value": 4,
-      "valueFunction": [Function],
     },
     {
       "children": [
@@ -740,7 +717,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -763,7 +739,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -786,7 +761,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
       ],
       "depth": 1,
@@ -833,7 +807,6 @@
         },
       ],
       "value": 3,
-      "valueFunction": [Function],
     },
     {
       "children": [
@@ -858,7 +831,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -881,7 +853,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -904,7 +875,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -927,7 +897,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
         {
           "depth": 2,
@@ -950,7 +919,6 @@
             },
           ],
           "value": 1,
-          "valueFunction": [Function],
         },
       ],
       "depth": 1,
@@ -1021,7 +989,6 @@
         },
       ],
       "value": 5,
-      "valueFunction": [Function],
     },
   ],
   "depth": 0,
@@ -1353,5 +1320,4 @@
     },
   ],
   "value": 27,
-  "valueFunction": [Function],
 }

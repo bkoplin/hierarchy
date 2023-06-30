@@ -1,6 +1,9 @@
 import {
   describe, expect, test,
 } from 'vitest'
+import {
+  map, mean, pipe, prop,
+} from 'rambdax'
 import group from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
 
@@ -45,10 +48,16 @@ describe(
       }
     )
     test(
-      'inline second level first child',
+      'change value function, inline second level first child',
       () => {
         const c = groupByAge.children[0]
 
+        c.setValueFunction(pipe(
+          prop('records'),
+          map(prop('crime_rate')),
+          mean
+        ))
+        c.setValues()
         expect(c).toMatchFileSnapshot('./group-children.json')
       }
     )
@@ -94,9 +103,10 @@ describe(
     const [ leaf, ] = groupByAge.leaves()
 
     test(
-      'first leaf node of root has depth of 2',
+      'first leaf node of root has depth of 2 and haschildren of false',
       () => {
         expect(leaf.depth).toBe(2)
+        expect(leaf.hasChildren()).toBe(false)
       }
     )
     test(
