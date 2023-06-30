@@ -90,9 +90,9 @@ describe(
     test(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
-        const ancestors = groupByAge.children[0].children[0].ancestorAt({ depth: 1, })
+        const ancestors = groupByAge.children[0].children[0]
 
-        expect(ancestors?.dim).toBe('education_level')
+        expect(ancestors.ancestorAt({ depth: 1, })?.dim).toBe('education_level')
       }
     )
   }

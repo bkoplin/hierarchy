@@ -1,7 +1,8 @@
+import type { KeyFnsLength, } from './index.d'
 import type { Node, } from './Nodes'
 
-export function* iterator<Input>(this: Node<Input, number, number>) {
-  type IteratorNode = Node<Input, number, number>
+export function* iterator<Input>(this: Node<Input, Exclude<KeyFnsLength, 0>, number>) {
+  type IteratorNode = Node<Input, Exclude<KeyFnsLength, 0>, number>
   let node = this as unknown as IteratorNode | Exclude<IteratorNode[ 'children' ], undefined>[ number ] | undefined
   let current
   let next = [ node, ] as unknown as [ IteratorNode, ...Exclude<IteratorNode[ 'children' ], undefined> ]

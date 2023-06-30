@@ -1,6 +1,6 @@
 import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
-import type { N, } from 'ts-toolbelt'
+import type { L, N, } from 'ts-toolbelt'
 import type {
   JsonPrimitive,
   ValueOf,
@@ -86,7 +86,7 @@ export function group<
   })
 }
 
-function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends Node<Input, Exclude<KeyFnsLength, MaxDepth>, Exclude<KeyFnsLength, 0 | MaxDepth>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
+function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends HierarchyNode<Input, Exclude<KeyFnsLength, MaxDepth>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
   const depth = (node.depth + 1) as unknown as N.Add<NodeType[ 'depth' ], 1>
   const height = (node.height - 1) as unknown as N.Sub<NodeType[ 'height' ], 1>
   let keyFn: (d: Input) => ValueOf<Input>
@@ -112,7 +112,6 @@ function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, 
       records,
     ] = vals
 
-    type ThisNodeType = HierarchyNode<Input, Exclude<KeyFnsLength, 0 | MaxDepth>, Exclude<KeyFnsLength, 0 | MaxDepth>>
     if (height > 0 && depth !== 0) {
       const child = new HierarchyNode(
         depth,
