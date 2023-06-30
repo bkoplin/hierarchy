@@ -1,4 +1,4 @@
-import type { L } from 'ts-toolbelt'
+import type { L, U } from 'ts-toolbelt'
 import type {
   JsonObject, StringKeyOf,
   ValueOf
@@ -46,3 +46,4 @@ export type KeyFns<T> = readonly [ KeyFn<T> ] |
     KeyFn<T>
   ]
 export type KeyFnsLength = L.Length<KeyFns<JsonObject>> | 0
+export type MaxDepth = U.Last<KeyFnsLength>
