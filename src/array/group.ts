@@ -2,13 +2,13 @@ import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
 import type { L, N, } from 'ts-toolbelt'
 import type {
+  IterableElement,
   JsonPrimitive,
   ValueOf,
 } from 'type-fest'
 import type {
-  KeyFn, KeyFns, KeyFnsLength, MaxDepth,
-} from './index.d'
-import type { Node, } from './Nodes'
+  KeyFn, KeyFns, NodeType, NumericUnion,
+} from './types'
 import {
   HierarchyNode, LeafNode, RootNode,
 } from './Nodes'
@@ -84,56 +84,55 @@ export function group<
       })
     }
   })
-}
+  function regroupFn<ThisNodeType extends (typeof root)|IterableElement<(typeof root)['children']>>(node: ThisNodeType, keyof: KeyFn<Input>) {
+    const depth = (node.depth + 1)
+    const height = (node.height - 1)
+    let keyFn: (d: Input) => ValueOf<Input>
 
-function regroupFn<Input extends { [ index: string | number ]: JsonPrimitive }, NodeType extends HierarchyNode<Input, Exclude<KeyFnsLength, MaxDepth>>>(node: NodeType, keyof: KeyFn<Input>): NodeType {
-  const depth = (node.depth + 1) as unknown as N.Add<NodeType[ 'depth' ], 1>
-  const height = (node.height - 1) as unknown as N.Sub<NodeType[ 'height' ], 1>
-  let keyFn: (d: Input) => ValueOf<Input>
+    if (typeof keyof === 'string' || typeof keyof === 'number')
+      keyFn = (d: Input) => d[keyof]
+    else keyFn = keyof[1]
+    const dim = typeof keyof === 'string' ? keyof : keyof[0]
+    const groupsObject = objectEntries(groupBy<Input, Record<`${ValueOf<Input>}`, Input[]>>(
+      (x) => {
+        const val = keyFn(x)
 
-  if (typeof keyof === 'string' || typeof keyof === 'number')
-    keyFn = (d: Input) => d[keyof]
-  else keyFn = keyof[1]
-  const dim = typeof keyof === 'string' ? keyof : keyof[0]
-  const groupsObject = objectEntries(groupBy<Input, Record<`${ValueOf<Input>}`, Input[]>>(
-    (x) => {
-      const val = keyFn(x)
+        if (val === null || typeof val === 'undefined')
+          return ''
+        else return val
+      },
+      node.records
+    ))
 
-      if (val === null || typeof val === 'undefined')
-        return ''
-      else return val
-    },
-    node.records
-  ))
-
-  groupsObject.forEach((vals) => {
-    const [
-      key,
-      records,
-    ] = vals
-
-    if (height > 0 && depth !== 0) {
-      const child = new HierarchyNode(
-        depth,
-        height,
+    groupsObject.forEach((vals) => {
+      const [
+        key,
         records,
-        key as ValueOf<Input>,
-        dim
-      )
+      ] = vals
 
-      node.addChild(child)
-    }
-    else {
-      const child = new LeafNode(
-        depth,
-        records,
-        key as ValueOf<Input>,
-        dim
-      )
+      if (node instanceof RootNode || node instanceof HierarchyNode) {
+        const child = new HierarchyNode(
+          depth,
+          height,
+          records,
+          key as ValueOf<Input>,
+          dim
+        )
 
-      node.addChild(child)
-    }
-  })
+        node.addChild(child)
+      }
+      else {
+        const child = new LeafNode(
+          depth,
+          records,
+          key as ValueOf<Input>,
+          dim
+        )
 
-  return node
+        node.addChild(child)
+      }
+    })
+
+    return node
+  }
 }

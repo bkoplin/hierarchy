@@ -1,21 +1,19 @@
-import type { KeyFnsLength, } from './index.d'
-import type { Node, } from './Nodes'
+import type { NodeType, NumericUnion, } from './types'
 
-export function* iterator<Input>(this: Node<Input, Exclude<KeyFnsLength, 0>, number>) {
-  type IteratorNode = Node<Input, Exclude<KeyFnsLength, 0>, number>
-  let node = this as unknown as IteratorNode | Exclude<IteratorNode[ 'children' ], undefined>[ number ] | undefined
+export function* iterator<Input, Depth extends number, RootHeight extends number>(this: NodeType<Input, Depth, RootHeight>) {
+  let node = this
   let current
-  let next = [ node, ] as unknown as [ IteratorNode, ...Exclude<IteratorNode[ 'children' ], undefined> ]
-  let children: IteratorNode[ 'children' ]
+  let next = [ node, ]
+  let children
   let i
   let n
 
   do {
     current = next.reverse()
-    next = [] as unknown as [ IteratorNode, ...Exclude<IteratorNode[ 'children' ], undefined> ]
+    next = []
     while ((node = current.pop()) !== undefined) {
-      yield node
-      if ((children = (node as unknown as IteratorNode)?.children) !== undefined)
+      yield node as unknown as NodeType<Input, NumericUnion<Depth, RootHeight>, RootHeight>
+      if ((children = (node)?.children) !== undefined)
         for (i = 0, n = children.length; i < n; ++i) next.push(children[i])
     }
   } while (next.length)
