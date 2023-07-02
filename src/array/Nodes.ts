@@ -1,43 +1,27 @@
 import {
   filterObject, length, pipe, prop,
 } from 'rambdax'
-import type {
-  IterableElement,
-  RequireExactlyOne,
-  Simplify,
-  StringKeyOf,
-  ValueOf,
-} from 'type-fest'
+import type { StringKeyOf, } from 'type-fest'
 import type {
   ChromaStatic, Color,
 } from 'chroma-js'
-import type { N, } from 'ts-toolbelt'
 import { iterator, } from './iterator'
-import type {
-  KeyFnsLength, NodeType, NumericUnion,
-} from './types'
 
-export abstract class Node<
-  T,
-  RootHeight extends Exclude<KeyFnsLength, 0>,
-  Depth extends number
-> {
+export abstract class Node {
   constructor(
-    public depth: Depth,
-    public height: N.Sub<RootHeight, Depth>,
-    public records: T[],
-    public id: Depth extends 0 ? undefined : ValueOf<T>,
-    public dim: Depth extends 0 ? undefined : StringKeyOf<T>
+    public depth,
+    public height,
+    public records,
+    public id,
+    public dim
   ) {
     this.name = id
     this.value = this.valueFunction(this)
   }
 
-  [Symbol.iterator] = iterator<T, Depth, RootHeight>
+  [Symbol.iterator] = iterator
 
-  children = [] as unknown as N.Lower<this['depth'], RootHeight> extends 0
-    ? undefined
-    : Array<NodeType<T, N.Add<this['depth'], 1>, RootHeight>>
+  children = []
 
   color?: string
   colorScale?: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color>
@@ -45,9 +29,7 @@ export abstract class Node<
   colorScaleMode?: 'e' | 'q' | 'l' | 'k'
   colorScaleNum?: number
   name: this['id']
-  parent = undefined as unknown as N.GreaterEq<Depth, 1> extends 0
-    ? undefined
-    : NodeType<T, N.Sub<Depth, 1>, RootHeight>
+  parent = undefined
 
   value = 0
 
@@ -55,12 +37,12 @@ export abstract class Node<
    * The function to set the value of the node
    * @default pipe(prop('records'), length)
    */
-  valueFunction: (args_0: this) => number = pipe<[typeof this], T[], number>(
+  valueFunction: (args_0: this) => number = pipe(
     prop('records'),
     length
   )
 
-  addChild(child: IterableElement<NodeType<T, Depth, RootHeight>['children']>) {
+  addChild(child) {
     if (this.height > 0)
       this.children?.push(child)
   }
@@ -72,10 +54,7 @@ export abstract class Node<
    * @param depthOrDim A parameter indicating either the depth or the dimension of the ancestor to return.
    */
 
-  ancestorAt(depthOrDim: RequireExactlyOne<
-      { depth?: NumericUnion<0, Depth>; dim?: StringKeyOf<T> },
-      'depth' | 'dim'
-    >) {
+  ancestorAt(depthOrDim) {
     return this.ancestors().find((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
@@ -94,13 +73,11 @@ export abstract class Node<
     let node = this
 
     while (typeof node !== 'undefined' && typeof node.parent !== 'undefined') {
-      nodes.push(node.parent as unknown as this)
-      node = node.parent as unknown as this
+      nodes.push(node.parent)
+      node = node.parent
     }
 
-    return nodes as unknown as Array<
-      NodeType<T, NumericUnion<0, Depth>, RootHeight>
-      >
+    return nodes
   }
 
   each(callback) {
@@ -122,13 +99,13 @@ export abstract class Node<
    * visited. The specified function is passed the current descendant, the zero-based traversal
    * index, and this node. If that is specified, it is the this context of the callback.
    */
-  eachAfter(callback: (node: NodeType<T, NumericUnion<Depth, RootHeight>, RootHeight>, index?: number) => void): this {
+  eachAfter(callback) {
     const nodes = [ this, ]
     const next = []
     let children
-    let i: number, n: number
+    let i
     let index = -1
-    let node: NodeType<T, NumericUnion<Depth, RootHeight>, RootHeight> | undefined
+    let node
 
     while ((node = nodes.pop()) !== undefined) {
       next.push(node)
@@ -151,12 +128,12 @@ export abstract class Node<
    * The specified function is passed the current descendant, the zero-based traversal index,
    * and this node. If that is specified, it is the this context of the callback.
    */
-  eachBefore(callback: (node: NodeType<T, NumericUnion<Depth, RootHeight>, RootHeight>, index?: number) => void): this {
+  eachBefore(callback) {
     const nodes = [ this, ]
     let children
     let i
     let index = -1
-    let node: NodeType<T, NumericUnion<Depth, RootHeight>, RootHeight> | undefined
+    let node
 
     while ((node = nodes.pop()) !== undefined) {
       callback(
@@ -182,8 +159,8 @@ export abstract class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<NodeType<T, RootHeight, RootHeight>> {
-    const leaves: Array<NodeType<T, RootHeight, RootHeight>> = []
+  leaves() {
+    const leaves = []
 
     this.eachBefore((node) => {
       if (!node.children)
@@ -192,7 +169,7 @@ export abstract class Node<
     return leaves
   }
 
-  links: NodeType<T, Depth, RootHeight>['links'] = function (this: NodeType<T, Depth, RootHeight>) {
+  links() {
     const links = []
 
     this.each((node) => {
@@ -212,7 +189,7 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @param {this} end the target node
    */
-  path(end: NodeType<T, number, RootHeight>) {
+  path(end) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -237,7 +214,7 @@ export abstract class Node<
     return nodes
   }
 
-  setValueFunction(valueFn: this['valueFunction']) {
+  setValueFunction(valueFn) {
     this.each(node => (node.valueFunction = valueFn))
   }
 
@@ -245,12 +222,7 @@ export abstract class Node<
     this.each(node => (node.value = node.valueFunction(node)))
   }
 
-  toJSON(this: Simplify<
-      Node<T, RootHeight, number> & {
-        parent?: Node<T, RootHeight, number>
-        children?: Array<Node<T, RootHeight, number>>
-      }
-    >) {
+  toJSON() {
     const node = filterObject(
       v => v !== undefined && typeof v !== 'function',
       this
@@ -262,12 +234,8 @@ export abstract class Node<
     return node
   }
 }
-export class LeafNode<T, Depth extends Exclude<KeyFnsLength, 0>> extends Node<
-  T,
-  Depth,
-  Depth
-> {
-  constructor(depth: Depth, records: T[], id: ValueOf<T>, dim: StringKeyOf<T>) {
+export class LeafNode extends Node {
+  constructor(depth, records, id, dim) {
     super(
       depth,
       0,
@@ -275,16 +243,12 @@ export class LeafNode<T, Depth extends Exclude<KeyFnsLength, 0>> extends Node<
       id,
       dim
     )
-
+    this.type = 'leaf'
     delete this.children
   }
 }
-export class RootNode<T, Height extends Exclude<KeyFnsLength, 0>> extends Node<
-  T,
-  0,
-  Height
-> {
-  constructor(height: Height, records: T[]) {
+export class RootNode extends Node {
+  constructor(height, records) {
     super(
       0,
       height,
@@ -292,28 +256,22 @@ export class RootNode<T, Height extends Exclude<KeyFnsLength, 0>> extends Node<
       undefined,
       undefined
     )
+    this.type = 'root'
     delete this.parent
     delete this.id
     delete this.name
     delete this.dim
   }
 }
-export class HierarchyNode<
-  T,
-  Depth extends Exclude<KeyFnsLength, 0>,
-  RootHeight extends Exclude<KeyFnsLength, 0>
-> extends Node<T, Depth, RootHeight> {
+export class HierarchyNode extends Node {
   constructor(...args: ConstructorParameters<
-      typeof Node<T, Depth, RootHeight>
+      typeof Node
     >) {
     super(...args)
   }
 }
 
-function leastCommonAncestor<
-  A extends Node<any, KeyFnsLength, Exclude<KeyFnsLength, 0>>,
-  B extends Node<any, KeyFnsLength, Exclude<KeyFnsLength, 0>> | A
->(a: A, b: B): A | null {
+function leastCommonAncestor(a, b) {
   if (a === b)
     return a
   const aNodes = a.ancestors()

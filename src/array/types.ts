@@ -5,6 +5,7 @@ import type {
   FixedLengthArray,
   IterableElement,
   JsonObject,
+  RequireExactlyOne,
   Simplify,
   StringKeyOf,
   ValueOf,
@@ -72,14 +73,21 @@ interface BaseNode<T, Depth extends number, Height extends number> {
   height: Height
   value: number
   records: T[]
+  type: Depth extends 0 ? 'root' : Height extends 0 ? 'leaf' : 'node'
   id: Depth extends 0 ? ValueOf<T> : undefined
   name: Depth extends 0 ? ValueOf<T> : undefined
   dim: Depth extends 0 ? StringKeyOf<T> : undefined
+  parent: Depth extends 0 ? undefined : BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>>
+  children: Height extends 0 ? undefined : Array<BaseNode<T, N.Add<Depth, 1>, N.Sub<Height, 1>>>
   valueFunction: (args_0: this) => number
   [Symbol.iterator](this: this): Generator<this, never, unknown>
   addChild(child: BaseNode<T, N.Add<Depth, 1>, N.Sub<Height, 1>>): void
-  ancestorAt<D extends number>(query: { depth: D }): BaseNode<T, D, Height>
-  ancestorAt(query: { dim: string }): this | undefined
+  ancestorAt(
+    depthOrDim: RequireExactlyOne<
+      { depth?: NumericUnion<0, Depth>; dim?: StringKeyOf<T> },
+      'depth' | 'dim'
+    >,
+  ): this | BaseNode<T, 0, number> | undefined
   ancestors(): FixedLengthArray<this, N.Add<Depth, 1>>
   /**
    * Invokes the specified function for node and each descendant in breadth-first order,
@@ -123,6 +131,8 @@ interface BaseNode<T, Depth extends number, Height extends number> {
     source: BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>>
     target: BaseNode<T, Depth, Height>
   }>
+  setValueFunction(func: (args_0: this) => number): void
+  setValues(): void
 }
 
 export type NodeType<
@@ -139,7 +149,6 @@ export type NodeType<
     I.Next<Height>,
     Simplify<
       ThisNode & {
-        parent: BaseNode<T, I.Pos<I.Prev<Depth>>, I.Pos<I.Next<Height>>>
         leaves(): Array<BaseNode<T, RootHeight, 0>>
       }
     >
@@ -151,15 +160,12 @@ export type NodeType<
     I.Next<Height>,
     Simplify<
       BaseNode<T, I.Pos<Depth>, I.Pos<Height>> & {
-        children: ThisNode[]
-        parent: BaseNode<T, I.Pos<I.Prev<Depth>>, I.Pos<I.Next<Height>>>
         leaves(): Array<BaseNode<T, RootHeight, 0>>
       }
     >
   >
   root: Simplify<
     BaseNode<T, I.Pos<Depth>, I.Pos<Height>> & {
-      children: ThisNode[]
       leaves(): Array<BaseNode<T, RootHeight, 0>>
     }
   >
@@ -168,26 +174,3 @@ export type NodeType<
   : N.IsZero<I.Pos<Height>> extends 1
     ? 'leaf'
     : 'node']
-
-// export interface NodeClass<
-//   T,
-//   Depth extends KeyFnsLength,
-//   RootHeight extends Exclude<KeyFnsLength, 0>,
-// > {
-//   new (
-//     depth: NonNegativeInteger<Depth>,
-//     height: N.Sub<RootHeight, Depth>,
-//     records: T[],
-//     id: ValueOf<T>,
-//     dim: StringKeyOf<T>,
-//   ): NodeType<T, Depth, RootHeight>;
-//   constructor(
-//     depth: NonNegativeInteger<Depth>,
-//     height: N.Sub<RootHeight, Depth>,
-//     records: T[],
-//     id: ValueOf<T>,
-//     dim: StringKeyOf<T>,
-//   ): NodeType<T, Depth, RootHeight>;
-// }
-
-type TypeDepth2 = NodeType<JsonObject, 3>

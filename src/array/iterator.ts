@@ -1,6 +1,6 @@
-import type { NodeType, NumericUnion, } from './types'
+import type { KeyFnsLength, NodeType, } from './types'
 
-export function* iterator<Input, Depth extends number, RootHeight extends number>(this: NodeType<Input, Depth, RootHeight>) {
+export function* iterator() {
   let node = this
   let current
   let next = [ node, ]
@@ -12,7 +12,7 @@ export function* iterator<Input, Depth extends number, RootHeight extends number
     current = next.reverse()
     next = []
     while ((node = current.pop()) !== undefined) {
-      yield node as unknown as NodeType<Input, NumericUnion<Depth, RootHeight>, RootHeight>
+      yield node
       if ((children = (node)?.children) !== undefined)
         for (i = 0, n = children.length; i < n; ++i) next.push(children[i])
     }

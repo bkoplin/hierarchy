@@ -20,5 +20,5 @@
       "~/": ["./src/"]
     }
   },
-  "exclude": ["./dist"]
+  "exclude": ["./dist", "./src/**/*.js"]
 }

@@ -100,7 +100,7 @@ export function group<
       keyFn = (d: Input) => d[keyof]
     else keyFn = keyof[1]
     const dim = typeof keyof === 'string' ? keyof : keyof[0]
-    const groupsObject = objectEntries(groupBy<Input, Record<`${ValueOf<Input>}`, Input[]>>(
+    const groupsObject = objectEntries(groupBy(
       (x) => {
         const val = keyFn(x)
 
