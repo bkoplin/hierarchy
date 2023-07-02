@@ -9,17 +9,17 @@ import { iterator, } from './iterator'
 
 export abstract class Node {
   constructor(
-    public depth,
-    public height,
-    public records,
-    public id,
-    public dim
+    public depth: number,
+    public height: number,
+    public records: any[],
+    public id: any,
+    public dim: any
   ) {
     this.name = id
     this.value = this.valueFunction(this)
   }
 
-  [Symbol.iterator] = iterator
+  [Symbol.iterator]: this[typeof Symbol.iterator] = iterator
 
   children = []
 
@@ -28,7 +28,7 @@ export abstract class Node {
   colorScaleBy?: 'parentListOnly' | 'allNodesAtDim'
   colorScaleMode?: 'e' | 'q' | 'l' | 'k'
   colorScaleNum?: number
-  name: this['id']
+  name: any
   parent = undefined
 
   value = 0
@@ -47,13 +47,6 @@ export abstract class Node {
       this.children?.push(child)
   }
 
-  /**
-   *
-   * Finds the first ancestor node that matches the specified parameter. The parameter can be either the depth or dimension to find.
-   *
-   * @param depthOrDim A parameter indicating either the depth or the dimension of the ancestor to return.
-   */
-
   ancestorAt(depthOrDim) {
     return this.ancestors().find((node) => {
       if (typeof depthOrDim.depth === 'number')
@@ -62,12 +55,6 @@ export abstract class Node {
     })
   }
 
-  /**
-   * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
-   *
-   * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
-   * @memberof Node
-   */
   ancestors() {
     const nodes = [ this, ]
     let node = this
@@ -93,12 +80,6 @@ export abstract class Node {
     return this
   }
 
-  /**
-   * Invokes the specified function for node and each descendant in post-order traversal,
-   * such that a given node is only visited after all of its descendants have already been
-   * visited. The specified function is passed the current descendant, the zero-based traversal
-   * index, and this node. If that is specified, it is the this context of the callback.
-   */
   eachAfter(callback) {
     const nodes = [ this, ]
     const next = []
@@ -122,12 +103,6 @@ export abstract class Node {
     return this
   }
 
-  /**
-   * Invokes the specified function for node and each descendant in pre-order traversal, such
-   * that a given node is only visited after all of its ancestors have already been visited.
-   * The specified function is passed the current descendant, the zero-based traversal index,
-   * and this node. If that is specified, it is the this context of the callback.
-   */
   eachBefore(callback) {
     const nodes = [ this, ]
     let children
@@ -154,11 +129,6 @@ export abstract class Node {
     return this?.depth > 0 && typeof this?.parent !== 'undefined'
   }
 
-  /**
-   * @description Returns the array of leaf nodes for this node
-   *
-   * @see {@link https://github.com/d3/d3-hierarchy#leaves}
-   */
   leaves() {
     const leaves = []
 
@@ -184,11 +154,6 @@ export abstract class Node {
     return links
   }
 
-  /**
-   * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
-   * @see {@link https://github.com/d3/d3-hierarchy#node_path}
-   * @param {this} end the target node
-   */
   path(end) {
     let start = this
     const ancestor = leastCommonAncestor(
