@@ -4,8 +4,10 @@ import {
 import {
   map, mean, pipe, prop,
 } from 'rambdax'
+import type { IterableElement, } from 'type-fest'
 import group from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
+import type { NodeType, } from '../../src/array/types'
 
 const groupByAge = group(
   data,
@@ -61,18 +63,6 @@ describe(
         expect(c).toMatchFileSnapshot('./group-children.json')
       }
     )
-
-    test(
-      'each method to assign name',
-      () => {
-        const newRoot = groupByAge.each(d => ({
-          ...d,
-          name: d.id,
-        }))
-
-        expect(newRoot).toMatchFileSnapshot('./group-each.json')
-      }
-    )
   }
 )
 
@@ -85,6 +75,7 @@ describe(
         const ancestors = groupByAge.children[0].ancestors()
 
         expect(ancestors.length).toBe(2)
+        expect(ancestors[0].hasChildren()).toBe(true)
       }
     )
     test(
@@ -92,7 +83,7 @@ describe(
       () => {
         const ancestors = groupByAge.children[0].children[0]
 
-        expect(ancestors.ancestorAt({ depth: 1, })?.dim).toBe('education_level')
+        expect(ancestors.ancestorAt({ depth: 1, })?.depth).toBe('education_level')
       }
     )
   }

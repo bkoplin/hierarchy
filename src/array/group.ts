@@ -1,62 +1,66 @@
 import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
-import type { L, N, } from 'ts-toolbelt'
+
 import type {
-  IterableElement,
-  JsonPrimitive,
-  ValueOf,
+  JsonPrimitive, ValueOf,
 } from 'type-fest'
+import type { L, } from 'ts-toolbelt'
 import type {
-  KeyFn, KeyFns, NodeType, NumericUnion,
+  KeyFn, KeyFns, NodeType,
 } from './types'
 import {
   HierarchyNode, LeafNode, RootNode,
 } from './Nodes'
 
 export default group
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
-  values: Input[],
-  key1: KeyFn<Input>
-): RootNode<Input, 1>
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>
-): RootNode<Input, 2>
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>,
-  key3: KeyFn<Input>
-): RootNode<Input, 3>
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive }
+>(values: Input[], key1: KeyFn<Input>): NodeType<Input, 1>
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive }
+>(values: Input[], key1: KeyFn<Input>, key2: KeyFn<Input>): NodeType<Input, 2>
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive }
+>(
   values: Input[],
   key1: KeyFn<Input>,
   key2: KeyFn<Input>,
   key3: KeyFn<Input>,
-  key4: KeyFn<Input>
-): RootNode<Input, 4>
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
+): NodeType<Input, 3>
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive }
+>(
   values: Input[],
   key1: KeyFn<Input>,
   key2: KeyFn<Input>,
   key3: KeyFn<Input>,
   key4: KeyFn<Input>,
-  key5: KeyFn<Input>
-): RootNode<Input, 5>
-export function group<Input extends { [ index: string | number ]: JsonPrimitive } >(
+): NodeType<Input, 4>
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive }
+>(
   values: Input[],
   key1: KeyFn<Input>,
   key2: KeyFn<Input>,
   key3: KeyFn<Input>,
   key4: KeyFn<Input>,
   key5: KeyFn<Input>,
-  key6: KeyFn<Input>
-): RootNode<Input, 6>
+): NodeType<Input, 5>
 export function group<
-  Input extends { [ index: string | number ]: JsonPrimitive },
+  Input extends { [index: string | number]: JsonPrimitive }
+>(
+  values: Input[],
+  key1: KeyFn<Input>,
+  key2: KeyFn<Input>,
+  key3: KeyFn<Input>,
+  key4: KeyFn<Input>,
+  key5: KeyFn<Input>,
+  key6: KeyFn<Input>,
+): NodeType<Input, 6>
+export function group<
+  Input extends { [index: string | number]: JsonPrimitive },
   KeyFunctions extends KeyFns<Input>
->(values: Input[], ...keys: KeyFunctions) {
+>(values: Input[], ...keys: KeyFunctions): NodeType<Input, L.Length<KeyFunctions>> {
   const root = new RootNode(
     keys.length,
     values
@@ -84,9 +88,12 @@ export function group<
       })
     }
   })
-  function regroupFn<ThisNodeType extends (typeof root)|IterableElement<(typeof root)['children']>>(node: ThisNodeType, keyof: KeyFn<Input>) {
-    const depth = (node.depth + 1)
-    const height = (node.height - 1)
+  function regroupFn(
+    node: any,
+    keyof: any
+  ) {
+    const depth = node.depth + 1
+    const height = node.height - 1
     let keyFn: (d: Input) => ValueOf<Input>
 
     if (typeof keyof === 'string' || typeof keyof === 'number')
