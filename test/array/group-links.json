@@ -1,134 +1,332 @@
 [
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
   },
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#f46d43",
+      "High School",
+    ],
   },
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#fee08b",
+      "Some College",
+    ],
   },
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#e6f598",
+      "Doctorate Degree",
+    ],
   },
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#66c2a5",
+      "Master's Degree",
+    ],
   },
   {
-    "source": 0,
-    "target": 1,
+    "source": [
+      undefined,
+      undefined,
+    ],
+    "target": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
+    "target": [
+      "#9e0142",
+      "Missouri",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
+    "target": [
+      "#b61c48",
+      "Arkansas",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
+    "target": [
+      "#ce364d",
+      "Colorado",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
+    "target": [
+      "#de4c4b",
+      "California",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#9e0142",
+      "Bachelor's Degree",
+    ],
+    "target": [
+      "#ec6146",
+      "New Hampshire",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#f46d43",
+      "High School",
+    ],
+    "target": [
+      "#f67848",
+      "Louisiana",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#f46d43",
+      "High School",
+    ],
+    "target": [
+      "#f99555",
+      "New Jersey",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#f46d43",
+      "High School",
+    ],
+    "target": [
+      "#fdb063",
+      "Rhode Island",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#f46d43",
+      "High School",
+    ],
+    "target": [
+      "#fdc675",
+      "Tennessee",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#f46d43",
+      "High School",
+    ],
+    "target": [
+      "#fedc87",
+      "Pennsylvania",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#fee08b",
+      "Some College",
+    ],
+    "target": [
+      "#feeb9d",
+      "Delaware",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#fee08b",
+      "Some College",
+    ],
+    "target": [
+      "#fff8b4",
+      "Wyoming",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#fee08b",
+      "Some College",
+    ],
+    "target": [
+      "#fafdb7",
+      "Minnesota",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#fee08b",
+      "Some College",
+    ],
+    "target": [
+      "#eff8a6",
+      "Utah",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#fee08b",
+      "Some College",
+    ],
+    "target": [
+      "#e1f399",
+      "Maryland",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#e6f598",
+      "Doctorate Degree",
+    ],
+    "target": [
+      "#c7e89e",
+      "Oklahoma",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#e6f598",
+      "Doctorate Degree",
+    ],
+    "target": [
+      "#b61c48",
+      "Arkansas",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#e6f598",
+      "Doctorate Degree",
+    ],
+    "target": [
+      "#fedc87",
+      "Pennsylvania",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#e6f598",
+      "Doctorate Degree",
+    ],
+    "target": [
+      "#aedea3",
+      "Massachusetts",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#66c2a5",
+      "Master's Degree",
+    ],
+    "target": [
+      "#90d2a4",
+      "Hawaii",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#66c2a5",
+      "Master's Degree",
+    ],
+    "target": [
+      "#72c7a5",
+      "New Mexico",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#66c2a5",
+      "Master's Degree",
+    ],
+    "target": [
+      "#58b3ab",
+      "Arizona",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
+    "target": [
+      "#429ab6",
+      "Wisconsin",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
+    "target": [
+      "#3881b9",
+      "Oregon",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
+    "target": [
+      "#4b68ae",
+      "Idaho",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
+    "target": [
+      "#5e4fa2",
+      "Illinois",
+    ],
   },
   {
-    "source": 1,
-    "target": 2,
+    "source": [
+      "#5e4fa2",
+      "Associate's Degree",
+    ],
+    "target": [
+      "#72c7a5",
+      "New Mexico",
+    ],
   },
 ]

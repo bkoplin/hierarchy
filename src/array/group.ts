@@ -9,7 +9,7 @@ import type {
   KeyFn, KeyFns, NodeType,
 } from './types'
 import {
-  HierarchyNode, LeafNode, RootNode,
+  HierarchyNode, LeafNode, createRootNode,
 } from './Nodes'
 
 export default group
@@ -61,7 +61,7 @@ export function group<
   Input extends { [index: string | number]: JsonPrimitive },
   KeyFunctions extends KeyFns<Input>
 >(values: Input[], ...keys: KeyFunctions): NodeType<Input, L.Length<KeyFunctions>> {
-  const root = new RootNode(
+  const root = createRootNode(
     keys.length,
     values
   )
@@ -81,17 +81,17 @@ export function group<
       )
     }
   }
-  return root.eachBefore((node) => {
+  root.eachBefore((node) => {
     if (node.hasChildren()) {
       node.children.forEach((child) => {
         child.parent = node
       })
     }
-  })
-  function regroupFn(
-    node: any,
-    keyof: any
-  ) {
+  }).setColor()
+
+  return root
+
+  function regroupFn(node: any, keyof: any) {
     const depth = node.depth + 1
     const height = node.height - 1
     let keyFn: (d: Input) => ValueOf<Input>

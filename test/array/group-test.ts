@@ -2,10 +2,11 @@ import {
   describe, expect, test,
 } from 'vitest'
 import {
-  map, mean, pipe, prop,
+  map, mean, pipe, prop, props,
 } from 'rambdax'
 import group from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
+import { pick } from 'lodash'
 
 const groupByAge = group(
   data,
@@ -96,6 +97,7 @@ describe(
       () => {
         expect(leaf.depth).toBe(2)
         expect(leaf.hasChildren()).toBe(false)
+        expect(leaf.color).toMatchInlineSnapshot('"#9e0142"')
       }
     )
     test(
@@ -112,11 +114,27 @@ describe(
     test(
       'root generates a links json',
       () => {
+        groupByAge.setColor(
+          'Spectral',
+          'allNodesAtDimIds'
+        )
         expect(groupByAge.links().map(({
           source, target,
         }) => ({
-          source: source?.depth,
-          target: target.depth,
+          source: pick(
+            source,
+            [
+              'color',
+              'id',
+            ],
+          ),
+          target: pick(
+            target,
+            [
+              'color',
+              'id',
+            ],
+          ),
         }))).toMatchFileSnapshot('./group-links.json')
       }
     )

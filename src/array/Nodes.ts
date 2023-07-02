@@ -1,22 +1,29 @@
 import {
-  filterObject, length, pipe, prop,
+  filterObject, length, pipe, prop, uniq, zipObj,
 } from 'rambdax'
-import type { StringKeyOf, } from 'type-fest'
+import type {
+  LiteralUnion, StringKeyOf,
+} from 'type-fest'
 import type {
   ChromaStatic, Color,
 } from 'chroma-js'
 import { iterator, } from './iterator'
+import type {
+  BaseNode, NodeType, NumericUnion,
+} from './types'
+import chroma from 'chroma-js'
 
-export abstract class Node {
+export abstract class Node<Datum> {
   constructor(
     public depth: number,
     public height: number,
-    public records: any[],
+    public records: Datum[],
     public id: any,
     public dim: any
   ) {
     this.name = id
     this.value = this.valueFunction(this)
+    this.color = undefined
   }
 
   [Symbol.iterator]: this[typeof Symbol.iterator] = iterator
@@ -24,10 +31,10 @@ export abstract class Node {
   children = []
 
   color?: string
-  colorScale?: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color>
-  colorScaleBy?: 'parentListOnly' | 'allNodesAtDim'
-  colorScaleMode?: 'e' | 'q' | 'l' | 'k'
-  colorScaleNum?: number
+  colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color> = 'Spectral'
+  colorScaleBy: 'parentListIds' | 'allNodesAtDimIds' | 'parentListValues' | 'allNodesAtDimValues' = 'allNodesAtDimIds'
+  colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
+  colorScaleNum: number | undefined = undefined
   name: any
   parent = undefined
 
@@ -67,6 +74,10 @@ export abstract class Node {
     }
 
     return nodes
+  }
+
+  descendants() {
+    return Array.from(this)
   }
 
   each(callback) {
@@ -181,6 +192,45 @@ export abstract class Node {
     return nodes
   }
 
+  setColor(
+    this: NodeType<Datum, 5>,
+    ...args: Parameters<BaseNode<Datum>['setColor']>
+  ) {
+    const [
+      scale,
+      scaleBy,
+      scaleMode,
+      scaleNum,
+    ] = args
+
+    this.each((node) => {
+      if (typeof scaleBy !== 'undefined')
+        node.colorScaleBy = scaleBy
+      if (typeof scale !== 'undefined')
+        node.colorScale = scale
+      if (typeof scaleMode !== 'undefined')
+        node.colorScaleMode = scaleMode
+      if (typeof scaleNum !== 'undefined')
+        node.colorScaleNum = scaleNum
+      if (!node.hasParent())
+        return
+      if (node.colorScaleBy === 'allNodesAtDimIds' || node.colorScaleBy === 'parentListIds') {
+        let values = node.parent.children.map(n => n.id)
+
+        if (node.colorScaleBy === 'allNodesAtDimIds') {
+          values = uniq(node.ancestorAt({ depth: 0, }).descendants()
+            .filter(d => d.dim === node.dim)
+            .map(n => n.id))
+        }
+        node.color = zipObj(
+          values,
+          chroma.scale(node.colorScale).colors(values.length)
+        )[node.id]
+      }
+    })
+    return this
+  }
+
   setValueFunction(valueFn) {
     this.each(node => (node.valueFunction = valueFn))
   }
@@ -189,7 +239,7 @@ export abstract class Node {
     this.each(node => (node.value = node.valueFunction(node)))
   }
 
-  toJSON() {
+  toJSON(this: NodeType<Datum, number>) {
     const node = filterObject(
       v => v !== undefined && typeof v !== 'function',
       this
@@ -201,8 +251,8 @@ export abstract class Node {
     return node
   }
 }
-export class LeafNode extends Node {
-  constructor(depth, records, id, dim) {
+export class LeafNode<Datum> extends Node<Datum> {
+  constructor(depth: number, records: Datum[], id, dim) {
     super(
       depth,
       0,
@@ -210,12 +260,13 @@ export class LeafNode extends Node {
       id,
       dim
     )
-    this.type = 'leaf'
     delete this.children
   }
+
+  type = 'leaf'
 }
-export class RootNode extends Node {
-  constructor(height, records) {
+export class RootNode<Datum> extends Node<Datum> {
+  constructor(height: number, records: Datum[]) {
     super(
       0,
       height,
@@ -223,19 +274,38 @@ export class RootNode extends Node {
       undefined,
       undefined
     )
-    this.type = 'root'
     delete this.parent
     delete this.id
     delete this.name
     delete this.dim
   }
+
+  type = 'root'
 }
-export class HierarchyNode extends Node {
-  constructor(...args: ConstructorParameters<
-      typeof Node
-    >) {
-    super(...args)
+export function createRootNode<Datum, Height extends NumericUnion<1, 7>>(height: LiteralUnion<Height, number>, records: Datum[]): BaseNode<Datum, 0, Height, Height> {
+  return new RootNode(
+    height,
+    records
+  )
+}
+export class HierarchyNode<Datum> extends Node<Datum> {
+  constructor(
+    depth: number,
+    height: number,
+    records: Datum[],
+    id: any,
+    dim: any
+  ) {
+    super(
+      depth,
+      height,
+      records,
+      id,
+      dim
+    )
   }
+
+  type = 'node'
 }
 
 function leastCommonAncestor(a, b) {

@@ -1,6 +1,10 @@
 {
   "children": [
     {
+      "color": "#9e0142",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
@@ -24,6 +28,10 @@
       "value": 998.33,
     },
     {
+      "color": "#b61c48",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
@@ -47,6 +55,10 @@
       "value": 718.57,
     },
     {
+      "color": "#ce364d",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
@@ -70,6 +82,10 @@
       "value": 472.47,
     },
     {
+      "color": "#de4c4b",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
@@ -93,6 +109,10 @@
       "value": 577.4,
     },
     {
+      "color": "#ec6146",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
@@ -116,6 +136,10 @@
       "value": 715.31,
     },
   ],
+  "color": "#9e0142",
+  "colorScale": "Spectral",
+  "colorScaleBy": "allNodesAtDimIds",
+  "colorScaleMode": "e",
   "depth": 1,
   "dim": "education_level",
   "height": 1,
@@ -183,5 +207,6 @@
       "unemployment_rate": 20.11,
     },
   ],
+  "type": "node",
   "value": 696.4159999999999,
 }
