@@ -133,7 +133,20 @@ describe(
           last,
         ] = groupByAge.children
 
-        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.id)).toMatchFileSnapshot('./group-path.json')
+        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.depth)).toMatchFileSnapshot('./group-path.json')
+      }
+    )
+  }
+)
+describe(
+  'JSON test',
+  () => {
+    test(
+      'root generates json without parent or methods',
+      () => {
+        const j = groupByAge.children[0].toJSON()
+
+        expect(j.parent).toBeUndefined()
       }
     )
   }

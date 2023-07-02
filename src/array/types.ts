@@ -3,9 +3,13 @@ import type {
   I, L, N, U,
 } from 'ts-toolbelt'
 import type {
+  ConditionalPick,
+  Except,
   FixedLengthArray,
   IterableElement,
+  JsonArray,
   JsonObject,
+  JsonPrimitive,
   RequireExactlyOne,
   Simplify,
   StringKeyOf,
@@ -82,6 +86,7 @@ export interface BaseNode<T, Depth extends number = KeyFnsLength, Height extends
   height: Height
   id: Depth extends 0 ? undefined : ValueOf<T>
   name: Depth extends 0 ? undefined : ValueOf<T>
+  parent: BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>, RootHeight>
   records: T[]
   type: Depth extends 0 ? 'root' : Height extends 0 ? 'leaf' : 'node'
   value: number
@@ -166,17 +171,22 @@ export interface BaseNode<T, Depth extends number = KeyFnsLength, Height extends
     source: BaseNode<T, FilteredDepthList<Depth, RootHeight>, FilteredDepthList<0, Height>, RootHeight>
     target: BaseNode<T, FilteredDepthList<N.Add<Depth, 1>, RootHeight>, FilteredDepthList<N.Sub<Height, 1>, RootHeight>>
   }>
+  /**
+   * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
+   * @see {@link https://github.com/d3/d3-hierarchy#node_path}
+   * @see {@link links}
+   */
+  path<EndDepth extends number, EndHeight extends number>(end: BaseNode<T, EndDepth, EndHeight>): Array<BaseNode<T, FilteredDepthList<0, EndDepth | Depth>, FilteredDepthList<EndHeight | Height, RootHeight>, RootHeight>>
   setValueFunction(func: (args_0: this) => number): void
   setValues(): void
+  toJSON(): ConditionalPick<Except<this, 'parent'>, JsonPrimitive | JsonArray>
 }
 export type NodeType<
   T,
   RootHeight extends number,
   Depth extends I.Iteration = I.IterationOf<RootHeight>,
   Height extends I.Iteration = I.IterationOf<0>,
-  ThisNode = BaseNode<T, RootHeight, 0, RootHeight> & {
-    parent: BaseNode<T, N.Sub<RootHeight, 1>, 1, RootHeight>
-  }
+  ThisNode = BaseNode<T, RootHeight, 0, RootHeight>
 > = {
   leaf: NodeType<
     T,
@@ -200,7 +210,7 @@ export type NodeType<
     >
   >
   root: Simplify<
-    BaseNode<T, I.Pos<Depth>, I.Pos<Height>, RootHeight> & {
+    Except<BaseNode<T, I.Pos<Depth>, I.Pos<Height>, RootHeight>, 'parent'> & {
       children: ThisNode[]
     }
   >
