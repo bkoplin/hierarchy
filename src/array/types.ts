@@ -244,18 +244,8 @@ export interface BaseNode<
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    */
   links(): Array<{
-    source: BaseNode<
-      T,
-      FilteredDepthList<Depth, RootHeight>,
-      FilteredDepthList<0, Height>,
-      RootHeight
-    >
-    target: BaseNode<
-      T,
-      FilteredDepthList<N.Add<Depth, 1>, RootHeight>,
-      FilteredDepthList<N.Sub<Height, 1>, RootHeight>,
-      RootHeight
-    >
+    source: BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>, RootHeight>
+    target: BaseNode<T, Depth, Height, RootHeight>
   }>
   /**
    * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
