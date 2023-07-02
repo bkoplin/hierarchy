@@ -117,7 +117,7 @@ export function group<
         records,
       ] = vals
 
-      if (node instanceof RootNode || node instanceof HierarchyNode) {
+      if (node.height > 1) {
         const child = new HierarchyNode(
           depth,
           height,

@@ -49,6 +49,8 @@ export abstract class Node {
 
   ancestorAt(depthOrDim) {
     return this.ancestors().find((node) => {
+      if (this === node)
+        return false
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim

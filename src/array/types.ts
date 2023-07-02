@@ -102,16 +102,20 @@ export interface BaseNode<T, Depth extends number = KeyFnsLength, Height extends
   addChild(child: BaseNode<T, N.Add<Depth, 1>, N.Sub<Height, 1>, RootHeight>): void
   /**
    *
-   * Finds the first ancestor node that matches the specified parameter. The parameter can be either the depth or dimension to find.
+   * Finds the first ancestor node that matches the specified parameter. The parameter can be either the depth or dimension to find. If the parameter would return this node, the return value is undefined
    *
-   * @param depthOrDim A parameter indicating either the depth or the dimension of the ancestor to return.
+   * @template ADepth
+   * @param {{ depth?: ADepth; dim?: StringKeyOf<T> }} depthOrDim A parameter indicating either the depth or the dimension of the ancestor to return.
+   * @param {ADepth} [depthOrDim.depth] The depth of the ancestor to return.
+   * @param {StringKeyOf<T>} [depthOrDim.dim] The dimension of the ancestor to return.
    */
-  ancestorAt(
+  ancestorAt<ADepth extends FilteredDepthList<0, N.Sub<Depth, 1>>>(
+
     depthOrDim: RequireExactlyOne<
-      { depth?: FilteredDepthList<0, Depth>; dim?: StringKeyOf<T> },
+      { depth?: ADepth; dim?: StringKeyOf<T> },
       'depth' | 'dim'
     >,
-  ): BaseNode<T, FilteredDepthList<0, Depth>, FilteredDepthList<Height, RootHeight>, RootHeight> | undefined
+  ): ADepth extends undefined ? (BaseNode<T, FilteredDepthList<0, N.Sub<Depth, 1>>, FilteredDepthList<0, N.Add<Height, 1>>, RootHeight>) : BaseNode<T, ADepth, N.Sub<RootHeight, ADepth>, RootHeight>
   /**
    * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
    *

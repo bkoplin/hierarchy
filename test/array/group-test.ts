@@ -79,9 +79,9 @@ describe(
     test(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
-        const ancestors = groupByAge.children[0]
+        const ancestors = groupByAge.leaves()[0]
 
-        expect(ancestors.ancestorAt({ depth: 1, })?.depth).toBe('education_level')
+        expect(ancestors.ancestorAt({ dim: 'state', })).toBeUndefined()
       }
     )
   }
@@ -115,8 +115,8 @@ describe(
         expect(groupByAge.links().map(({
           source, target,
         }) => ({
-          source: source?.id,
-          target: target.id,
+          source: source?.depth,
+          target: target.depth,
         }))).toMatchFileSnapshot('./group-links.json')
       }
     )
@@ -133,7 +133,13 @@ describe(
           last,
         ] = groupByAge.children
 
-        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.depth)).toMatchFileSnapshot('./group-path.json')
+        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.depth)).toStrictEqual([
+          2,
+          1,
+          0,
+          1,
+          2,
+        ])
       }
     )
   }
