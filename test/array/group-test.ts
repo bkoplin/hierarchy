@@ -4,10 +4,8 @@ import {
 import {
   map, mean, pipe, prop,
 } from 'rambdax'
-import type { IterableElement, } from 'type-fest'
 import group from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
-import type { NodeType, } from '../../src/array/types'
 
 const groupByAge = group(
   data,
@@ -81,7 +79,7 @@ describe(
     test(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
-        const ancestors = groupByAge.children[0].children[0]
+        const ancestors = groupByAge.children[0]
 
         expect(ancestors.ancestorAt({ depth: 1, })?.depth).toBe('education_level')
       }

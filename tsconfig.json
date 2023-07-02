@@ -20,5 +20,6 @@
       "~/": ["./src/"]
     }
   },
+  "include": ["./src/array/*", "./tests/**/*"],
   "exclude": ["./dist", "./src/**/*.js"]
 }
