@@ -1,4 +1,5 @@
-import type { KeyFnsLength, NodeType, } from './types'
+import type { KeyFnsLength, } from './types'
+import type { NodeType } from './NodeType'
 
 export function* iterator() {
   let node = this

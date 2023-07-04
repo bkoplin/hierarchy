@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -20,6 +20,6 @@
       "~/": ["./src/"]
     }
   },
-  "include": ["./src/array/*", "./tests/**/*"],
-  "exclude": ["./dist", "./src/**/*.js"]
+  "include": ["./src/**/*.ts", "./test/**/*.ts"],
+  "exclude": ["./dist", "./**/*.js"]
 }

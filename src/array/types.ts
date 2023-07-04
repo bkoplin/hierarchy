@@ -9,12 +9,9 @@ import type {
   Except,
   FixedLengthArray,
   IterableElement,
-  JsonArray,
   JsonObject,
-  JsonPrimitive,
+  JsonValue,
   RequireExactlyOne,
-  SetRequired,
-  Simplify,
   StringKeyOf,
   ValueOf,
 } from 'type-fest'
@@ -78,7 +75,7 @@ export type NumericUnion<
 
 type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-type FilteredDepthList<
+export type FilteredDepthList<
   MinVal extends number,
   MaxVal extends number,
   Ln extends number[] = [],
@@ -97,14 +94,11 @@ type FilteredDepthList<
     I.Next<Idx>
   >
 }[N.Lower<I.Pos<I.Next<Idx>>, L.Length<DepthAndHeightOptions>>]
-
 export interface BaseNode<
   T,
-  Depth extends number = KeyFnsLength,
-  Height extends number = KeyFnsLength,
+  Depth extends number,
   RootHeight extends number = 11
 > {
-  children?: Array<BaseNode<T, N.Add<Depth, 1>, N.Sub<Height, 1>, RootHeight>>
   color?: string
   colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color>
   colorScaleBy:
@@ -115,34 +109,26 @@ export interface BaseNode<
   colorScaleMode: 'e' | 'q' | 'l' | 'k'
   colorScaleNum: number
   depth: Depth
-  dim: Depth extends 0 ? undefined : StringKeyOf<T>
-  height: Height
-  id: Depth extends 0 ? undefined : ValueOf<T>
-  name: Depth extends 0 ? undefined : ValueOf<T>
-  parent?: BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>, RootHeight>
+  dim: N.Greater<Depth, 0> extends 1 ? StringKeyOf<T> : never
+  height: N.Sub<RootHeight, Depth>
+  id: N.Greater<Depth, 0> extends 1 ? ValueOf<T> : never
+  name: N.Greater<Depth, 0> extends 1 ? ValueOf<T> : never
   records: T[]
-  type: Depth extends 0 ? 'root' : Height extends 0 ? 'leaf' : 'node'
+  type: Depth extends 0
+    ? 'root'
+    : this['height'] extends 0
+      ? 'leaf'
+      : 'node'
   value: number
   valueFunction: (args_0: any) => number
   new (
     depth: Depth,
-    height: Height,
+    height: N.Sub<RootHeight, Depth>,
     records: T[],
-    id: Height extends 0 ? ValueOf<T> : undefined,
-    dim: Height extends 0 ? StringKeyOf<T> : undefined,
+    id: N.Sub<RootHeight, Depth> extends 0 ? ValueOf<T> : undefined,
+    dim: N.Sub<RootHeight, Depth> extends 0 ? StringKeyOf<T> : undefined,
   ): this
-  [Symbol.iterator](
-    this: this,
-  ): Generator<
-    BaseNode<
-      T,
-      FilteredDepthList<Depth, RootHeight>,
-      FilteredDepthList<0, Depth>,
-      RootHeight
-    >,
-    never,
-    unknown
-  >
+  [Symbol.iterator](): Generator<BaseNode<T, FilteredDepthList<Depth, RootHeight>, RootHeight>, never, unknown>
   addChild<C>(
     this: C,
     child: C extends { children: Array<infer Child> } ? Child : never,
@@ -165,10 +151,9 @@ export interface BaseNode<
     ? BaseNode<
         T,
         FilteredDepthList<0, N.Sub<Depth, 1>>,
-        FilteredDepthList<0, N.Add<Height, 1>>,
         RootHeight
       >
-    : BaseNode<T, ADepth, N.Sub<RootHeight, ADepth>, RootHeight>
+    : BaseNode<T, ADepth, RootHeight>
   /**
    * @description Returns the array of descendant nodes, starting with this node.
    *
@@ -182,10 +167,7 @@ export interface BaseNode<
    * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
    * @see {ancestorAt}
    */
-  ancestors<P extends { depth: number }>(this: { parent: P }): FixedLengthArray<
-    P,
-    N.Add<this['depth'], 1>
-  >
+  ancestors(): FixedLengthArray<BaseNode<T, FilteredDepthList<0, Depth>, RootHeight>, N.Add<Depth, 1>>
   /**
    * Invokes the specified function for node and each descendant in breadth-first order,
    * such that a given node is only visited if all nodes of lesser depth have already been
@@ -206,9 +188,9 @@ export interface BaseNode<
    * visited. The specified function is passed the current descendant, the zero-based traversal
    * index, and this node. If that is specified, it is the this context of the callback.
    */
-  eachAfter<D>(
-    this: D,
-    callback: (node: IterableElement<D>, index?: number) => void,
+  eachAfter(
+    this: this,
+    callback: (node: IterableElement<this>, index?: number) => void,
   ): this
   /**
    * @description Returns an array of links for this node and its descendants, where each link is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
@@ -225,40 +207,40 @@ export interface BaseNode<
    * @see {@link each}
    * @see {@link eachAfter}
    */
-  eachBefore<D>(
-    this: D,
-    callback: (node: IterableElement<D>, index?: number) => void,
+  eachBefore(
+    callback: (node: IterableElement<this>, index?: number) => void,
   ): this
-  hasChildren(
-  ): this is SetRequired<this, 'children'>
-  hasParent<P extends SetRequired<this, 'parent'>>(
-  ): this is P & { parent: SetRequired<P['parent'], 'children'> }
+  hasChildren<Type extends Depth extends RootHeight ? Except<this, 'children'> : this>(): this is Type
+  hasParent(): this['height'] extends RootHeight
+    ? false
+    : Depth extends 0
+      ? false
+      : true
   /**
    * @description Returns the array of leaf nodes for this node
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<BaseNode<T, RootHeight, 0, RootHeight>>
+  leaves(): Array<BaseNode<T, RootHeight, RootHeight>>
   /**
    * Returns an array of links for this node and its descendants, where each *link* is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    */
   links(): Array<{
-    source: BaseNode<T, N.Sub<Depth, 1>, N.Add<Height, 1>, RootHeight>
-    target: BaseNode<T, Depth, Height, RootHeight>
+    source: BaseNode<T, N.Sub<Depth, 1>, RootHeight>
+    target: BaseNode<T, Depth, RootHeight>
   }>
   /**
    * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path<EndDepth extends number, EndHeight extends number>(
-    end: BaseNode<T, EndDepth, EndHeight>,
+  path<EndDepth extends number>(
+    end: BaseNode<T, EndDepth, RootHeight>,
   ): Array<
     BaseNode<
       T,
       FilteredDepthList<0, EndDepth | Depth>,
-      FilteredDepthList<EndHeight | Height, RootHeight>,
       RootHeight
     >
   >
@@ -271,35 +253,5 @@ export interface BaseNode<
   ): void
   setValueFunction(func: (args_0: this) => number): void
   setValues(): void
-  toJSON(): ConditionalPick<
-    Except<this & { parent: any }, 'parent'>,
-    JsonPrimitive | JsonArray
-  >
+  toJSON(): ConditionalPick<Except<this, 'parent'>, JsonValue>
 }
-export type NodeType<
-  T,
-  RootHeight extends number = 11,
-  Depth extends I.Iteration = I.IterationOf<RootHeight>,
-  Height extends I.Iteration = I.IterationOf<0>,
-  ThisNode = BaseNode<T, RootHeight, 0, RootHeight>
-> = {
-  leaf: NodeType<T, RootHeight, I.Prev<Depth>, I.Next<Height>, Except<BaseNode<T, RootHeight, 0, RootHeight>, 'children'>>
-  node: NodeType<
-    T,
-    RootHeight,
-    I.Prev<Depth>,
-    I.Next<Height>,
-    BaseNode<T, I.Pos<Depth>, I.Pos<Height>, RootHeight> & {
-      children: ThisNode[]
-    }
-  >
-  root: Simplify<
-    BaseNode<T, I.Pos<Depth>, I.Pos<Height>, RootHeight> & {
-      children: ThisNode[]
-    }
-  >
-}[N.IsZero<I.Pos<I.Prev<Depth>>> extends 1
-  ? 'root'
-  : N.IsZero<I.Pos<I.Next<Height>>> extends 1
-    ? 'leaf'
-    : 'node']

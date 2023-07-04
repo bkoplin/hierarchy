@@ -4,15 +4,13 @@ import { groupBy, } from 'rambdax'
 import type {
   JsonPrimitive, ValueOf,
 } from 'type-fest'
-import type { L, } from 'ts-toolbelt'
-import type {
-  KeyFn, KeyFns, NodeType,
-} from './types'
+
+import type { KeyFn, } from './types'
+import type { NodeType, } from './NodeType'
 import {
-  HierarchyNode, LeafNode, createRootNode,
+  HierarchyNode, LeafNode, RootNode,
 } from './Nodes'
 
-export default group
 export function group<
   Input extends { [index: string | number]: JsonPrimitive }
 >(values: Input[], key1: KeyFn<Input>): NodeType<Input, 1>
@@ -57,14 +55,26 @@ export function group<
   key5: KeyFn<Input>,
   key6: KeyFn<Input>,
 ): NodeType<Input, 6>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive },
-  KeyFunctions extends KeyFns<Input>
->(values: Input[], ...keys: KeyFunctions): NodeType<Input, L.Length<KeyFunctions>> {
-  const root = createRootNode(
+export function group<Input extends { [index: string | number]: JsonPrimitive }>(
+  values: Input[], key1: KeyFn<Input>,
+  key2?: KeyFn<Input>,
+  key3?: KeyFn<Input>,
+  key4?: KeyFn<Input>,
+  key5?: KeyFn<Input>,
+  key6?: KeyFn<Input>
+): NodeType<Input, 1 | 2 | 3 | 4 | 5 | 6> {
+  const keys = [
+    key1,
+    key2,
+    key3,
+    key4,
+    key5,
+    key6,
+  ].filter(Boolean)
+  const root = new RootNode(
     keys.length,
     values
-  )
+  ) as unknown as NodeType<Input, 6>
   let idx = 0
   const thisNode = regroupFn(
     root,
@@ -83,9 +93,8 @@ export function group<
   }
   root.eachBefore((node) => {
     if (node.hasChildren()) {
-      node.children.forEach((child) => {
+      for (const child of node.children)
         child.parent = node
-      })
     }
   }).setColor()
 

@@ -1,17 +1,14 @@
 import {
   filterObject, length, pipe, prop, uniq, zipObj,
 } from 'rambdax'
-import type {
-  LiteralUnion, StringKeyOf,
-} from 'type-fest'
+import type { StringKeyOf, } from 'type-fest'
 import type {
   ChromaStatic, Color,
 } from 'chroma-js'
-import { iterator, } from './iterator'
-import type {
-  BaseNode, NodeType, NumericUnion,
-} from './types'
 import chroma from 'chroma-js'
+import { iterator, } from './iterator'
+import type { BaseNode, FilteredDepthList, } from './types'
+import type { NodeType, } from './NodeType'
 
 export abstract class Node<Datum> {
   constructor(
@@ -282,11 +279,11 @@ export class RootNode<Datum> extends Node<Datum> {
 
   type = 'root'
 }
-export function createRootNode<Datum, Height extends NumericUnion<1, 7>>(height: LiteralUnion<Height, number>, records: Datum[]): BaseNode<Datum, 0, Height, Height> {
+export function createRootNode<Datum, Height extends number>(height: Height, records: Datum[]) {
   return new RootNode(
     height,
     records
-  )
+  ) as unknown as NodeType<Datum, Height>
 }
 export class HierarchyNode<Datum> extends Node<Datum> {
   constructor(

@@ -2,17 +2,26 @@ import {
   describe, expect, test,
 } from 'vitest'
 import {
-  map, mean, pipe, prop, props,
+  map, mean, pipe, prop,
 } from 'rambdax'
-import group from '../../src/array/group'
+import { pick, } from 'lodash'
+import { group, } from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
-import { pick } from 'lodash'
 
 const groupByAge = group(
   data,
   'education_level',
   'state'
 )
+
+// groupByAge.eachBefore((node) => {
+//   const {
+//     depth, height,
+//   } = node
+
+//   if (node.depth !== 0)
+//     const h = node.height
+// })
 
 describe(
   'group function',
@@ -21,12 +30,15 @@ describe(
       'root dim is undefined',
       () => {
         expect(groupByAge.dim).toBeUndefined()
+        expect(groupByAge.depth).toBe(0)
       }
     )
     test(
       'first level child dim is education_level',
       () => {
         expect(groupByAge.children[0].dim).toEqual('education_level')
+        expect(groupByAge.children[0].depth).toEqual(1)
+        expect(groupByAge.children[0].parent.depth).toEqual(1)
       }
     )
     test(
@@ -45,7 +57,10 @@ describe(
     test(
       'second level child depth is 2',
       () => {
+        expect(groupByAge.children?.[0].depth).toBe(1)
         expect(groupByAge.children?.[0]?.children?.[0].depth).toBe(2)
+        expect(groupByAge.children?.[0]?.children?.[0].type).toBe('leaf')
+        expect(groupByAge.children?.[0]?.children?.[0].parent.depth).toBe(1)
       }
     )
     test(
@@ -126,14 +141,14 @@ describe(
             [
               'color',
               'id',
-            ],
+            ]
           ),
           target: pick(
             target,
             [
               'color',
               'id',
-            ],
+            ]
           ),
         }))).toMatchFileSnapshot('./group-links.json')
       }
