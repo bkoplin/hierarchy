@@ -1,7 +1,4 @@
-import type { KeyFnsLength, } from './types'
-import type { NodeType } from './NodeType'
-
-export function* iterator() {
+export function* iterator<T>(this: T): Generator<T, void, unknown> {
   let node = this
   let current
   let next = [ node, ]

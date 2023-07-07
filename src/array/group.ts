@@ -2,79 +2,71 @@ import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
 
 import type {
+  FixedLengthArray,
   JsonPrimitive, ValueOf,
 } from 'type-fest'
 
-import type { KeyFn, } from './types'
+import type { L, } from 'ts-toolbelt'
+import type {
+  FilteredDepthList, KeyFn,
+} from './types'
 import type { NodeType, } from './NodeType'
 import {
   HierarchyNode, LeafNode, RootNode,
 } from './Nodes'
 
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(values: Input[], key1: KeyFn<Input>): NodeType<Input, 1>
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(values: Input[], key1: KeyFn<Input>, key2: KeyFn<Input>): NodeType<Input, 2>
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(
+//   values: Input[],
+//   key1: KeyFn<Input>,
+//   key2: KeyFn<Input>,
+//   key3: KeyFn<Input>,
+// ): NodeType<Input, 3>
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(
+//   values: Input[],
+//   key1: KeyFn<Input>,
+//   key2: KeyFn<Input>,
+//   key3: KeyFn<Input>,
+//   key4: KeyFn<Input>,
+// ): NodeType<Input, 4>
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(
+//   values: Input[],
+//   key1: KeyFn<Input>,
+//   key2: KeyFn<Input>,
+//   key3: KeyFn<Input>,
+//   key4: KeyFn<Input>,
+//   key5: KeyFn<Input>,
+// ): NodeType<Input, 5>
+// export function group<
+//   Input extends { [index: string | number]: JsonPrimitive }
+// >(
+//   values: Input[],
+//   key1: KeyFn<Input>,
+//   key2: KeyFn<Input>,
+//   key3: KeyFn<Input>,
+//   key4: KeyFn<Input>,
+//   key5: KeyFn<Input>,
+//   key6: KeyFn<Input>,
+// ): NodeType<Input, 6>
 export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(values: Input[], key1: KeyFn<Input>): NodeType<Input, 1>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(values: Input[], key1: KeyFn<Input>, key2: KeyFn<Input>): NodeType<Input, 2>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>,
-  key3: KeyFn<Input>,
-): NodeType<Input, 3>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>,
-  key3: KeyFn<Input>,
-  key4: KeyFn<Input>,
-): NodeType<Input, 4>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>,
-  key3: KeyFn<Input>,
-  key4: KeyFn<Input>,
-  key5: KeyFn<Input>,
-): NodeType<Input, 5>
-export function group<
-  Input extends { [index: string | number]: JsonPrimitive }
->(
-  values: Input[],
-  key1: KeyFn<Input>,
-  key2: KeyFn<Input>,
-  key3: KeyFn<Input>,
-  key4: KeyFn<Input>,
-  key5: KeyFn<Input>,
-  key6: KeyFn<Input>,
-): NodeType<Input, 6>
-export function group<Input extends { [index: string | number]: JsonPrimitive }>(
-  values: Input[], key1: KeyFn<Input>,
-  key2?: KeyFn<Input>,
-  key3?: KeyFn<Input>,
-  key4?: KeyFn<Input>,
-  key5?: KeyFn<Input>,
-  key6?: KeyFn<Input>
-): NodeType<Input, 1 | 2 | 3 | 4 | 5 | 6> {
-  const keys = [
-    key1,
-    key2,
-    key3,
-    key4,
-    key5,
-    key6,
-  ].filter(Boolean)
+  Input extends { [index: string | number]: JsonPrimitive },
+  KeyFunctions extends FixedLengthArray<KeyFn<Input>, FilteredDepthList<1, 11>>
+>(values: Input[], ...keys: KeyFunctions): NodeType<Input, L.Length<KeyFunctions>> {
   const root = new RootNode(
     keys.length,
     values
-  ) as unknown as NodeType<Input, 6>
+  )
   let idx = 0
   const thisNode = regroupFn(
     root,
@@ -91,12 +83,12 @@ export function group<Input extends { [index: string | number]: JsonPrimitive }>
       )
     }
   }
-  root.eachBefore((node) => {
-    if (node.hasChildren()) {
-      for (const child of node.children)
-        child.parent = node
-    }
-  }).setColor()
+  root
+    .eachBefore((node) => {
+      if (node.hasChildren())
+        for (const child of node.children) child.parent = node
+    })
+    .setColor()
 
   return root
 

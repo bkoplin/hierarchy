@@ -14,14 +14,9 @@ const groupByAge = group(
   'state'
 )
 
-// groupByAge.eachBefore((node) => {
-//   const {
-//     depth, height,
-//   } = node
-
-//   if (node.depth !== 0)
-//     const h = node.height
-// })
+groupByAge.eachBefore((node) => {
+  const depth = node.depth
+})
 
 describe(
   'group function',
@@ -31,6 +26,7 @@ describe(
       () => {
         expect(groupByAge.dim).toBeUndefined()
         expect(groupByAge.depth).toBe(0)
+        expect(groupByAge.parent).toBeUndefined()
       }
     )
     test(
@@ -58,9 +54,12 @@ describe(
       'second level child depth is 2',
       () => {
         expect(groupByAge.children?.[0].depth).toBe(1)
-        expect(groupByAge.children?.[0]?.children?.[0].depth).toBe(2)
-        expect(groupByAge.children?.[0]?.children?.[0].type).toBe('leaf')
-        expect(groupByAge.children?.[0]?.children?.[0].parent.depth).toBe(1)
+        const secondLevelChild = groupByAge.children?.[0]?.children?.[0]
+
+        expect(secondLevelChild.depth).toBe(2)
+        expect(secondLevelChild.type).toBe('leaf')
+        if (secondLevelChild.hasParent())
+          expect(secondLevelChild.parent.depth).toBe(1)
       }
     )
     test(
@@ -110,7 +109,9 @@ describe(
     test(
       'first leaf node of root has depth of 2 and haschildren of false',
       () => {
+        expect(leaf.parent.depth).toBe(1)
         expect(leaf.depth).toBe(2)
+        expect(leaf.height).toBe(0)
         expect(leaf.hasChildren()).toBe(false)
         expect(leaf.color).toMatchInlineSnapshot('"#9e0142"')
       }
@@ -135,22 +136,26 @@ describe(
         )
         expect(groupByAge.links().map(({
           source, target,
-        }) => ({
-          source: pick(
-            source,
-            [
-              'color',
-              'id',
-            ]
-          ),
-          target: pick(
-            target,
-            [
-              'color',
-              'id',
-            ]
-          ),
-        }))).toMatchFileSnapshot('./group-links.json')
+        }) => {
+          const depth = target.depth
+
+          return {
+            source: pick(
+              source,
+              [
+                'color',
+                'id',
+              ]
+            ),
+            target: pick(
+              target,
+              [
+                'color',
+                'id',
+              ]
+            ),
+          }
+        })).toMatchFileSnapshot('./group-links.json')
       }
     )
   }
