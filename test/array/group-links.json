@@ -60,7 +60,7 @@
     },
     "target": {
       "color": "#9e0142",
-      "id": "Missouri",
+      "id": "M",
     },
   },
   {
@@ -69,8 +69,8 @@
       "id": "Bachelor's Degree",
     },
     "target": {
-      "color": "#b61c48",
-      "id": "Arkansas",
+      "color": "#c8304c",
+      "id": "A",
     },
   },
   {
@@ -79,8 +79,8 @@
       "id": "Bachelor's Degree",
     },
     "target": {
-      "color": "#ce364d",
-      "id": "Colorado",
+      "color": "#e65749",
+      "id": "C",
     },
   },
   {
@@ -89,68 +89,88 @@
       "id": "Bachelor's Degree",
     },
     "target": {
-      "color": "#de4c4b",
-      "id": "California",
+      "color": "#f7814c",
+      "id": "N",
     },
   },
   {
     "source": {
+      "color": "#f46d43",
+      "id": "High School",
+    },
+    "target": {
+      "color": "#fdb264",
+      "id": "L",
+    },
+  },
+  {
+    "source": {
+      "color": "#f46d43",
+      "id": "High School",
+    },
+    "target": {
+      "color": "#f7814c",
+      "id": "N",
+    },
+  },
+  {
+    "source": {
+      "color": "#f46d43",
+      "id": "High School",
+    },
+    "target": {
+      "color": "#fed885",
+      "id": "R",
+    },
+  },
+  {
+    "source": {
+      "color": "#f46d43",
+      "id": "High School",
+    },
+    "target": {
+      "color": "#fff3ab",
+      "id": "T",
+    },
+  },
+  {
+    "source": {
+      "color": "#f46d43",
+      "id": "High School",
+    },
+    "target": {
+      "color": "#f5fbb0",
+      "id": "P",
+    },
+  },
+  {
+    "source": {
+      "color": "#fee08b",
+      "id": "Some College",
+    },
+    "target": {
+      "color": "#ddf19a",
+      "id": "D",
+    },
+  },
+  {
+    "source": {
+      "color": "#fee08b",
+      "id": "Some College",
+    },
+    "target": {
+      "color": "#b0dfa3",
+      "id": "W",
+    },
+  },
+  {
+    "source": {
+      "color": "#fee08b",
+      "id": "Some College",
+    },
+    "target": {
       "color": "#9e0142",
-      "id": "Bachelor's Degree",
-    },
-    "target": {
-      "color": "#ec6146",
-      "id": "New Hampshire",
-    },
-  },
-  {
-    "source": {
-      "color": "#f46d43",
-      "id": "High School",
-    },
-    "target": {
-      "color": "#f67848",
-      "id": "Louisiana",
-    },
-  },
-  {
-    "source": {
-      "color": "#f46d43",
-      "id": "High School",
-    },
-    "target": {
-      "color": "#f99555",
-      "id": "New Jersey",
-    },
-  },
-  {
-    "source": {
-      "color": "#f46d43",
-      "id": "High School",
-    },
-    "target": {
-      "color": "#fdb063",
-      "id": "Rhode Island",
-    },
-  },
-  {
-    "source": {
-      "color": "#f46d43",
-      "id": "High School",
-    },
-    "target": {
-      "color": "#fdc675",
-      "id": "Tennessee",
-    },
-  },
-  {
-    "source": {
-      "color": "#f46d43",
-      "id": "High School",
-    },
-    "target": {
-      "color": "#fedc87",
-      "id": "Pennsylvania",
+      "id": "M",
     },
   },
   {
@@ -159,48 +179,8 @@
       "id": "Some College",
     },
     "target": {
-      "color": "#feeb9d",
-      "id": "Delaware",
-    },
-  },
-  {
-    "source": {
-      "color": "#fee08b",
-      "id": "Some College",
-    },
-    "target": {
-      "color": "#fff8b4",
-      "id": "Wyoming",
-    },
-  },
-  {
-    "source": {
-      "color": "#fee08b",
-      "id": "Some College",
-    },
-    "target": {
-      "color": "#fafdb7",
-      "id": "Minnesota",
-    },
-  },
-  {
-    "source": {
-      "color": "#fee08b",
-      "id": "Some College",
-    },
-    "target": {
-      "color": "#eff8a6",
-      "id": "Utah",
-    },
-  },
-  {
-    "source": {
-      "color": "#fee08b",
-      "id": "Some College",
-    },
-    "target": {
-      "color": "#e1f399",
-      "id": "Maryland",
+      "color": "#7bcaa5",
+      "id": "U",
     },
   },
   {
@@ -209,8 +189,8 @@
       "id": "Doctorate Degree",
     },
     "target": {
-      "color": "#c7e89e",
-      "id": "Oklahoma",
+      "color": "#4ea7b0",
+      "id": "O",
     },
   },
   {
@@ -219,8 +199,8 @@
       "id": "Doctorate Degree",
     },
     "target": {
-      "color": "#b61c48",
-      "id": "Arkansas",
+      "color": "#c8304c",
+      "id": "A",
     },
   },
   {
@@ -229,8 +209,8 @@
       "id": "Doctorate Degree",
     },
     "target": {
-      "color": "#fedc87",
-      "id": "Pennsylvania",
+      "color": "#f5fbb0",
+      "id": "P",
     },
   },
   {
@@ -239,8 +219,8 @@
       "id": "Doctorate Degree",
     },
     "target": {
-      "color": "#aedea3",
-      "id": "Massachusetts",
+      "color": "#9e0142",
+      "id": "M",
     },
   },
   {
@@ -249,8 +229,8 @@
       "id": "Master's Degree",
     },
     "target": {
-      "color": "#90d2a4",
-      "id": "Hawaii",
+      "color": "#3c7bb7",
+      "id": "H",
     },
   },
   {
@@ -259,8 +239,8 @@
       "id": "Master's Degree",
     },
     "target": {
-      "color": "#72c7a5",
-      "id": "New Mexico",
+      "color": "#f7814c",
+      "id": "N",
     },
   },
   {
@@ -269,8 +249,8 @@
       "id": "Master's Degree",
     },
     "target": {
-      "color": "#58b3ab",
-      "id": "Arizona",
+      "color": "#c8304c",
+      "id": "A",
     },
   },
   {
@@ -279,8 +259,8 @@
       "id": "Associate's Degree",
     },
     "target": {
-      "color": "#429ab6",
-      "id": "Wisconsin",
+      "color": "#b0dfa3",
+      "id": "W",
     },
   },
   {
@@ -289,18 +269,8 @@
       "id": "Associate's Degree",
     },
     "target": {
-      "color": "#3881b9",
-      "id": "Oregon",
-    },
-  },
-  {
-    "source": {
-      "color": "#5e4fa2",
-      "id": "Associate's Degree",
-    },
-    "target": {
-      "color": "#4b68ae",
-      "id": "Idaho",
+      "color": "#4ea7b0",
+      "id": "O",
     },
   },
   {
@@ -310,7 +280,7 @@
     },
     "target": {
       "color": "#5e4fa2",
-      "id": "Illinois",
+      "id": "I",
     },
   },
   {
@@ -319,8 +289,8 @@
       "id": "Associate's Degree",
     },
     "target": {
-      "color": "#72c7a5",
-      "id": "New Mexico",
+      "color": "#f7814c",
+      "id": "N",
     },
   },
 ]

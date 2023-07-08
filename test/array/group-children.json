@@ -8,8 +8,8 @@
       "depth": 2,
       "dim": "state",
       "height": 0,
-      "id": "Missouri",
-      "name": "Missouri",
+      "id": "M",
+      "name": "M",
       "records": [
         {
           "crime_rate": 998.33,
@@ -28,15 +28,15 @@
       "value": 998.33,
     },
     {
-      "color": "#b61c48",
+      "color": "#c8304c",
       "colorScale": "Spectral",
       "colorScaleBy": "allNodesAtDimIds",
       "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
-      "id": "Arkansas",
-      "name": "Arkansas",
+      "id": "A",
+      "name": "A",
       "records": [
         {
           "crime_rate": 718.57,
@@ -55,15 +55,15 @@
       "value": 718.57,
     },
     {
-      "color": "#ce364d",
+      "color": "#e65749",
       "colorScale": "Spectral",
       "colorScaleBy": "allNodesAtDimIds",
       "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
-      "id": "Colorado",
-      "name": "Colorado",
+      "id": "C",
+      "name": "C",
       "records": [
         {
           "crime_rate": 472.47,
@@ -77,21 +77,6 @@
           "state": "Colorado",
           "unemployment_rate": 81.97,
         },
-      ],
-      "type": "leaf",
-      "value": 472.47,
-    },
-    {
-      "color": "#de4c4b",
-      "colorScale": "Spectral",
-      "colorScaleBy": "allNodesAtDimIds",
-      "colorScaleMode": "e",
-      "depth": 2,
-      "dim": "state",
-      "height": 0,
-      "id": "California",
-      "name": "California",
-      "records": [
         {
           "crime_rate": 577.4,
           "education_level": "Bachelor's Degree",
@@ -106,18 +91,18 @@
         },
       ],
       "type": "leaf",
-      "value": 577.4,
+      "value": 524.935,
     },
     {
-      "color": "#ec6146",
+      "color": "#f7814c",
       "colorScale": "Spectral",
       "colorScaleBy": "allNodesAtDimIds",
       "colorScaleMode": "e",
       "depth": 2,
       "dim": "state",
       "height": 0,
-      "id": "New Hampshire",
-      "name": "New Hampshire",
+      "id": "N",
+      "name": "N",
       "records": [
         {
           "crime_rate": 715.31,

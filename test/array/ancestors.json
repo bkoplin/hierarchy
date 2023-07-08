@@ -9,8 +9,8 @@
         "depth": 2,
         "dim": "state",
         "height": 0,
-        "id": "Missouri",
-        "name": "Missouri",
+        "id": "M",
+        "name": "M",
         "records": [
           {
             "crime_rate": 998.33,
@@ -29,15 +29,15 @@
         "value": 998.33,
       },
       {
-        "color": "#b61c48",
+        "color": "#c8304c",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
         "depth": 2,
         "dim": "state",
         "height": 0,
-        "id": "Arkansas",
-        "name": "Arkansas",
+        "id": "A",
+        "name": "A",
         "records": [
           {
             "crime_rate": 718.57,
@@ -56,15 +56,15 @@
         "value": 718.57,
       },
       {
-        "color": "#ce364d",
+        "color": "#e65749",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
         "depth": 2,
         "dim": "state",
         "height": 0,
-        "id": "Colorado",
-        "name": "Colorado",
+        "id": "C",
+        "name": "C",
         "records": [
           {
             "crime_rate": 472.47,
@@ -78,21 +78,6 @@
             "state": "Colorado",
             "unemployment_rate": 81.97,
           },
-        ],
-        "type": "leaf",
-        "value": 472.47,
-      },
-      {
-        "color": "#de4c4b",
-        "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
-        "colorScaleMode": "e",
-        "depth": 2,
-        "dim": "state",
-        "height": 0,
-        "id": "California",
-        "name": "California",
-        "records": [
           {
             "crime_rate": 577.4,
             "education_level": "Bachelor's Degree",
@@ -107,18 +92,18 @@
           },
         ],
         "type": "leaf",
-        "value": 577.4,
+        "value": 524.935,
       },
       {
-        "color": "#ec6146",
+        "color": "#f7814c",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
         "depth": 2,
         "dim": "state",
         "height": 0,
-        "id": "New Hampshire",
-        "name": "New Hampshire",
+        "id": "N",
+        "name": "N",
         "records": [
           {
             "crime_rate": 715.31,
@@ -223,8 +208,8 @@
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Missouri",
-            "name": "Missouri",
+            "id": "M",
+            "name": "M",
             "records": [
               {
                 "crime_rate": 998.33,
@@ -243,15 +228,15 @@
             "value": 998.33,
           },
           {
-            "color": "#b61c48",
+            "color": "#c8304c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Arkansas",
-            "name": "Arkansas",
+            "id": "A",
+            "name": "A",
             "records": [
               {
                 "crime_rate": 718.57,
@@ -270,15 +255,15 @@
             "value": 718.57,
           },
           {
-            "color": "#ce364d",
+            "color": "#e65749",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Colorado",
-            "name": "Colorado",
+            "id": "C",
+            "name": "C",
             "records": [
               {
                 "crime_rate": 472.47,
@@ -292,21 +277,6 @@
                 "state": "Colorado",
                 "unemployment_rate": 81.97,
               },
-            ],
-            "type": "leaf",
-            "value": 472.47,
-          },
-          {
-            "color": "#de4c4b",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "California",
-            "name": "California",
-            "records": [
               {
                 "crime_rate": 577.4,
                 "education_level": "Bachelor's Degree",
@@ -321,18 +291,18 @@
               },
             ],
             "type": "leaf",
-            "value": 577.4,
+            "value": 524.935,
           },
           {
-            "color": "#ec6146",
+            "color": "#f7814c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "New Hampshire",
-            "name": "New Hampshire",
+            "id": "N",
+            "name": "N",
             "records": [
               {
                 "crime_rate": 715.31,
@@ -428,15 +398,15 @@
       {
         "children": [
           {
-            "color": "#f67848",
+            "color": "#fdb264",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Louisiana",
-            "name": "Louisiana",
+            "id": "L",
+            "name": "L",
             "records": [
               {
                 "crime_rate": 774.78,
@@ -455,15 +425,15 @@
             "value": 1,
           },
           {
-            "color": "#f99555",
+            "color": "#f7814c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "New Jersey",
-            "name": "New Jersey",
+            "id": "N",
+            "name": "N",
             "records": [
               {
                 "crime_rate": 989.46,
@@ -482,15 +452,15 @@
             "value": 1,
           },
           {
-            "color": "#fdb063",
+            "color": "#fed885",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Rhode Island",
-            "name": "Rhode Island",
+            "id": "R",
+            "name": "R",
             "records": [
               {
                 "crime_rate": 829.65,
@@ -509,15 +479,15 @@
             "value": 1,
           },
           {
-            "color": "#fdc675",
+            "color": "#fff3ab",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Tennessee",
-            "name": "Tennessee",
+            "id": "T",
+            "name": "T",
             "records": [
               {
                 "crime_rate": 15.13,
@@ -536,15 +506,15 @@
             "value": 1,
           },
           {
-            "color": "#fedc87",
+            "color": "#f5fbb0",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Pennsylvania",
-            "name": "Pennsylvania",
+            "id": "P",
+            "name": "P",
             "records": [
               {
                 "crime_rate": 982.58,
@@ -640,15 +610,15 @@
       {
         "children": [
           {
-            "color": "#feeb9d",
+            "color": "#ddf19a",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Delaware",
-            "name": "Delaware",
+            "id": "D",
+            "name": "D",
             "records": [
               {
                 "crime_rate": 974.77,
@@ -667,15 +637,15 @@
             "value": 1,
           },
           {
-            "color": "#fff8b4",
+            "color": "#b0dfa3",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Wyoming",
-            "name": "Wyoming",
+            "id": "W",
+            "name": "W",
             "records": [
               {
                 "crime_rate": 506.81,
@@ -694,15 +664,15 @@
             "value": 1,
           },
           {
-            "color": "#fafdb7",
+            "color": "#9e0142",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Minnesota",
-            "name": "Minnesota",
+            "id": "M",
+            "name": "M",
             "records": [
               {
                 "crime_rate": 784.69,
@@ -716,20 +686,32 @@
                 "state": "Minnesota",
                 "unemployment_rate": 48.93,
               },
+              {
+                "crime_rate": 568.42,
+                "education_level": "Some College",
+                "ethnicity": "Black or African American",
+                "median_age": 24,
+                "median_income": 376235,
+                "population": 9807563,
+                "poverty_rate": 85.17,
+                "region": "Midwest",
+                "state": "Maryland",
+                "unemployment_rate": 34.94,
+              },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 2,
           },
           {
-            "color": "#eff8a6",
+            "color": "#7bcaa5",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Utah",
-            "name": "Utah",
+            "id": "U",
+            "name": "U",
             "records": [
               {
                 "crime_rate": 62.68,
@@ -742,33 +724,6 @@
                 "region": "West",
                 "state": "Utah",
                 "unemployment_rate": 40.89,
-              },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#e1f399",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "Maryland",
-            "name": "Maryland",
-            "records": [
-              {
-                "crime_rate": 568.42,
-                "education_level": "Some College",
-                "ethnicity": "Black or African American",
-                "median_age": 24,
-                "median_income": 376235,
-                "population": 9807563,
-                "poverty_rate": 85.17,
-                "region": "Midwest",
-                "state": "Maryland",
-                "unemployment_rate": 34.94,
               },
             ],
             "type": "leaf",
@@ -852,15 +807,15 @@
       {
         "children": [
           {
-            "color": "#c7e89e",
+            "color": "#4ea7b0",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Oklahoma",
-            "name": "Oklahoma",
+            "id": "O",
+            "name": "O",
             "records": [
               {
                 "crime_rate": 312.77,
@@ -879,15 +834,15 @@
             "value": 1,
           },
           {
-            "color": "#b61c48",
+            "color": "#c8304c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Arkansas",
-            "name": "Arkansas",
+            "id": "A",
+            "name": "A",
             "records": [
               {
                 "crime_rate": 693.4,
@@ -906,15 +861,15 @@
             "value": 1,
           },
           {
-            "color": "#fedc87",
+            "color": "#f5fbb0",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Pennsylvania",
-            "name": "Pennsylvania",
+            "id": "P",
+            "name": "P",
             "records": [
               {
                 "crime_rate": 981.11,
@@ -933,15 +888,15 @@
             "value": 1,
           },
           {
-            "color": "#aedea3",
+            "color": "#9e0142",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Massachusetts",
-            "name": "Massachusetts",
+            "id": "M",
+            "name": "M",
             "records": [
               {
                 "crime_rate": 922.47,
@@ -1025,15 +980,15 @@
       {
         "children": [
           {
-            "color": "#90d2a4",
+            "color": "#3c7bb7",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Hawaii",
-            "name": "Hawaii",
+            "id": "H",
+            "name": "H",
             "records": [
               {
                 "crime_rate": 871.71,
@@ -1052,15 +1007,15 @@
             "value": 1,
           },
           {
-            "color": "#72c7a5",
+            "color": "#f7814c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "New Mexico",
-            "name": "New Mexico",
+            "id": "N",
+            "name": "N",
             "records": [
               {
                 "crime_rate": 697.82,
@@ -1079,15 +1034,15 @@
             "value": 1,
           },
           {
-            "color": "#58b3ab",
+            "color": "#c8304c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Arizona",
-            "name": "Arizona",
+            "id": "A",
+            "name": "A",
             "records": [
               {
                 "crime_rate": 601.82,
@@ -1159,15 +1114,15 @@
       {
         "children": [
           {
-            "color": "#429ab6",
+            "color": "#b0dfa3",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Wisconsin",
-            "name": "Wisconsin",
+            "id": "W",
+            "name": "W",
             "records": [
               {
                 "crime_rate": 514.82,
@@ -1186,15 +1141,15 @@
             "value": 1,
           },
           {
-            "color": "#3881b9",
+            "color": "#4ea7b0",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Oregon",
-            "name": "Oregon",
+            "id": "O",
+            "name": "O",
             "records": [
               {
                 "crime_rate": 356.88,
@@ -1213,15 +1168,15 @@
             "value": 1,
           },
           {
-            "color": "#4b68ae",
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "Idaho",
-            "name": "Idaho",
+            "id": "I",
+            "name": "I",
             "records": [
               {
                 "crime_rate": 421.59,
@@ -1235,21 +1190,6 @@
                 "state": "Idaho",
                 "unemployment_rate": 85.54,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#5e4fa2",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "Illinois",
-            "name": "Illinois",
-            "records": [
               {
                 "crime_rate": 580.89,
                 "education_level": "Associate's Degree",
@@ -1264,18 +1204,18 @@
               },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 2,
           },
           {
-            "color": "#72c7a5",
+            "color": "#f7814c",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "New Mexico",
-            "name": "New Mexico",
+            "id": "N",
+            "name": "N",
             "records": [
               {
                 "crime_rate": 677.97,

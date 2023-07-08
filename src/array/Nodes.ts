@@ -25,7 +25,7 @@ export abstract class Node<Datum> {
 
   [Symbol.iterator] = iterator
 
-  children = []
+  children? = []
 
   color?: string
   colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color> = 'Spectral'
@@ -53,8 +53,6 @@ export abstract class Node<Datum> {
 
   ancestorAt(depthOrDim) {
     return this.ancestors().find((node) => {
-      if (this === node)
-        return false
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim
@@ -190,8 +188,8 @@ export abstract class Node<Datum> {
   }
 
   setColor(
-    this: NodeType<Datum, 5>,
-    ...args: Parameters<BaseNode<Datum>['setColor']>
+    this: NodeType<Datum, readonly [keyof Datum]>,
+    ...args: Parameters<BaseNode<Datum, this['depth']>['setColor']>
   ) {
     const [
       scale,
@@ -209,13 +207,13 @@ export abstract class Node<Datum> {
         node.colorScaleMode = scaleMode
       if (typeof scaleNum !== 'undefined')
         node.colorScaleNum = scaleNum
-      if (!node.hasParent())
-        return
-      if (node.colorScaleBy === 'allNodesAtDimIds' || node.colorScaleBy === 'parentListIds') {
-        let values = node.parent.children.map(n => n.id)
+      if ((node.colorScaleBy === 'allNodesAtDimIds' || node.colorScaleBy === 'parentListIds') && node.hasParent()) {
+        let values = node.parent!.children.map(n => n.id)
 
         if (node.colorScaleBy === 'allNodesAtDimIds') {
-          values = uniq(node.ancestorAt({ depth: 0, }).descendants()
+          const ancestor = node.ancestorAt({ depth: 0, })
+
+          values = uniq(ancestor.descendants()
             .filter(d => d.dim === node.dim)
             .map(n => n.id))
         }
@@ -228,15 +226,15 @@ export abstract class Node<Datum> {
     return this
   }
 
-  setValueFunction(valueFn) {
+  setValueFunction(this: NodeType<Datum, readonly [keyof Datum]>, valueFn) {
     this.each(node => (node.valueFunction = valueFn))
   }
 
-  setValues() {
+  setValues(this: NodeType<Datum, readonly [keyof Datum]>) {
     this.each(node => (node.value = node.valueFunction(node)))
   }
 
-  toJSON(this: NodeType<Datum, number>) {
+  toJSON(this: NodeType<Datum, readonly [keyof Datum]>) {
     const node = filterObject(
       v => v !== undefined && typeof v !== 'function',
       this
@@ -278,12 +276,6 @@ export class RootNode<Datum> extends Node<Datum> {
   }
 
   type = 'root'
-}
-export function createRootNode<Datum, Height extends number>(height: Height, records: Datum[]) {
-  return new RootNode(
-    height,
-    records
-  ) as unknown as NodeType<Datum, Height>
 }
 export class HierarchyNode<Datum> extends Node<Datum> {
   constructor(

@@ -11,7 +11,10 @@ import data from '../data/MOCK_DATA.json'
 const groupByAge = group(
   data,
   'education_level',
-  'state'
+  [
+    'state',
+    x => x.state[0],
+  ]
 )
 
 describe(
@@ -108,8 +111,9 @@ describe(
       () => {
         const [ leaf, ] = groupByAge.leaves()
 
-        expect(leaf.ancestorAt({ dim: 'state', })).toBeUndefined()
-        expect(leaf.ancestorAt({ depth: 1, }).depth).toBe(1)
+        expect(leaf.ancestorAt({ dim: 'state', })).toBeTruthy()
+        expect(leaf.ancestorAt({ depth: 2, }).depth).toBe(2)
+        expect(leaf.type).toBe('leaf')
       }
     )
   }
@@ -124,6 +128,7 @@ describe(
       () => {
         expect(leaf.parent.depth).toBe(1)
         expect(leaf.depth).toBe(2)
+        expect(leaf.dim).toBe('state')
         expect(leaf.height).toBe(0)
         expect(leaf.hasChildren()).toBe(false)
         expect(leaf.color).toMatchInlineSnapshot('"#9e0142"')

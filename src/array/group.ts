@@ -61,8 +61,8 @@ import {
 // ): NodeType<Input, 6>
 export function group<
   Input extends { [index: string | number]: JsonPrimitive },
-  KeyFunctions extends FixedLengthArray<KeyFn<Input>, FilteredDepthList<1, 11>>
->(values: Input[], ...keys: KeyFunctions): NodeType<Input, L.Length<KeyFunctions>> {
+  KeyFunctions extends L.List<KeyFn<Input>>
+>(values: Input[], ...keys: KeyFunctions): NodeType<Input, KeyFunctions> {
   const root = new RootNode(
     keys.length,
     values
