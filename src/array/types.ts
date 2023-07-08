@@ -218,6 +218,11 @@ export interface BaseNode<
       KeyFuncs
     >, index?: number) => void,
   ): this
+  /**
+   * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
+   * @see {@link https://github.com/d3/d3-hierarchy#find}
+   */
+  find(callBack: (node: this) => boolean): this | undefined
   hasChildren(): N.Lower<Depth, KeyFuncs['length']> extends 1 ? true : false
   hasParent(): N.Greater<Depth, 0> extends 1 ? true : false
 

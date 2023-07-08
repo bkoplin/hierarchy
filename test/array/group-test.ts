@@ -201,6 +201,47 @@ describe(
   }
 )
 describe(
+  'find test',
+  () => {
+    test(
+      'find returns the correct node',
+      () => {
+        const found = groupByAge.find(node => node.dim === 'state')
+
+        expect(found).toMatchInlineSnapshot(`
+          {
+            "color": "#9e0142",
+            "colorScale": "Spectral",
+            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleMode": "e",
+            "depth": 2,
+            "dim": "state",
+            "height": 0,
+            "id": "M",
+            "name": "M",
+            "records": [
+              {
+                "crime_rate": 998.33,
+                "education_level": "Bachelor's Degree",
+                "ethnicity": "Two or More Races",
+                "median_age": 16,
+                "median_income": 15379,
+                "population": 6909596,
+                "poverty_rate": 79.28,
+                "region": "South",
+                "state": "Missouri",
+                "unemployment_rate": 43.28,
+              },
+            ],
+            "type": "leaf",
+            "value": 998.33,
+          }
+        `)
+      }
+    )
+  }
+)
+describe(
   'JSON test',
   () => {
     test(

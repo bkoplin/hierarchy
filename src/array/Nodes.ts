@@ -129,6 +129,20 @@ export abstract class Node<Datum> {
     return this
   }
 
+  find(callback, that) {
+    let index = -1
+
+    for (const node of this) {
+      if (callback.call(
+        that,
+        node,
+        ++index,
+        this
+      ))
+        return node
+    }
+  }
+
   hasChildren() {
     return this?.height > 0 && typeof this?.children !== 'undefined'
   }
