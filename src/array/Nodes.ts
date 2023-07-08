@@ -6,12 +6,18 @@ import type {
   ChromaStatic, Color,
 } from 'chroma-js'
 import chroma from 'chroma-js'
-import { iterator, } from './iterator'
-import type { BaseNode, } from './types'
+import type {
+  BaseNode, KeyFn,
+} from './types'
 import type { NodeType, } from './NodeType'
+import { iterator, } from './iterator'
 
-export abstract class Node<Datum> {
+export abstract class Node<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = []
+> {
   constructor(
+    public keyFns: KeyFuncs,
     public depth: number,
     public height: number,
     public records: Datum[],
@@ -28,8 +34,15 @@ export abstract class Node<Datum> {
   children? = []
 
   color?: string
-  colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color> = 'Spectral'
-  colorScaleBy: 'parentListIds' | 'allNodesAtDimIds' | 'parentListValues' | 'allNodesAtDimValues' = 'allNodesAtDimIds'
+  colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color> =
+    'Spectral'
+
+  colorScaleBy:
+  | 'parentListIds'
+  | 'allNodesAtDimIds'
+  | 'parentListValues'
+  | 'allNodesAtDimValues' = 'allNodesAtDimIds'
+
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number | undefined = undefined
   name: any
@@ -229,13 +242,18 @@ export abstract class Node<Datum> {
         node.colorScaleMode = scaleMode
       if (typeof scaleNum !== 'undefined')
         node.colorScaleNum = scaleNum
-      if ((node.colorScaleBy === 'allNodesAtDimIds' || node.colorScaleBy === 'parentListIds') && node.hasParent()) {
-        let values = node.parent!.children.map(n => n.id)
+      if (
+        (node.colorScaleBy === 'allNodesAtDimIds' ||
+          node.colorScaleBy === 'parentListIds') &&
+        node.hasParent()
+      ) {
+        let values: string[] = node.parent!.children!.map(n => n.id)
 
         if (node.colorScaleBy === 'allNodesAtDimIds') {
           const ancestor = node.ancestorAt({ depth: 0, })
 
-          values = uniq(ancestor.descendants()
+          values = uniq(ancestor
+            .descendants()
             .filter(d => d.dim === node.dim)
             .map(n => n.id))
         }
@@ -244,12 +262,35 @@ export abstract class Node<Datum> {
           chroma.scale(node.colorScale).colors(values.length)
         )[node.id]
       }
+      else if (node.hasParent()) {
+        let values: number[] = node.parent!.children!.map(n => n.value)
+
+        if (node.colorScaleBy === 'allNodesAtDimValues') {
+          const ancestor = node.ancestorAt({ depth: 0, })
+
+          values = uniq(ancestor
+            .descendants()
+            .filter(d => d.dim === node.dim)
+            .map(n => n.value))
+        }
+        const colorValues = chroma.limits(
+          values,
+          node.colorScaleMode,
+          node.colorScaleNum
+        )
+
+        node.color = chroma
+          .scale(node.colorScale)
+          .domain(colorValues)(node.id)
+          .hex()
+      }
     })
     return this
   }
 
   setValueFunction(this: NodeType<Datum, readonly [keyof Datum]>, valueFn) {
     this.each(node => (node.valueFunction = valueFn))
+    this.setValues()
   }
 
   setValues(this: NodeType<Datum, readonly [keyof Datum]>) {
@@ -268,9 +309,10 @@ export abstract class Node<Datum> {
     return node
   }
 }
-export class LeafNode<Datum> extends Node<Datum> {
-  constructor(depth: number, records: Datum[], id, dim) {
+export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
+  constructor(keyFuncs: KeyFuncs, depth: number, records: Datum[], id: any, dim: any) {
     super(
+      keyFuncs,
       depth,
       0,
       records,
@@ -282,9 +324,10 @@ export class LeafNode<Datum> extends Node<Datum> {
 
   type = 'leaf'
 }
-export class RootNode<Datum> extends Node<Datum> {
-  constructor(height: number, records: Datum[]) {
+export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
+  constructor(keyFuncs: KeyFuncs, height: number, records: Datum[]) {
     super(
+      keyFuncs,
       0,
       height,
       records,
@@ -299,8 +342,16 @@ export class RootNode<Datum> extends Node<Datum> {
 
   type = 'root'
 }
-export class HierarchyNode<Datum> extends Node<Datum> {
+export function createRootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>(keyFuncs: KeyFuncs, records: Datum[]) {
+  return new RootNode(
+    keyFuncs,
+    keyFuncs.length,
+    records
+  ) as unknown as BaseNode<Datum, KeyFuncs>
+}
+export class HierarchyNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
   constructor(
+    keyFuncs: KeyFuncs,
     depth: number,
     height: number,
     records: Datum[],
@@ -308,6 +359,7 @@ export class HierarchyNode<Datum> extends Node<Datum> {
     dim: any
   ) {
     super(
+      keyFuncs,
       depth,
       height,
       records,

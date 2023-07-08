@@ -29,7 +29,8 @@ export type NodeType<
       Simplify<
         BaseNode<T, I.Pos<Depth>, KeyFuncs> &
         {
-          parent: NodeType<T, KeyFuncs, I.Prev<Depth>>
+          parent: NodeType<T, KeyFuncs, I.Prev<Depth>, BaseNode<T, I.Pos<Depth>, KeyFuncs>>
+          leaves(): Array<NodeType<T, KeyFuncs, I.IterationOf<KeyFuncs['length']>, BaseNode<T, I.Pos<Depth>, KeyFuncs>>>
         }
       >
     >
@@ -42,6 +43,7 @@ export type NodeType<
         {
           children: ThisNode[]
           parent: NodeType<T, KeyFuncs, I.Prev<Depth>>
+          leaves(): Array<NodeType<T, KeyFuncs, I.IterationOf<KeyFuncs['length']>, BaseNode<T, I.Pos<Depth>, KeyFuncs>>>
         }
       >
     >
@@ -50,6 +52,7 @@ export type NodeType<
     BaseNode<T, 0, KeyFuncs> &
     {
       children: ThisNode[]
+      leaves(): Array<NodeType<T, KeyFuncs, I.IterationOf<KeyFuncs['length']>, BaseNode<T, I.Pos<Depth>, KeyFuncs>>>
     }
   >
 }[N.IsZero<I.Pos<Depth>>]

@@ -2,17 +2,15 @@ import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
 
 import type {
-  FixedLengthArray,
   JsonPrimitive, ValueOf,
 } from 'type-fest'
 
 import type { L, } from 'ts-toolbelt'
 import type {
-  FilteredDepthList, KeyFn,
+  BaseNode, KeyFn,
 } from './types'
-import type { NodeType, } from './NodeType'
 import {
-  HierarchyNode, LeafNode, RootNode,
+  HierarchyNode, LeafNode, createRootNode,
 } from './Nodes'
 
 // export function group<
@@ -62,9 +60,9 @@ import {
 export function group<
   Input extends { [index: string | number]: JsonPrimitive },
   KeyFunctions extends L.List<KeyFn<Input>>
->(values: Input[], ...keys: KeyFunctions): NodeType<Input, KeyFunctions> {
-  const root = new RootNode(
-    keys.length,
+>(values: Input[], ...keys: KeyFunctions): BaseNode<Input, KeyFunctions> {
+  const root = createRootNode(
+    keys,
     values
   )
   let idx = 0
@@ -92,7 +90,7 @@ export function group<
 
   return root
 
-  function regroupFn(node: any, keyof: any) {
+  function regroupFn(node: BaseNode<Input, KeyFunctions>, keyof: any) {
     const depth = node.depth + 1
     const height = node.height - 1
     let keyFn: (d: Input) => ValueOf<Input>

@@ -35,6 +35,9 @@ describe(
 
         expect(child.dim).toEqual('education_level')
         expect(child.depth).toEqual(1)
+        if (child.hasChildren())
+          expect(child.children).toBeTruthy()
+
         expect(child.parent.depth).toEqual(0)
         child.eachBefore((node) => {
           expect(node.depth).toBeGreaterThan(0)
@@ -80,7 +83,10 @@ describe(
           map(prop('crime_rate')),
           mean
         ))
-        c.setValues()
+        c.setColor(
+          undefined,
+          'allNodesAtDimValues'
+        )
         expect(c).toMatchFileSnapshot('./group-children.json')
       }
     )
@@ -113,6 +119,7 @@ describe(
 
         expect(leaf.ancestorAt({ dim: 'state', })).toBeTruthy()
         expect(leaf.ancestorAt({ depth: 2, }).depth).toBe(2)
+        expect(leaf.ancestorAt({ depth: 1, }).type).toBe('node')
         expect(leaf.type).toBe('leaf')
       }
     )
@@ -131,7 +138,7 @@ describe(
         expect(leaf.dim).toBe('state')
         expect(leaf.height).toBe(0)
         expect(leaf.hasChildren()).toBe(false)
-        expect(leaf.color).toMatchInlineSnapshot('"#9e0142"')
+        expect(leaf.color).toMatchInlineSnapshot('"#cccccc"')
       }
     )
     test(
@@ -209,7 +216,7 @@ describe(
         const found = groupByAge.descendants()[5].find(node => node.dim === 'state')
         const [ found2, ] = groupByAge.descendantsAt({ depth: 2, })
 
-        expect(found2.depth).toBe(1)
+        expect(found2.depth).toBe(2)
         expect(found).toMatchInlineSnapshot(`
           {
             "color": "#3c7bb7",

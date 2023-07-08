@@ -6,6 +6,7 @@ import type {
 } from 'ts-toolbelt'
 import type {
   Except,
+  Get,
   IterableElement,
   JsonObject,
   RequireExactlyOne,
@@ -71,8 +72,8 @@ export type NumericUnion<
 type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 export type FilteredDepthList<
-  MinVal extends number,
-  MaxVal extends number,
+  MinVal extends number = 0,
+  MaxVal extends number = L.Last<DepthAndHeightOptions>,
   Ln extends number[] = [],
   Idx extends I.Iteration = I.IterationOf<0>
 > = {
@@ -91,10 +92,13 @@ export type FilteredDepthList<
 }[N.Lower<I.Pos<I.Next<Idx>>, L.Length<DepthAndHeightOptions>>]
 export interface BaseNode<
   T,
-  Depth extends number,
-  KeyFuncs extends ReadonlyArray<KeyFn<T>> = []
+  KeyFuncs extends ReadonlyArray<KeyFn<T>> = [],
+  Iter extends I.Iteration = I.IterationOf<0>
 > {
-  children: N.Lower<Depth, KeyFuncs['length']> extends 1 ? Array<BaseNode<T, N.Add<Depth, 1>, KeyFuncs>> : []
+  children: {
+    0: undefined
+    1: Array<BaseNode<T, KeyFuncs, I.Next<Iter>>>
+  }[N.Lower<I.Pos<Iter>, KeyFuncs['length']>]
   color?: string
   colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color>
   colorScaleBy:
@@ -104,31 +108,66 @@ export interface BaseNode<
   | 'allNodesAtDimValues'
   colorScaleMode: 'e' | 'q' | 'l' | 'k'
   colorScaleNum: number
-  depth: Depth
-  dim: N.Greater<Depth, 0> extends 1
-    ? KeyFuncs[N.Sub<Depth, 1>] extends [infer Dim, any]
+  depth: I.Pos<Iter>
+  dim: {
+    1: KeyFuncs[I.Pos<I.Prev<Iter>>] extends [infer Dim, any]
       ? Dim
-      : KeyFuncs[N.Sub<Depth, 1>]
-    : undefined
-  height: N.Sub<KeyFuncs['length'], Depth>
-  id: N.Greater<Depth, 0> extends 1 ? ValueOf<T> : undefined
-  name: N.Greater<Depth, 0> extends 1 ? ValueOf<T> : undefined
-  parent: N.Greater<Depth, 0> extends 1 ? BaseNode<T, N.Sub<this['depth'], 1>, KeyFuncs> : undefined
+      : KeyFuncs[I.Pos<I.Prev<Iter>>]
+    0: undefined
+  }[N.Greater<I.Pos<Iter>, 0>]
+  height: N.Sub<KeyFuncs['length'], I.Pos<Iter>>
+  id: {
+    1: ValueOf<T>
+    0: undefined
+  }[N.Greater<I.Pos<Iter>, 0>]
+  keyFns: KeyFuncs
+  name: {
+    1: ValueOf<T>
+    0: undefined
+  }[N.Greater<I.Pos<Iter>, 0>]
+  parent: {
+    0: undefined
+    1: BaseNode<T, KeyFuncs, I.Prev<Iter>>
+  }[N.Greater<I.Pos<Iter>, 0>]
   records: T[]
-  type: Depth extends 0 ? 'root' : this['height'] extends 0 ? 'leaf' : 'node'
+  type: {
+    1: {
+      0: 'leaf'
+      1: 'node'
+    }[N.Lower<I.Pos<Iter>, KeyFuncs['length']>]
+    0: 'root'
+  }[N.Greater<I.Pos<Iter>, 0>]
   value: number
   valueFunction: (args_0: this) => number
-  new (
-    depth: Depth,
-    height: N.Sub<KeyFuncs['length'], Depth>,
-    records: T[],
-    id: N.Sub<KeyFuncs['length'], Depth> extends 0 ? ValueOf<T> : undefined,
-    dim: N.Sub<KeyFuncs['length'], Depth> extends 0 ? keyof T : undefined,
-  ): this
-  [Symbol.iterator](): Generator<this, void, unknown>
+  [Symbol.iterator](): Generator<BaseNode<T, KeyFuncs, I.IterationOf<FilteredDepthList<I.Pos<Iter>, KeyFuncs['length']>>>, void, unknown>
   addChild(
-    child: this extends { children: Array<infer Child> } ? Child : never,
+    child: BaseNode<T, KeyFuncs, I.Next<Iter>>,
   ): void
+  /**
+   * @description Returns the array of descendant nodes, starting with this node.
+   *
+   * @see {@link https://github.com/d3/d3-hierarchy#descendants}
+   * @see {@link ancestors}
+   */
+  descendants(): Array<BaseNode<T, KeyFuncs, I.IterationOf<FilteredDepthList<I.Pos<Iter>, KeyFuncs['length']>>>>
+  descendantsAt<
+    Param extends RequireExactlyOne<
+      { depth?: FilteredDepthList<I.Pos<Iter>, KeyFuncs['length']>; dim?: keyof T },
+      'depth' | 'dim'
+    >
+  >(
+    depthOrDim: Param,
+  ): Param['depth'] extends number
+    ? Array<BaseNode<T, KeyFuncs, I.IterationOf<Param['depth']>>>
+    : Param['dim'] extends keyof T
+      ? Array<IterableElement<ReturnType<this['descendants']>>>
+      : undefined
+  /**
+   * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
+   *
+   * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
+   * @see {ancestorAt}
+   */
   /**
    *
    * Finds the first ancestor node that matches the specified parameter. The parameter can be either the depth or dimension to find. If the parameter would return this node, the return value is undefined
@@ -140,45 +179,16 @@ export interface BaseNode<
    */
   ancestorAt<
     Param extends RequireExactlyOne<
-      { depth?: FilteredDepthList<0, Depth>; dim?: keyof T },
+      { depth?: FilteredDepthList<0, I.Pos<Iter>>; dim?: keyof T },
       'depth' | 'dim'
     >
   >(
     depthOrDim: Param,
   ): Param['depth'] extends number
-    ? N.LowerEq<Param['depth'], Depth> extends 1
-      ? BaseNode<T, Param['depth'], KeyFuncs>
-      : undefined
+    ? BaseNode<T, KeyFuncs, I.IterationOf<Param['depth']>>
     : Param['dim'] extends keyof T
       ? IterableElement<ReturnType<this['ancestors']>>
       : undefined
-  /**
-   * @description Returns the array of descendant nodes, starting with this node.
-   *
-   * @see {@link https://github.com/d3/d3-hierarchy#descendants}
-   * @see {@link ancestors}
-   */
-  descendants(): Array<BaseNode<T, FilteredDepthList<Depth, KeyFuncs['length']>, KeyFuncs>>
-  descendantsAt<
-    Param extends RequireExactlyOne<
-      { depth?: FilteredDepthList<Depth, KeyFuncs['length']>; dim?: keyof T },
-      'depth' | 'dim'
-    >
-  >(
-    depthOrDim: Param,
-  ): Param['depth'] extends number
-    ? N.GreaterEq<Param['depth'], Depth> extends 1
-      ? Array<BaseNode<T, Param['depth'], KeyFuncs>>
-      : undefined
-    : Param['dim'] extends keyof T
-      ? ReturnType<this['descendants']>
-      : undefined
-  /**
-   * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
-   *
-   * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
-   * @see {ancestorAt}
-   */
   ancestors(): AncestorArray<this>
   /**
    * Invokes the specified function for node and each descendant in breadth-first order,
@@ -191,11 +201,7 @@ export interface BaseNode<
    * @see {@link eachAfter}
    */
   each(
-    callback: (node: BaseNode<
-      T,
-      FilteredDepthList<Depth, KeyFuncs['length']>,
-      KeyFuncs
-    >, index?: number) => void,
+    callback: (node: IterableElement<this>, index?: number) => void,
   ): this
   /**
    * Invokes the specified function for node and each descendant in post-order traversal,
@@ -204,11 +210,7 @@ export interface BaseNode<
    * index, and this node. If that is specified, it is the this context of the callback.
    */
   eachAfter(
-    callback: (node: BaseNode<
-      T,
-      FilteredDepthList<Depth, KeyFuncs['length']>,
-      KeyFuncs
-    >, index?: number) => void,
+    callback: (node: IterableElement<this>, index?: number) => void,
   ): this
   /**
    * @description Returns an array of links for this node and its descendants, where each link is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
@@ -226,45 +228,39 @@ export interface BaseNode<
    * @see {@link eachAfter}
    */
   eachBefore(
-    callback: (node: BaseNode<
-      T,
-      FilteredDepthList<Depth, KeyFuncs['length']>,
-      KeyFuncs
-    >, index?: number) => void,
+    callback: (node: IterableElement<this>, index?: number) => void,
   ): this
   /**
    * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
    * @see {@link https://github.com/d3/d3-hierarchy#find}
    */
   find(callBack: (node: this) => boolean): this | undefined
-  hasChildren(): N.Lower<Depth, KeyFuncs['length']> extends 1 ? true : false
-  hasParent(): N.Greater<Depth, 0> extends 1 ? true : false
+  hasChildren<Type extends N.Lower<I.Pos<Iter>, KeyFuncs['length']> extends 1 ? BaseNode<T, KeyFuncs, Iter> : never>(): this is Type
+  hasParent<Type extends N.Greater<I.Pos<Iter>, 0> extends 1 ? BaseNode<T, KeyFuncs, Iter> : never>(): this is Type
 
   /**
    * @description Returns the array of leaf nodes for this node
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<BaseNode<T, KeyFuncs['length'], KeyFuncs>>
+  leaves(): Array<BaseNode<T, KeyFuncs, I.IterationOf<KeyFuncs['length']>>>
   /**
    * Returns an array of links for this node and its descendants, where each *link* is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    */
-  links<Type extends this>(): Array<{
-    source: Type['depth'] extends 0
-      ? undefined
-      : BaseNode<T, N.Sub<Type['depth'], 1>, KeyFuncs>
-    target: BaseNode<T, Type['depth'], KeyFuncs>
+  links<Target extends BaseNode<T, KeyFuncs, I.IterationOf<FilteredDepthList<I.Pos<Iter>, KeyFuncs['length']>>>>(): Array<{
+    source: Get<Target, 'parent'>
+    target: Target
   }>
   /**
    * @description Returns the shortest path through the hierarchy from this node to the specified target node. The path starts at this node, ascends to the least common ancestor of this node and the target node, and then descends to the target node. This is particularly useful for hierarchical edge bundling.
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path<EndDepth extends number>(
-    end: BaseNode<T, EndDepth, KeyFuncs>,
+  path<EndNode, EndDepth extends EndNode extends { depth: infer Depth } ? Depth extends number ? Depth : never : never>(
+    end: EndNode,
   ): Array<
-    BaseNode<T, FilteredDepthList<0, EndDepth | this['depth']>, KeyFuncs>
+    BaseNode<T, KeyFuncs, I.IterationOf<FilteredDepthList<0, EndDepth | I.Pos<Iter>>>>
   >
   setColor(
     scale?: this['colorScale'],
