@@ -1,9 +1,12 @@
 import type {
-  I, N,
+  I, L, N,
 } from 'ts-toolbelt'
 
+import type {
+  Except,
+  Get, Simplify,
+} from 'type-fest'
 import type { BaseNode, } from './types'
-import { Simplify } from 'type-fest'
 
 type GetParentDepth<Type> = Type extends { depth: infer Depth }
   ? Depth extends number
@@ -40,3 +43,11 @@ export type NodeType<
     children: ThisNode[]
   }>
 }[N.LowerEq<I.Pos<Depth>, 0>]
+export type AncestorArray<
+  Node,
+  Arr extends any[] = [],
+  Length extends I.Iteration = I.IterationOf<1>
+> = {
+  0: Simplify<Except<Arr, 'length'> & { length: I.Pos<Length> }>
+  1: AncestorArray<Get<Node, 'parent'>, L.Append<Arr, Get<Node, 'parent'>>, I.Next<Length>>
+}[Get<Node, 'parent'> extends object ? 1 : 0]

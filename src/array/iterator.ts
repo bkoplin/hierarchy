@@ -1,4 +1,6 @@
-export function* iterator<T>(this: T): Generator<T, void, unknown> {
+type ChildType<T> = T extends { children: Array<infer Child> } ? Child : never
+
+export function* iterator<T>(this: T): Generator<T & ChildType<T>, void, unknown> {
   let node = this
   let current
   let next = [ node, ]

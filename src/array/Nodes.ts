@@ -7,7 +7,7 @@ import type {
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import { iterator, } from './iterator'
-import type { BaseNode, FilteredDepthList, } from './types'
+import type { BaseNode, } from './types'
 import type { NodeType, } from './NodeType'
 
 export abstract class Node<Datum> {
@@ -23,7 +23,7 @@ export abstract class Node<Datum> {
     this.color = undefined
   }
 
-  [Symbol.iterator]: this[typeof Symbol.iterator] = iterator
+  [Symbol.iterator] = iterator
 
   children = []
 
@@ -46,7 +46,7 @@ export abstract class Node<Datum> {
     length
   )
 
-  addChild(child) {
+  addChild(this: this, child) {
     if (this.height > 0)
       this.children?.push(child)
   }

@@ -4,7 +4,7 @@ import {
 import {
   map, mean, pipe, prop,
 } from 'rambdax'
-import { pick, } from 'lodash'
+import { pick, } from 'lodash-es'
 import { group, } from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
 
@@ -14,15 +14,11 @@ const groupByAge = group(
   'state'
 )
 
-groupByAge.eachBefore((node) => {
-  const depth = node.depth
-})
-
 describe(
   'group function',
   () => {
     test(
-      'root dim is undefined',
+      'root tests',
       () => {
         expect(groupByAge.dim).toBeUndefined()
         expect(groupByAge.depth).toBe(0)
@@ -30,11 +26,16 @@ describe(
       }
     )
     test(
-      'first level child dim is education_level',
+      'first level child tests',
       () => {
-        expect(groupByAge.children[0].dim).toEqual('education_level')
-        expect(groupByAge.children[0].depth).toEqual(1)
-        expect(groupByAge.children[0].parent.depth).toEqual(1)
+        const [ child, ] = groupByAge.children
+
+        expect(child.dim).toEqual('education_level')
+        expect(child.depth).toEqual(1)
+        expect(child.parent.depth).toEqual(0)
+        child.eachBefore((node) => {
+          expect(node.depth).toBeGreaterThan(0)
+        })
       }
     )
     test(
@@ -46,8 +47,12 @@ describe(
     test(
       'second level child has no children',
       () => {
-        expect(groupByAge.children[0].children[0].hasChildren()).toBe(false)
-        expect(groupByAge.children[0].children[0].children).toBeUndefined()
+        const [ child, ] = groupByAge.children[0].children
+
+        expect(child.hasChildren()).toBe(false)
+        expect(child.hasParent()).toBeTruthy()
+        if (child.hasParent())
+          expect(child.parent.depth).toBe(1)
       }
     )
     test(
@@ -83,20 +88,28 @@ describe(
   'ancestor tests',
   () => {
     test(
-      'ancestors of first level child has length of 2',
+      'ancestors tests',
       () => {
-        const ancestors = groupByAge.children[0].ancestors()
+        const [ level1Child, ] = groupByAge.children
+        const ancestors = level1Child.ancestors()
+        const [
+          firstAncestor,
+          secondAncestor,
+        ] = ancestors
 
+        expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(2)
-        expect(ancestors[0].hasChildren()).toBe(true)
+        expect(firstAncestor.hasChildren()).toBe(true)
+        expect(secondAncestor.hasParent()).toBe(false)
       }
     )
     test(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
-        const ancestors = groupByAge.leaves()[0]
+        const [ leaf, ] = groupByAge.leaves()
 
-        expect(ancestors.ancestorAt({ dim: 'state', })).toBeUndefined()
+        expect(leaf.ancestorAt({ dim: 'state', })).toBeUndefined()
+        expect(leaf.ancestorAt({ depth: 1, }).depth).toBe(1)
       }
     )
   }

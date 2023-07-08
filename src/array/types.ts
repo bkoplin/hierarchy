@@ -5,17 +5,15 @@ import type {
   B, I, L, N, U,
 } from 'ts-toolbelt'
 import type {
-  ConditionalPick,
   Except,
-  FixedLengthArray,
+  Get,
   IterableElement,
   JsonObject,
-  JsonValue,
   RequireExactlyOne,
-  Simplify,
   StringKeyOf,
   ValueOf,
 } from 'type-fest'
+import type { AncestorArray, } from './NodeType'
 
 export type KeyFn<T> =
   | readonly [
@@ -117,7 +115,7 @@ export interface BaseNode<
   records: T[]
   type: Depth extends 0 ? 'root' : this['height'] extends 0 ? 'leaf' : 'node'
   value: number
-  valueFunction: (args_0: any) => number
+  valueFunction: (args_0: this) => number
   new (
     depth: Depth,
     height: N.Sub<RootHeight, Depth>,
@@ -138,14 +136,12 @@ export interface BaseNode<
    * @param {ADepth} [depthOrDim.depth] The depth of the ancestor to return.
    * @param {StringKeyOf<T>} [depthOrDim.dim] The dimension of the ancestor to return.
    */
-  ancestorAt<ADepth extends FilteredDepthList<0, N.Sub<Depth, 1>>>(
-    depthOrDim: RequireExactlyOne<
-      { depth?: ADepth; dim?: StringKeyOf<T> },
-      'depth' | 'dim'
-    >,
-  ): ADepth extends undefined
-    ? BaseNode<T, FilteredDepthList<0, N.Sub<Depth, 1>>, RootHeight>
-    : BaseNode<T, ADepth, RootHeight>
+  ancestorAt<Param extends RequireExactlyOne<
+    { depth?: FilteredDepthList<0, Depth>; dim?: StringKeyOf<T> },
+    'depth' | 'dim'
+  >>(
+    depthOrDim: Param,
+  ): Param extends {depth: FilteredDepthList<0, Depth>} ? BaseNode<T, Param['depth'], RootHeight> : IterableElement<ReturnType<this['ancestors']>>
   /**
    * @description Returns the array of descendant nodes, starting with this node.
    *
@@ -159,10 +155,7 @@ export interface BaseNode<
    * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
    * @see {ancestorAt}
    */
-  ancestors(): FixedLengthArray<
-    BaseNode<T, FilteredDepthList<0, Depth>, RootHeight>,
-    N.Add<Depth, 1>
-  >
+  ancestors(): AncestorArray<this>
   /**
    * Invokes the specified function for node and each descendant in breadth-first order,
    * such that a given node is only visited if all nodes of lesser depth have already been
@@ -224,14 +217,8 @@ export interface BaseNode<
       index?: number,
     ) => void,
   ): this
-  hasChildren(): this is this['depth'] extends RootHeight
-    ? this
-    : Simplify<
-        this & { children: Array<BaseNode<T, N.Add<Depth, 1>, RootHeight>> }
-      >
-  hasParent(): this is this['depth'] extends 0
-    ? this
-    : Simplify<this & { parent: BaseNode<T, N.Sub<Depth, 1>, RootHeight> }>
+  hasChildren(): N.Greater<this['height'], 0> extends 1 ? true : false
+  hasParent(): N.Greater<this['depth'], 0> extends 1 ? true : false
   /**
    * @description Returns the array of leaf nodes for this node
    *
@@ -271,5 +258,5 @@ export interface BaseNode<
   ): void
   setValueFunction(func: (args_0: this) => number): void
   setValues(): void
-  toJSON(): ConditionalPick<Except<this, 'parent'>, JsonValue>
+  toJSON<Type>(this: Type): Type extends { parent: any } ? Except<Type, 'parent'> : T
 }
