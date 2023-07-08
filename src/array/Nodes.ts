@@ -59,6 +59,14 @@ export abstract class Node<Datum> {
     })
   }
 
+  descendantsAt(depthOrDim) {
+    return this.descendants().filter((node) => {
+      if (typeof depthOrDim.depth === 'number')
+        return node.depth === depthOrDim.depth
+      else return node.dim === depthOrDim.dim
+    })
+  }
+
   ancestors() {
     const nodes = [ this, ]
     let node = this

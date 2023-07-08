@@ -156,9 +156,23 @@ export interface BaseNode<
    * @description Returns the array of descendant nodes, starting with this node.
    *
    * @see {@link https://github.com/d3/d3-hierarchy#descendants}
-   * @see {descendants}
+   * @see {@link ancestors}
    */
   descendants(): Array<BaseNode<T, FilteredDepthList<Depth, KeyFuncs['length']>, KeyFuncs>>
+  descendantsAt<
+    Param extends RequireExactlyOne<
+      { depth?: FilteredDepthList<Depth, KeyFuncs['length']>; dim?: keyof T },
+      'depth' | 'dim'
+    >
+  >(
+    depthOrDim: Param,
+  ): Param['depth'] extends number
+    ? N.GreaterEq<Param['depth'], Depth> extends 1
+      ? Array<BaseNode<T, Param['depth'], KeyFuncs>>
+      : undefined
+    : Param['dim'] extends keyof T
+      ? ReturnType<this['descendants']>
+      : undefined
   /**
    * @description Returns the array of ancestors nodes, starting with this node, then followed by each parent up to the root.
    *

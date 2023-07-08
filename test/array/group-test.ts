@@ -201,40 +201,42 @@ describe(
   }
 )
 describe(
-  'find test',
+  'find tests',
   () => {
     test(
       'find returns the correct node',
       () => {
-        const found = groupByAge.find(node => node.dim === 'state')
+        const found = groupByAge.descendants()[5].find(node => node.dim === 'state')
+        const [ found2, ] = groupByAge.descendantsAt({ depth: 2, })
 
+        expect(found2.depth).toBe(1)
         expect(found).toMatchInlineSnapshot(`
           {
-            "color": "#9e0142",
+            "color": "#3c7bb7",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
             "depth": 2,
             "dim": "state",
             "height": 0,
-            "id": "M",
-            "name": "M",
+            "id": "H",
+            "name": "H",
             "records": [
               {
-                "crime_rate": 998.33,
-                "education_level": "Bachelor's Degree",
-                "ethnicity": "Two or More Races",
-                "median_age": 16,
-                "median_income": 15379,
-                "population": 6909596,
-                "poverty_rate": 79.28,
-                "region": "South",
-                "state": "Missouri",
-                "unemployment_rate": 43.28,
+                "crime_rate": 871.71,
+                "education_level": "Master's Degree",
+                "ethnicity": "White",
+                "median_age": 21,
+                "median_income": 189775,
+                "population": 9502876,
+                "poverty_rate": 7.54,
+                "region": "West",
+                "state": "Hawaii",
+                "unemployment_rate": 41.79,
               },
             ],
             "type": "leaf",
-            "value": 998.33,
+            "value": 1,
           }
         `)
       }
