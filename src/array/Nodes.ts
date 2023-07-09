@@ -1,11 +1,14 @@
 import {
   filterObject, length, pipe, prop, uniq, zipObj,
 } from 'rambdax'
-import type { StringKeyOf, } from 'type-fest'
+import type {
+  IterableElement, StringKeyOf,
+} from 'type-fest'
 import type {
   ChromaStatic, Color,
 } from 'chroma-js'
 import chroma from 'chroma-js'
+import type { I, } from 'ts-toolbelt'
 import type {
   BaseNode, KeyFn,
 } from './types'
@@ -15,7 +18,7 @@ import { iterator, } from './iterator'
 export abstract class Node<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = []
-> {
+> implements BaseNode<Datum, KeyFuncs, I.IterationOf<0>> {
   constructor(
     public keyFns: KeyFuncs,
     public depth: number,
@@ -30,9 +33,7 @@ export abstract class Node<
   }
 
   [Symbol.iterator] = iterator
-
-  children? = []
-
+  children = [] as unknown as BaseNode<Datum, KeyFuncs>['children']
   color?: string
   colorScale: StringKeyOf<ChromaStatic['brewer']> | Array<string | Color> =
     'Spectral'
@@ -59,9 +60,9 @@ export abstract class Node<
     length
   )
 
-  addChild(this: this, child) {
-    if (this.height > 0)
-      this.children?.push(child)
+  addChild<T extends BaseNode<Datum, KeyFuncs>>(this: T, child: IterableElement<T['children']>) {
+    if (this.hasChildren())
+      this.children.push(child)
   }
 
   ancestorAt(depthOrDim) {
@@ -164,12 +165,12 @@ export abstract class Node<
     }
   }
 
-  hasChildren() {
-    return this?.height > 0 && typeof this?.children !== 'undefined'
+  hasChildren(this: BaseNode<Datum, KeyFuncs>): ReturnType<BaseNode<Datum, KeyFuncs>['hasChildren']> {
+    return this?.height > 0
   }
 
-  hasParent() {
-    return this?.depth > 0 && typeof this?.parent !== 'undefined'
+  hasParent(this: BaseNode<Datum, KeyFuncs>) {
+    return this?.depth > 0
   }
 
   leaves() {
@@ -309,8 +310,17 @@ export abstract class Node<
     return node
   }
 }
-export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
-  constructor(keyFuncs: KeyFuncs, depth: number, records: Datum[], id: any, dim: any) {
+export class LeafNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<Datum, KeyFuncs> {
+  constructor(
+    keyFuncs: KeyFuncs,
+    depth: number,
+    records: Datum[],
+    id: any,
+    dim: any
+  ) {
     super(
       keyFuncs,
       depth,
@@ -324,7 +334,10 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> exten
 
   type = 'leaf'
 }
-export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
+export class RootNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<Datum, KeyFuncs> {
   constructor(keyFuncs: KeyFuncs, height: number, records: Datum[]) {
     super(
       keyFuncs,
@@ -340,16 +353,22 @@ export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> exten
     delete this.dim
   }
 
-  type = 'root'
+  type = 'root' as const
 }
-export function createRootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>(keyFuncs: KeyFuncs, records: Datum[]) {
+export function createRootNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+>(keyFuncs: KeyFuncs, records: Datum[]) {
   return new RootNode(
     keyFuncs,
     keyFuncs.length,
     records
   ) as unknown as BaseNode<Datum, KeyFuncs>
 }
-export class HierarchyNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>> extends Node<Datum, KeyFuncs> {
+export class HierarchyNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<Datum, KeyFuncs> {
   constructor(
     keyFuncs: KeyFuncs,
     depth: number,

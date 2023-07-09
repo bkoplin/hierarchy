@@ -107,7 +107,7 @@ export interface BaseNode<
   | 'parentListValues'
   | 'allNodesAtDimValues'
   colorScaleMode: 'e' | 'q' | 'l' | 'k'
-  colorScaleNum: number
+  colorScaleNum: number | undefined
   depth: I.Pos<Iter>
   dim: {
     1: KeyFuncs[I.Pos<I.Prev<Iter>>] extends [infer Dim, any]
