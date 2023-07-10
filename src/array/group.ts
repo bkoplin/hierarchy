@@ -16,7 +16,7 @@ import {
 export function group<
   Input extends JsonObject | String,
   KeyFunctions extends L.List<KeyFn<Input>>
->(values: Input[], ...keys: KeyFunctions): Simplify<Node<Input, KeyFunctions>> {
+>(values: Input[], ...keys: KeyFunctions): Node<Input, KeyFunctions> {
   const root = new RootNode(
     keys,
     values

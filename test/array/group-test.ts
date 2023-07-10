@@ -41,7 +41,7 @@ describe(
 
         expect(child.parent.depth).toEqual(0)
         child.eachBefore((node) => {
-          expect(node.depth).toBeGreaterThan(0)
+          expect(node.dim).toBeGreaterThan(0)
         })
       }
     )
@@ -112,7 +112,7 @@ describe(
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         expect(firstAncestor.depth).toBe(true)
-        expect(secondAncestor.depth).toBe(false)
+        expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
       }
     )
