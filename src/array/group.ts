@@ -1,111 +1,58 @@
 import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
 
-import type {
-  JsonPrimitive, ValueOf,
-} from 'type-fest'
+import type { JsonObject, Simplify } from 'type-fest'
 
-import type { L, } from 'ts-toolbelt'
 import type {
-  BaseNode, KeyFn,
-} from './types'
+  I, L, N,
+} from 'ts-toolbelt'
+import { isArray, } from 'lodash-es'
+import type { KeyFn, } from './types'
+import type { Node, } from './Nodes'
 import {
-  HierarchyNode, LeafNode, createRootNode,
+  HierarchyNode, LeafNode, RootNode,
 } from './Nodes'
 
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(values: Input[], key1: KeyFn<Input>): NodeType<Input, 1>
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(values: Input[], key1: KeyFn<Input>, key2: KeyFn<Input>): NodeType<Input, 2>
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(
-//   values: Input[],
-//   key1: KeyFn<Input>,
-//   key2: KeyFn<Input>,
-//   key3: KeyFn<Input>,
-// ): NodeType<Input, 3>
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(
-//   values: Input[],
-//   key1: KeyFn<Input>,
-//   key2: KeyFn<Input>,
-//   key3: KeyFn<Input>,
-//   key4: KeyFn<Input>,
-// ): NodeType<Input, 4>
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(
-//   values: Input[],
-//   key1: KeyFn<Input>,
-//   key2: KeyFn<Input>,
-//   key3: KeyFn<Input>,
-//   key4: KeyFn<Input>,
-//   key5: KeyFn<Input>,
-// ): NodeType<Input, 5>
-// export function group<
-//   Input extends { [index: string | number]: JsonPrimitive }
-// >(
-//   values: Input[],
-//   key1: KeyFn<Input>,
-//   key2: KeyFn<Input>,
-//   key3: KeyFn<Input>,
-//   key4: KeyFn<Input>,
-//   key5: KeyFn<Input>,
-//   key6: KeyFn<Input>,
-// ): NodeType<Input, 6>
 export function group<
-  Input extends { [index: string | number]: JsonPrimitive },
+  Input extends JsonObject | String,
   KeyFunctions extends L.List<KeyFn<Input>>
->(values: Input[], ...keys: KeyFunctions): BaseNode<Input, KeyFunctions> {
-  const root = createRootNode(
+>(values: Input[], ...keys: KeyFunctions): Simplify<Node<Input, KeyFunctions>> {
+  const root = new RootNode(
     keys,
     values
   )
-  let idx = 0
-  const thisNode = regroupFn(
-    root,
-    keys[idx]
-  )
+  const thisNode = regroupFn(root)
   let children
 
-  while ((children = thisNode?.children) !== undefined && !!keys[idx + 1]) {
-    idx++
-    for (const child of children) {
-      regroupFn(
-        child,
-        keys[idx]
-      )
-    }
+  while ((children = thisNode?.children) !== undefined) {
+    for (const child of children)
+      regroupFn(child)
   }
+
   root
     .eachBefore((node) => {
-      if (node.hasChildren())
-        for (const child of node.children) child.parent = node
+      if (node.hasChildren()) {
+        node.children!.forEach((child) => {
+          if (child.hasParent())
+            child.parent = node
+        })
+      }
     })
     .setColor()
 
   return root
 
-  function regroupFn(node: BaseNode<Input, KeyFunctions>, keyof: any) {
-    const depth = node.depth + 1
-    const height = node.height - 1
-    let keyFn: (d: Input) => ValueOf<Input>
-
-    if (typeof keyof === 'string' || typeof keyof === 'number')
-      keyFn = (d: Input) => d[keyof]
-    else keyFn = keyof[1]
-    const dim = typeof keyof === 'string' ? keyof : keyof[0]
+  function regroupFn<NodeType extends Node<Input, KeyFunctions, I.IterationOf<N.Range<0, L.Drop<KeyFunctions, 1>['length']>[number]>>>(node: NodeType) {
+    const depth: N.Add<NodeType['depth'], 1> = node.depth + 1 as unknown as N.Add<NodeType['depth'], 1>
+    const height: N.Sub<NodeType['height'], 1> = node.height - 1 as unknown as N.Sub<NodeType['height'], 1>
+    const keyof = node.keyFns[node.depth]
     const groupsObject = objectEntries(groupBy(
       (x) => {
-        const val = keyFn(x)
-
-        if (val === null || typeof val === 'undefined')
-          return ''
-        else return val
+        if (isArray(keyof))
+          return keyof[1](x) ?? ''
+        else if (!isArray(keyof))
+          return x[keyof] ?? ''
+        else return ''
       },
       node.records
     ))
@@ -116,23 +63,21 @@ export function group<
         records,
       ] = vals
 
-      if (node.height > 1) {
+      if (height > 0) {
         const child = new HierarchyNode(
+          node.keyFns,
           depth,
-          height,
           records,
-          key as ValueOf<Input>,
-          dim
+          key
         )
 
         node.addChild(child)
       }
       else {
         const child = new LeafNode(
-          depth,
+          node.keyFns,
           records,
-          key as ValueOf<Input>,
-          dim
+          key
         )
 
         node.addChild(child)

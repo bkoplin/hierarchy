@@ -12,9 +12,10 @@ const groupByAge = group(
   data,
   'education_level',
   [
-    'state',
+    'state_letter',
     x => x.state[0],
-  ]
+  ],
+  'state'
 )
 
 describe(
@@ -99,27 +100,33 @@ describe(
     test(
       'ancestors tests',
       () => {
-        const [ level1Child, ] = groupByAge.children
+        const [ level1Child, ] = groupByAge.leaves()
         const ancestors = level1Child.ancestors()
         const [
           firstAncestor,
           secondAncestor,
+          thirdAncestor,
+          root
         ] = ancestors
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
-        expect(ancestors.length).toBe(2)
-        expect(firstAncestor.hasChildren()).toBe(true)
-        expect(secondAncestor.hasParent()).toBe(false)
+        expect(ancestors.length).toBe(3)
+        expect(firstAncestor.depth).toBe(true)
+        expect(secondAncestor.depth).toBe(false)
+        expect(root.depth).toBe(false)
       }
     )
     test(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
-        const [ leaf, ] = groupByAge.leaves()
+        const [ leaf, ] = groupByAge.children
+        const ancestor = leaf.ancestorAt({ dim: undefined, })
+        const depth2 = leaf.ancestorAt({ depth: 2, })
 
-        expect(leaf.ancestorAt({ dim: 'state', })).toBeTruthy()
-        expect(leaf.ancestorAt({ depth: 2, }).depth).toBe(2)
-        expect(leaf.ancestorAt({ depth: 1, }).type).toBe('node')
+        expect(ancestor).toBeTruthy()
+        expect(ancestor.depth).toBeTruthy()
+        expect(depth2.depth).toBe(2)
+        expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('node')
         expect(leaf.type).toBe('leaf')
       }
     )
@@ -138,7 +145,7 @@ describe(
         expect(leaf.dim).toBe('state')
         expect(leaf.height).toBe(0)
         expect(leaf.hasChildren()).toBe(false)
-        expect(leaf.color).toMatchInlineSnapshot('"#cccccc"')
+        expect(leaf.color).toMatchInlineSnapshot('"#5e4fa2"')
       }
     )
     test(
@@ -196,7 +203,10 @@ describe(
           last,
         ] = groupByAge.children
 
-        expect(last.leaves()[0].path(first.leaves()[0]).map(node => node.depth)).toStrictEqual([
+        expect(last
+          .leaves()[0]
+          .path(first.leaves()[0])
+          .map(node => node.depth)).toStrictEqual([
           2,
           1,
           0,
@@ -213,38 +223,49 @@ describe(
     test(
       'find returns the correct node',
       () => {
-        const found = groupByAge.descendants()[5].find(node => node.dim === 'state')
-        const [ found2, ] = groupByAge.descendantsAt({ depth: 2, })
+        const found = groupByAge
+          .descendants()[5]
+          .find(node => node.dim === 'state')
+        const found2 = groupByAge.descendantsAt({ depth: 2, })
 
-        expect(found2.depth).toBe(2)
-        expect(found).toMatchInlineSnapshot(`
-          {
-            "color": "#3c7bb7",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "H",
-            "name": "H",
-            "records": [
-              {
-                "crime_rate": 871.71,
-                "education_level": "Master's Degree",
-                "ethnicity": "White",
-                "median_age": 21,
-                "median_income": 189775,
-                "population": 9502876,
-                "poverty_rate": 7.54,
-                "region": "West",
-                "state": "Hawaii",
-                "unemployment_rate": 41.79,
-              },
+        expect(found2[0].depth).toBe(2)
+        expect(found2.map(n => [
+          n.id,
+          n.value,
+          n.color,
+        ])).toMatchInlineSnapshot(`
+          [
+            [
+              "Bachelor's Degree",
+              696.4159999999999,
+              "#9e0142",
             ],
-            "type": "leaf",
-            "value": 1,
-          }
+            [
+              "High School",
+              5,
+              "#f46d43",
+            ],
+            [
+              "Some College",
+              5,
+              "#fee08b",
+            ],
+            [
+              "Doctorate Degree",
+              4,
+              "#e6f598",
+            ],
+            [
+              "Master's Degree",
+              3,
+              "#66c2a5",
+            ],
+            [
+              "Associate's Degree",
+              5,
+              "#5e4fa2",
+            ],
+          ]
         `)
       }
     )

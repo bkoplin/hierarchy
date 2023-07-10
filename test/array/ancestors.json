@@ -2,15 +2,23 @@
   {
     "children": [
       {
-        "color": "#cccccc",
+        "color": "#5e4fa2",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
+        "colorScaleNum": 5,
         "depth": 2,
-        "dim": "state",
+        "dim": "education_level",
         "height": 0,
-        "id": "M",
-        "name": "M",
+        "id": "Bachelor's Degree",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
+        "name": "Bachelor's Degree",
         "records": [
           {
             "crime_rate": 998.33,
@@ -24,21 +32,6 @@
             "state": "Missouri",
             "unemployment_rate": 43.28,
           },
-        ],
-        "type": "leaf",
-        "value": 998.33,
-      },
-      {
-        "color": "#cccccc",
-        "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimValues",
-        "colorScaleMode": "e",
-        "depth": 2,
-        "dim": "state",
-        "height": 0,
-        "id": "A",
-        "name": "A",
-        "records": [
           {
             "crime_rate": 718.57,
             "education_level": "Bachelor's Degree",
@@ -51,21 +44,6 @@
             "state": "Arkansas",
             "unemployment_rate": 42.05,
           },
-        ],
-        "type": "leaf",
-        "value": 718.57,
-      },
-      {
-        "color": "#cccccc",
-        "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimValues",
-        "colorScaleMode": "e",
-        "depth": 2,
-        "dim": "state",
-        "height": 0,
-        "id": "C",
-        "name": "C",
-        "records": [
           {
             "crime_rate": 472.47,
             "education_level": "Bachelor's Degree",
@@ -90,21 +68,6 @@
             "state": "California",
             "unemployment_rate": 28.84,
           },
-        ],
-        "type": "leaf",
-        "value": 524.935,
-      },
-      {
-        "color": "#cccccc",
-        "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimValues",
-        "colorScaleMode": "e",
-        "depth": 2,
-        "dim": "state",
-        "height": 0,
-        "id": "N",
-        "name": "N",
-        "records": [
           {
             "crime_rate": 715.31,
             "education_level": "Bachelor's Degree",
@@ -119,17 +82,25 @@
           },
         ],
         "type": "leaf",
-        "value": 715.31,
+        "value": 696.4159999999999,
       },
     ],
-    "color": "#cccccc",
+    "color": "#5e4fa2",
     "colorScale": "Spectral",
     "colorScaleBy": "allNodesAtDimValues",
     "colorScaleMode": "e",
+    "colorScaleNum": 5,
     "depth": 1,
     "dim": "education_level",
     "height": 1,
     "id": "Bachelor's Degree",
+    "keyFns": [
+      "education_level",
+      [
+        "state",
+        [Function],
+      ],
+    ],
     "name": "Bachelor's Degree",
     "records": [
       {
@@ -201,15 +172,23 @@
       {
         "children": [
           {
-            "color": "#cccccc",
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
+            "colorScaleNum": 5,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "M",
-            "name": "M",
+            "id": "Bachelor's Degree",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "Bachelor's Degree",
             "records": [
               {
                 "crime_rate": 998.33,
@@ -223,21 +202,6 @@
                 "state": "Missouri",
                 "unemployment_rate": 43.28,
               },
-            ],
-            "type": "leaf",
-            "value": 998.33,
-          },
-          {
-            "color": "#cccccc",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimValues",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "A",
-            "name": "A",
-            "records": [
               {
                 "crime_rate": 718.57,
                 "education_level": "Bachelor's Degree",
@@ -250,21 +214,6 @@
                 "state": "Arkansas",
                 "unemployment_rate": 42.05,
               },
-            ],
-            "type": "leaf",
-            "value": 718.57,
-          },
-          {
-            "color": "#cccccc",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimValues",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "C",
-            "name": "C",
-            "records": [
               {
                 "crime_rate": 472.47,
                 "education_level": "Bachelor's Degree",
@@ -289,21 +238,6 @@
                 "state": "California",
                 "unemployment_rate": 28.84,
               },
-            ],
-            "type": "leaf",
-            "value": 524.935,
-          },
-          {
-            "color": "#cccccc",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimValues",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "N",
-            "name": "N",
-            "records": [
               {
                 "crime_rate": 715.31,
                 "education_level": "Bachelor's Degree",
@@ -318,17 +252,25 @@
               },
             ],
             "type": "leaf",
-            "value": 715.31,
+            "value": 696.4159999999999,
           },
         ],
-        "color": "#cccccc",
+        "color": "#5e4fa2",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
+        "colorScaleNum": 5,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "Bachelor's Degree",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "Bachelor's Degree",
         "records": [
           {
@@ -398,15 +340,23 @@
       {
         "children": [
           {
-            "color": "#fdb264",
+            "color": "#f46d43",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
+            "colorScaleNum": 5,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "L",
-            "name": "L",
+            "id": "High School",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "High School",
             "records": [
               {
                 "crime_rate": 774.78,
@@ -420,21 +370,6 @@
                 "state": "Louisiana",
                 "unemployment_rate": 85.21,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#f7814c",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "N",
-            "name": "N",
-            "records": [
               {
                 "crime_rate": 989.46,
                 "education_level": "High School",
@@ -447,21 +382,6 @@
                 "state": "New Jersey",
                 "unemployment_rate": 79.45,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#fed885",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "R",
-            "name": "R",
-            "records": [
               {
                 "crime_rate": 829.65,
                 "education_level": "High School",
@@ -474,21 +394,6 @@
                 "state": "Rhode Island",
                 "unemployment_rate": 1.14,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#fff3ab",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "T",
-            "name": "T",
-            "records": [
               {
                 "crime_rate": 15.13,
                 "education_level": "High School",
@@ -501,21 +406,6 @@
                 "state": "Tennessee",
                 "unemployment_rate": 20.9,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#f5fbb0",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "P",
-            "name": "P",
-            "records": [
               {
                 "crime_rate": 982.58,
                 "education_level": "High School",
@@ -530,17 +420,25 @@
               },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 5,
           },
         ],
         "color": "#f46d43",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
+        "colorScaleNum": 5,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "High School",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "High School",
         "records": [
           {
@@ -610,15 +508,23 @@
       {
         "children": [
           {
-            "color": "#ddf19a",
+            "color": "#fee08b",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
+            "colorScaleNum": 5,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "D",
-            "name": "D",
+            "id": "Some College",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "Some College",
             "records": [
               {
                 "crime_rate": 974.77,
@@ -632,21 +538,6 @@
                 "state": "Delaware",
                 "unemployment_rate": 22.02,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#b0dfa3",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "W",
-            "name": "W",
-            "records": [
               {
                 "crime_rate": 506.81,
                 "education_level": "Some College",
@@ -659,21 +550,6 @@
                 "state": "Wyoming",
                 "unemployment_rate": 86.43,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#9e0142",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "M",
-            "name": "M",
-            "records": [
               {
                 "crime_rate": 784.69,
                 "education_level": "Some College",
@@ -685,6 +561,18 @@
                 "region": "Midwest",
                 "state": "Minnesota",
                 "unemployment_rate": 48.93,
+              },
+              {
+                "crime_rate": 62.68,
+                "education_level": "Some College",
+                "ethnicity": "White",
+                "median_age": 74,
+                "median_income": 524056,
+                "population": 1006842,
+                "poverty_rate": 71.71,
+                "region": "West",
+                "state": "Utah",
+                "unemployment_rate": 40.89,
               },
               {
                 "crime_rate": 568.42,
@@ -700,44 +588,25 @@
               },
             ],
             "type": "leaf",
-            "value": 2,
-          },
-          {
-            "color": "#7bcaa5",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "U",
-            "name": "U",
-            "records": [
-              {
-                "crime_rate": 62.68,
-                "education_level": "Some College",
-                "ethnicity": "White",
-                "median_age": 74,
-                "median_income": 524056,
-                "population": 1006842,
-                "poverty_rate": 71.71,
-                "region": "West",
-                "state": "Utah",
-                "unemployment_rate": 40.89,
-              },
-            ],
-            "type": "leaf",
-            "value": 1,
+            "value": 5,
           },
         ],
         "color": "#fee08b",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
+        "colorScaleNum": 5,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "Some College",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "Some College",
         "records": [
           {
@@ -807,15 +676,23 @@
       {
         "children": [
           {
-            "color": "#4ea7b0",
+            "color": "#e6f598",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
+            "colorScaleNum": 4,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "O",
-            "name": "O",
+            "id": "Doctorate Degree",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "Doctorate Degree",
             "records": [
               {
                 "crime_rate": 312.77,
@@ -829,21 +706,6 @@
                 "state": "Oklahoma",
                 "unemployment_rate": 64.42,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#c8304c",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "A",
-            "name": "A",
-            "records": [
               {
                 "crime_rate": 693.4,
                 "education_level": "Doctorate Degree",
@@ -856,21 +718,6 @@
                 "state": "Arkansas",
                 "unemployment_rate": 61.83,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#f5fbb0",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "P",
-            "name": "P",
-            "records": [
               {
                 "crime_rate": 981.11,
                 "education_level": "Doctorate Degree",
@@ -883,21 +730,6 @@
                 "state": "Pennsylvania",
                 "unemployment_rate": 88.16,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#9e0142",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "M",
-            "name": "M",
-            "records": [
               {
                 "crime_rate": 922.47,
                 "education_level": "Doctorate Degree",
@@ -912,17 +744,25 @@
               },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 4,
           },
         ],
         "color": "#e6f598",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
+        "colorScaleNum": 4,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "Doctorate Degree",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "Doctorate Degree",
         "records": [
           {
@@ -980,15 +820,23 @@
       {
         "children": [
           {
-            "color": "#3c7bb7",
+            "color": "#66c2a5",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
+            "colorScaleNum": 3,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "H",
-            "name": "H",
+            "id": "Master's Degree",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "Master's Degree",
             "records": [
               {
                 "crime_rate": 871.71,
@@ -1002,21 +850,6 @@
                 "state": "Hawaii",
                 "unemployment_rate": 41.79,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#f7814c",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "N",
-            "name": "N",
-            "records": [
               {
                 "crime_rate": 697.82,
                 "education_level": "Master's Degree",
@@ -1029,21 +862,6 @@
                 "state": "New Mexico",
                 "unemployment_rate": 19.34,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#c8304c",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "A",
-            "name": "A",
-            "records": [
               {
                 "crime_rate": 601.82,
                 "education_level": "Master's Degree",
@@ -1058,17 +876,25 @@
               },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 3,
           },
         ],
         "color": "#66c2a5",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
+        "colorScaleNum": 3,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "Master's Degree",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "Master's Degree",
         "records": [
           {
@@ -1114,15 +940,23 @@
       {
         "children": [
           {
-            "color": "#b0dfa3",
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
             "colorScaleBy": "allNodesAtDimIds",
             "colorScaleMode": "e",
+            "colorScaleNum": 5,
             "depth": 2,
-            "dim": "state",
+            "dim": "education_level",
             "height": 0,
-            "id": "W",
-            "name": "W",
+            "id": "Associate's Degree",
+            "keyFns": [
+              "education_level",
+              [
+                "state",
+                [Function],
+              ],
+            ],
+            "name": "Associate's Degree",
             "records": [
               {
                 "crime_rate": 514.82,
@@ -1136,21 +970,6 @@
                 "state": "Wisconsin",
                 "unemployment_rate": 37.03,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#4ea7b0",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "O",
-            "name": "O",
-            "records": [
               {
                 "crime_rate": 356.88,
                 "education_level": "Associate's Degree",
@@ -1163,21 +982,6 @@
                 "state": "Oregon",
                 "unemployment_rate": 35.29,
               },
-            ],
-            "type": "leaf",
-            "value": 1,
-          },
-          {
-            "color": "#5e4fa2",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "I",
-            "name": "I",
-            "records": [
               {
                 "crime_rate": 421.59,
                 "education_level": "Associate's Degree",
@@ -1202,21 +1006,6 @@
                 "state": "Illinois",
                 "unemployment_rate": 53.77,
               },
-            ],
-            "type": "leaf",
-            "value": 2,
-          },
-          {
-            "color": "#f7814c",
-            "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
-            "colorScaleMode": "e",
-            "depth": 2,
-            "dim": "state",
-            "height": 0,
-            "id": "N",
-            "name": "N",
-            "records": [
               {
                 "crime_rate": 677.97,
                 "education_level": "Associate's Degree",
@@ -1231,17 +1020,25 @@
               },
             ],
             "type": "leaf",
-            "value": 1,
+            "value": 5,
           },
         ],
         "color": "#5e4fa2",
         "colorScale": "Spectral",
         "colorScaleBy": "allNodesAtDimIds",
         "colorScaleMode": "e",
+        "colorScaleNum": 5,
         "depth": 1,
         "dim": "education_level",
         "height": 1,
         "id": "Associate's Degree",
+        "keyFns": [
+          "education_level",
+          [
+            "state",
+            [Function],
+          ],
+        ],
         "name": "Associate's Degree",
         "records": [
           {
@@ -1309,11 +1106,20 @@
         "value": 5,
       },
     ],
+    "color": "#cccccc",
     "colorScale": "Spectral",
     "colorScaleBy": "allNodesAtDimIds",
     "colorScaleMode": "e",
+    "colorScaleNum": 27,
     "depth": 0,
     "height": 2,
+    "keyFns": [
+      "education_level",
+      [
+        "state",
+        [Function],
+      ],
+    ],
     "records": [
       {
         "crime_rate": 998.33,
