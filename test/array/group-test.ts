@@ -12,7 +12,7 @@ const groupByAge = group(
   data,
   'education_level',
   [
-    'state_letter',
+    'state_letter' as const,
     x => x.state[0],
   ],
   'state'
@@ -106,12 +106,13 @@ describe(
           firstAncestor,
           secondAncestor,
           thirdAncestor,
-          root
+          root,
         ] = ancestors
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        expect(firstAncestor.depth).toBe(true)
+        expect(thirdAncestor.dims).toBe(true)
+        expect(firstAncestor.ancestorAt({ dim: 'state_letter' }).depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
       }
@@ -120,8 +121,8 @@ describe(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
         const [ leaf, ] = groupByAge.children
-        const ancestor = leaf.ancestorAt({ dim: undefined, })
-        const depth2 = leaf.ancestorAt({ depth: 2, })
+        const ancestor = leaf.ancestorAt({ dim: 'state', })
+        const depth2 = leaf.ancestorAt({ depth: 1, })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()

@@ -4,12 +4,9 @@ import {
 import type {
   ConditionalExcept,
   ConditionalKeys,
-  FixedLengthArray,
   Get,
   IterableElement,
-  JsonPrimitive,
   LiteralUnion,
-  Merge,
   RequireExactlyOne,
   ValueOf,
 } from 'type-fest'
@@ -18,69 +15,18 @@ import type {
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import type {
-  I, L, N, S,
+  I, N,
 } from 'ts-toolbelt'
-import { isArray, } from 'lodash-es'
-import type { KeyFn, } from './types'
-
-export type AncestorArray<
-  Datum,
-  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>,
-  Iter extends I.Iteration = I.IterationOf<1>,
-  Arr extends L.List = []
-> = {
-  0: L.Append<Arr, Node<Datum, KeyFuncs, I.IterationOf<I.Pos<Iter>>>>
-  1: AncestorArray<
-    Datum,
-    KeyFuncs,
-    I.Prev<Iter>,
-    L.Append<Arr, Node<Datum, KeyFuncs, I.IterationOf<I.Pos<Iter>>>>
-  >
-}[N.Greater<I.Pos<Iter>, 0>]
-
-type NumRange<
-  Min extends number = 0,
-  Max extends number = N.Add<Min, 1>,
-  Rules extends `${'[' | '('}${']' | ')'}` = '[]',
-  TrueMin extends number = S.Split<Rules, ''>[0] extends '['
-    ? Min
-    : N.Add<Min, 1>,
-  TrueMax extends number = S.Split<Rules, ''>[1] extends ']'
-    ? Max
-    : N.Sub<Max, 1>
-> = N.Greater<TrueMax, TrueMin> extends 1
-  ? N.Range<TrueMin, TrueMax>[number]
-  : TrueMin
-
-type GetDims<
-  KeyFunctions extends ReadonlyArray<KeyFn<any>>,
-  Iter extends I.Iteration = I.IterationOf<0>,
-  ReturnArray extends Record<number, any> = {}
-> = {
-  0: Merge<{ 0: undefined }, ReturnArray>
-  1: GetDims<
-    KeyFunctions,
-    I.Next<Iter>,
-    Merge<
-      ReturnArray,
-      Record<
-        I.Pos<I.Next<Iter>>,
-        KeyFunctions[I.Pos<Iter>] extends readonly [infer Dim, any]
-          ? Dim extends JsonPrimitive
-            ? `${Dim}`
-            : never
-          : KeyFunctions[I.Pos<Iter>] extends JsonPrimitive
-            ? `${KeyFunctions[I.Pos<Iter>]}`
-            : never
-      >
-    >
-  >
-}[N.Lower<I.Pos<Iter>, KeyFunctions['length']>]
-
-type dims = GetDims<['ben', 'guiia', 'ava']>
+import type {
+  AncestorArray,
+  DescendantArray,
+  GetDims,
+  KeyFn,
+  NumRange,
+} from './types'
 
 export abstract class Node<
-  Datum = any,
+  Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = [],
   Iter extends I.Iteration = I.IterationOf<0>
 > {
@@ -90,17 +36,23 @@ export abstract class Node<
     public records: Datum[],
     public id: N.Greater<I.Pos<Iter>, 0> extends 1 ? ValueOf<Datum> : undefined
   ) {
-    this.dims = [
-      undefined,
-      ...keyFns.map((keyFn, i) => {
-        if (isArray(keyFn))
-          return keyFn[0]
-        else return keyFn
-      }),
-    ] as unknown as GetDims<KeyFuncs>
+    this.dims = keyFns.reduce(
+      (acc, keyFn) => {
+        if (
+          typeof keyFn !== 'string' &&
+          typeof keyFn !== 'number' &&
+          typeof keyFn !== 'symbol'
+        )
+          acc.push(keyFn[0])
+        else acc.push(keyFn)
+        return acc
+      },
+      [ undefined, ]
+    ) as unknown as GetDims<KeyFuncs, KeyFuncs['length']>
+
     const keyFn: KeyFuncs[I.Pos<Iter>] = keyFns[depth - 1]
 
-    this.dim = this.dims[depth]
+    this.dim = this.dims[this.depth]
     this.parent = undefined as unknown as (typeof this)['parent']
     this.children = undefined as unknown as (typeof this)['children']
     this.type = 'node' as unknown as (typeof this)['type']
@@ -132,9 +84,9 @@ export abstract class Node<
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
 
-  dim: GetDims<KeyFuncs>[I.Pos<Iter>]
+  dim: GetDims<KeyFuncs, KeyFuncs['length']>[I.Pos<Iter>]
 
-  dims: GetDims<KeyFuncs>
+  dims: GetDims<KeyFuncs, KeyFuncs['length']>
 
   height: N.Sub<KeyFuncs['length'], I.Pos<Iter>>
   name: {
@@ -142,7 +94,7 @@ export abstract class Node<
     0: undefined
   }[N.Greater<I.Pos<Iter>, 0>]
 
-  parent: I.Pos<Iter> extends 0
+  parent: this['depth'] extends 0
     ? undefined
     : Node<Datum, KeyFuncs, I.Prev<Iter>>
 
@@ -164,11 +116,7 @@ export abstract class Node<
   );
 
   *[Symbol.iterator](): Generator<
-    Node<
-      Datum,
-      KeyFuncs,
-      I.IterationOf<NumRange<I.Pos<Iter>, KeyFuncs['length']>>
-    >,
+    IterableElement<DescendantArray<this>>,
     void,
     unknown
     > {
@@ -205,29 +153,30 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    ParamDepth extends NumRange<0, I.Pos<Iter>>,
-    ParamDim extends GetDims<KeyFuncs>[NumRange<0, I.Pos<Iter>>],
-    Param extends RequireExactlyOne<
-      {
-        depth: ParamDepth
-        dim: ParamDim
-      },
-      'depth' | 'dim'
+    Depth extends NumRange<0, this['depth']>,
+    Dim extends GetDims<KeyFuncs, KeyFuncs['length']>[Depth],
+    Param extends RequireExactlyOne<{
+      depth: Depth
+      dim: Dim
+    }>
+  >(depthOrDim: Param) {
+    let node = this
+    let test = false
+
+    while (typeof test === false && typeof node !== 'undefined') {
+      test = node.dim === depthOrDim.dim || node.depth === depthOrDim.depth
+      node = node.parent
+    }
+
+    return node as unknown as Param['depth'] extends number ? Node<
+      Datum,
+      KeyFuncs,
+      I.IterationOf<Param['depth']>
+    > : Node<
+      Datum,
+      KeyFuncs,
+      I.IterationOf<ConditionalKeys<this['dims'], Param['dim']>>
     >
-  >(depthOrDim: Param): Param['depth'] extends ParamDepth
-    ? Node<Datum, KeyFuncs, I.IterationOf<Param['depth']>>
-    : Param['dim'] extends ParamDim
-      ? Node<
-        Datum,
-        KeyFuncs,
-        I.IterationOf<ConditionalKeys<GetDims<KeyFuncs>, Param['dim']>>
-      >
-      : never {
-    return this.ancestors().find((node) => {
-      if (typeof depthOrDim.depth === 'number')
-        return node.depth === depthOrDim.depth
-      else return node.dim === depthOrDim.dim
-    })
   }
 
   /**
@@ -236,8 +185,8 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
    * @see {ancestorAt}
    */
-  ancestors(): AncestorArray<Datum, KeyFuncs, Iter> {
-    const nodes = [ this, ]
+  ancestors() {
+    const nodes: any[] = [ this, ]
     let node = this
 
     while (typeof node !== 'undefined' && typeof node.parent !== 'undefined') {
@@ -245,7 +194,7 @@ export abstract class Node<
       node = node.parent
     }
 
-    return nodes
+    return nodes as unknown as AncestorArray<this>
   }
 
   /**
@@ -254,13 +203,13 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#descendants}
    * @see {@link ancestors}
    */
-  descendants() {
+  descendants(): DescendantArray<this> {
     return Array.from(this)
   }
 
   descendantsAt<
     ParamDepth extends NumRange<I.Pos<Iter>, KeyFuncs['length']>,
-    ParamDim extends GetDims<KeyFuncs>[NumRange<
+    ParamDim extends GetDims<KeyFuncs, KeyFuncs['length']>[NumRange<
       I.Pos<Iter>,
       KeyFuncs['length']
     >],
@@ -274,7 +223,10 @@ export abstract class Node<
   >(depthOrDim: Param) {
     type ReturnDepth = Param['depth'] extends number
       ? Param['depth']
-      : ConditionalKeys<GetDims<KeyFuncs>, Param['dim']>
+      : ConditionalKeys<
+          GetDims<KeyFuncs, KeyFuncs['length']>,
+          Param['dim']
+        >
 
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
