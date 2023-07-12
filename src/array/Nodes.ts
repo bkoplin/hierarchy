@@ -15,7 +15,7 @@ import type {
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import type {
-  I, N,
+  I, L, N,
 } from 'ts-toolbelt'
 import type {
   AncestorArray,
@@ -28,13 +28,14 @@ import type {
 export abstract class Node<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = [],
-  Iter extends I.Iteration = I.IterationOf<0>
+  Iter extends I.Iteration = I.IterationOf<0>,
+  Depth extends number = I.Pos<Iter>
 > {
   constructor(
     public keyFns: KeyFuncs,
-    public depth: I.Pos<Iter>,
+    public depth: Depth,
     public records: Datum[],
-    public id: N.Greater<I.Pos<Iter>, 0> extends 1 ? ValueOf<Datum> : undefined
+    public id: N.Greater<Depth, 0> extends 1 ? ValueOf<Datum> : undefined
   ) {
     this.dims = keyFns.reduce(
       (acc, keyFn) => {
@@ -50,7 +51,7 @@ export abstract class Node<
       [ undefined, ]
     ) as unknown as GetDims<KeyFuncs, KeyFuncs['length']>
 
-    const keyFn: KeyFuncs[I.Pos<Iter>] = keyFns[depth - 1]
+    const keyFn: KeyFuncs[Depth] = keyFns[depth - 1]
 
     this.dim = this.dims[this.depth]
     this.parent = undefined as unknown as (typeof this)['parent']
@@ -66,7 +67,7 @@ export abstract class Node<
       this.type = 'leaf' as unknown as (typeof this)['type']
   }
 
-  children: I.Pos<Iter> extends KeyFuncs['length']
+  children: Depth extends KeyFuncs['length']
     ? undefined
     : Array<Node<Datum, KeyFuncs, I.Next<Iter>>>
 
@@ -84,23 +85,23 @@ export abstract class Node<
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
 
-  dim: GetDims<KeyFuncs, KeyFuncs['length']>[I.Pos<Iter>]
+  dim: GetDims<KeyFuncs, KeyFuncs['length']>[Depth]
 
   dims: GetDims<KeyFuncs, KeyFuncs['length']>
 
-  height: N.Sub<KeyFuncs['length'], I.Pos<Iter>>
+  height: N.Sub<KeyFuncs['length'], Depth>
   name: {
     1: ValueOf<Datum>
     0: undefined
-  }[N.Greater<I.Pos<Iter>, 0>]
+  }[N.Greater<Depth, 0>]
 
   parent: this['depth'] extends 0
     ? undefined
     : Node<Datum, KeyFuncs, I.Prev<Iter>>
 
-  type: I.Pos<Iter> extends 0
+  type: Depth extends 0
     ? 'root'
-    : I.Pos<Iter> extends KeyFuncs['length']
+    : Depth extends KeyFuncs['length']
       ? 'leaf'
       : 'node'
 
@@ -153,11 +154,12 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    Depth extends NumRange<0, this['depth']>,
-    Dim extends GetDims<KeyFuncs, KeyFuncs['length']>[Depth],
     Param extends RequireExactlyOne<{
-      depth: Depth
-      dim: Dim
+      depth: NumRange<0, Depth>
+      dim: L.Take<
+        GetDims<KeyFuncs, KeyFuncs['length']>,
+        N.Add<Depth, 1>
+      >[number]
     }>
   >(depthOrDim: Param) {
     let node = this
@@ -168,15 +170,11 @@ export abstract class Node<
       node = node.parent
     }
 
-    return node as unknown as Param['depth'] extends number ? Node<
-      Datum,
-      KeyFuncs,
-      I.IterationOf<Param['depth']>
-    > : Node<
-      Datum,
-      KeyFuncs,
-      I.IterationOf<ConditionalKeys<this['dims'], Param['dim']>>
-    >
+    return node as this extends { parent: infer Parent }
+      ? Parent extends { depth: Param['depth'] } | { dim: Param['dim'] }
+        ? Parent
+        : undefined
+      : undefined
   }
 
   /**
@@ -208,9 +206,9 @@ export abstract class Node<
   }
 
   descendantsAt<
-    ParamDepth extends NumRange<I.Pos<Iter>, KeyFuncs['length']>,
+    ParamDepth extends NumRange<Depth, KeyFuncs['length']>,
     ParamDim extends GetDims<KeyFuncs, KeyFuncs['length']>[NumRange<
-      I.Pos<Iter>,
+      Depth,
       KeyFuncs['length']
     >],
     Param extends RequireExactlyOne<
@@ -223,10 +221,7 @@ export abstract class Node<
   >(depthOrDim: Param) {
     type ReturnDepth = Param['depth'] extends number
       ? Param['depth']
-      : ConditionalKeys<
-          GetDims<KeyFuncs, KeyFuncs['length']>,
-          Param['dim']
-        >
+      : ConditionalKeys<GetDims<KeyFuncs, KeyFuncs['length']>, Param['dim']>
 
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
@@ -332,7 +327,7 @@ export abstract class Node<
     }
   }
 
-  hasChildren(): this is I.Pos<Iter> extends KeyFuncs['length']
+  hasChildren(): this is Depth extends KeyFuncs['length']
     ? never
     : Node<Datum, KeyFuncs, Iter> {
     return this?.height > 0
@@ -351,9 +346,7 @@ export abstract class Node<
   //   return this?.height > 0
   // }
 
-  hasParent(): this is I.Pos<Iter> extends 0
-    ? never
-    : Node<Datum, KeyFuncs, Iter> {
+  hasParent(): this is Depth extends 0 ? never : Node<Datum, KeyFuncs, Iter> {
     return this?.depth > 0
   }
 
@@ -381,7 +374,7 @@ export abstract class Node<
     Target extends Node<
       Datum,
       KeyFuncs,
-      I.IterationOf<NumRange<I.Pos<Iter>, KeyFuncs['length']>>
+      I.IterationOf<NumRange<Depth, KeyFuncs['length']>>
     >
   >(): Array<{
     source: Get<Target, 'parent'>
@@ -410,7 +403,7 @@ export abstract class Node<
     Node<
       Datum,
       KeyFuncs,
-      I.IterationOf<N.Range<0, I.Pos<Iter> | Get<EndNode, 'depth'>>[number]>
+      I.IterationOf<N.Range<0, Depth | Get<EndNode, 'depth'>>[number]>
     >
   > {
     let start = this
@@ -573,7 +566,7 @@ export class HierarchyNode<
 > extends Node<Datum, KeyFuncs, Iter> {
   constructor(
     keyFns: KeyFuncs,
-    depth: I.Pos<Iter>,
+    depth: Depth,
     records: Datum[],
     id: ValueOf<Datum>
   ) {
