@@ -3,7 +3,6 @@ import {
 } from 'rambdax'
 import type {
   ConditionalExcept,
-  ConditionalKeys,
   Get,
   IterableElement,
   LiteralUnion,
@@ -20,8 +19,6 @@ import type {
 import type {
   AncestorArray,
   DescendantArray,
-  DimsDepthObject,
-  DimsDimObject,
   GetDims,
   KeyFn,
   NumRange,
@@ -31,7 +28,7 @@ export abstract class Node<
   Datum = any,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = ReadonlyArray<KeyFn<Datum>>,
   Iter extends I.Iteration = I.IterationOf<0>,
-  Depth extends number = I.Pos<Iter>
+  Depth extends I.Pos<Iter> = 0
 > {
   constructor(
     public keyFns: KeyFuncs,
@@ -73,7 +70,7 @@ export abstract class Node<
 
   children: Depth extends KeyFuncs['length']
     ? undefined
-    : Array<Node<Datum, KeyFuncs, I.Next<Iter>>>
+    : Array<Node<Datum, KeyFuncs, I.Next<Iter>, I.Pos<I.Next<Iter>>>>
 
   color = '#cccccc'
   colorScale:
@@ -160,26 +157,28 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    ThisDims extends DimsDimObject<KeyFuncs, KeyFuncs['length']>,
-    ThisDepths extends DimsDepthObject<KeyFuncs, KeyFuncs['length']>,
     Param extends RequireExactlyOne<{
       depth: NumRange<0, I.Pos<Iter>>
-      dim: keyof ThisDims
+      dim: IterableElement<GetDims<KeyFuncs, I.Pos<Iter>>>
     }>
   >(depthOrDim: Param) {
     let node = this
     let test = false
+
+    type AncestorAt<T> = T extends {
+      parent?: infer P
+    }
+      ? P extends { dim: Param['dim'] } | { depth: Param['depth'] }
+        ? P
+        : AncestorAt<P>
+      : T
 
     while (test === false && typeof node !== 'undefined') {
       test = node.dim === depthOrDim.dim || node.depth === depthOrDim.depth
       node = node.parent
     }
 
-    return node as unknown as Param['depth'] extends undefined
-      ? Param['dim'] extends undefined
-        ? Node<Datum, KeyFuncs, I.IterationOf<0>>
-        : Node<Datum, KeyFuncs, I.IterationOf<ThisDims[Param['dim']]>>
-      : Node<Datum, KeyFuncs, I.IterationOf<Param['depth']>>
+    return node as AncestorAt<this>
   }
 
   /**
@@ -211,30 +210,27 @@ export abstract class Node<
   }
 
   descendantsAt<
-    ParamDepth extends NumRange<Depth, KeyFuncs['length']>,
-    ParamDim extends GetDims<KeyFuncs, KeyFuncs['length']>[NumRange<
-      Depth,
-      KeyFuncs['length']
-    >],
-    Param extends RequireExactlyOne<
-      {
-        depth: ParamDepth
-        dim: ParamDim
-      },
-      'depth' | 'dim'
-    >
+    Param extends RequireExactlyOne<{
+      depth: NumRange<I.Pos<Iter>, KeyFuncs['length']>
+      dim: IterableElement<GetDims<KeyFuncs, KeyFuncs['length']>>
+    }>
   >(depthOrDim: Param) {
-    type ReturnDepth = Param['depth'] extends number
-      ? Param['depth']
-      : ConditionalKeys<GetDims<KeyFuncs, KeyFuncs['length']>, Param['dim']>
-
+    type DescendantAt<T> = T extends {
+      children?: Array<infer P>
+    }
+      ? P extends { depth: Param['depth'] }
+        ? P
+        : P extends { dim: Param['dim'] }
+          ? P
+          : DescendantAt<P>
+      : T extends { dim: Param['dim'] } | { depth: Param['depth'] }
+        ? T
+        : never
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim
-    }) as ReturnDepth extends number
-      ? Array<Node<Datum, KeyFuncs, I.IterationOf<ReturnDepth>>>
-      : undefined[]
+    }) as unknown as Array<DescendantAt<this>>
   }
 
   /**
@@ -334,7 +330,7 @@ export abstract class Node<
 
   hasChildren(): this is Depth extends KeyFuncs['length']
     ? never
-    : Node<Datum, KeyFuncs, Iter> {
+    : Node<Datum, KeyFuncs, Iter, I.Pos<Iter>> {
     return this?.height > 0
   }
   // hasChildren(): this is Merge<
@@ -360,7 +356,9 @@ export abstract class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>>> {
+  leaves(): Array<
+    Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>, KeyFuncs['length']>
+    > {
     const leaves = []
 
     this.eachBefore((node) => {
@@ -379,7 +377,8 @@ export abstract class Node<
     Target extends Node<
       Datum,
       KeyFuncs,
-      I.IterationOf<NumRange<Depth, KeyFuncs['length']>>
+      I.IterationOf<NumRange<Depth, KeyFuncs['length']>>,
+      NumRange<Depth, KeyFuncs['length']>
     >
   >(): Array<{
     source: Get<Target, 'parent'>
@@ -408,7 +407,8 @@ export abstract class Node<
     Node<
       Datum,
       KeyFuncs,
-      I.IterationOf<N.Range<0, Depth | Get<EndNode, 'depth'>>[number]>
+      I.IterationOf<N.Range<0, Depth | Get<EndNode, 'depth'>>[number]>,
+      N.Range<0, Depth | Get<EndNode, 'depth'>>[number]
     >
   > {
     let start = this
@@ -532,13 +532,18 @@ export abstract class Node<
 export class LeafNode<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
-> extends Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>> {
+> extends Node<
+  Datum,
+  KeyFuncs,
+  I.IterationOf<KeyFuncs['length']>,
+  KeyFuncs['length']
+> {
   constructor(keyFns: KeyFuncs, records: Datum[], id: ValueOf<Datum>) {
     super(
       keyFns,
       keyFns.length,
       records,
-      id as unknown as Node<Datum, KeyFuncs, Iter>['id']
+      id as unknown as this['id']
     )
     delete this.children
   }
@@ -546,13 +551,13 @@ export class LeafNode<
 export class RootNode<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
-> extends Node<Datum, KeyFuncs, I.IterationOf<0>> {
+> extends Node<Datum, KeyFuncs, I.IterationOf<0>, 0> {
   constructor(keyFuncs: KeyFuncs, records: Datum[]) {
     super(
       keyFuncs,
       0,
       records,
-      undefined as unknown as Node<Datum, KeyFuncs>['id']
+      undefined as unknown as this['id']
     )
     delete this.parent
     delete this.id
@@ -564,11 +569,13 @@ export class RootNode<
 }
 export class HierarchyNode<
   Datum,
-  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>,
-  Iter extends I.Iteration = I.IterationOf<
-    N.Range<1, KeyFuncs['length']>[number]
-  >
-> extends Node<Datum, KeyFuncs, Iter> {
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<
+  Datum,
+  KeyFuncs,
+  I.IterationOf<NumRange<1, KeyFuncs['length']>>,
+  NumRange<1, KeyFuncs['length']>
+> {
   constructor(
     keyFns: KeyFuncs,
     depth: Depth,
@@ -579,7 +586,7 @@ export class HierarchyNode<
       keyFns,
       depth,
       records,
-      id as unknown as Node<Datum, KeyFuncs>['id']
+      id as unknown as this['id']
     )
   }
 }
