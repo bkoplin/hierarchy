@@ -1,27 +1,23 @@
 import type {
-  B, I, L, N, S,
+  B, I, L, N, O, S,
 } from 'ts-toolbelt'
 import type {
-  IterableElement, ValueOf,
+  ConditionalExcept,
+  ConditionalKeys,
+  ConditionalPick,
+  Simplify, ValueOf,
 } from 'type-fest'
 
-export type AncestorArray<
-  T extends { parent?: any; depth: number },
-  Arr extends L.List = []
-> = {
-  1: L.Append<Arr, T>
-  0: AncestorArray<T['parent'], L.Append<Arr, T>>
-}[T['depth'] extends 0 ? 1 : 0]
-export type DescendantArray<
-  T extends { children?: any[] },
-  Arr extends L.List = [T]
-> = {
-  0: Arr
-  1: AncestorArray<
-    IterableElement<T['children']>,
-    L.Append<Arr, IterableElement<T['children']>>
-  >
-}[T['children'] extends undefined ? 0 : 1]
+export type AncestorArray<T, Arr extends any[] = []> = T extends {
+  parent: infer P
+}
+  ? [T, ...AncestorArray<P, Arr>]
+  : Arr
+export type DescendantArray<T, Arr extends L.List = [T]> = T extends {
+  children: Array<infer P>
+}
+  ? [T, ...DescendantArray<P, Arr>]
+  : Arr
 export type NumRange<
   Min extends number = 0,
   Max extends number = N.Add<Min, 1>,
@@ -36,26 +32,36 @@ export type NumRange<
   ? N.Range<TrueMin, TrueMax>[number]
   : TrueMin
 export type GetDims<
-  T extends readonly any[],
-  Length extends number,
+  T extends ReadonlyArray<any | readonly [any, any]>,
+  Length extends L.Length<T>,
   Iter extends I.Iteration = I.IterationOf<Length>,
-  ReturnArray extends L.List = []
+  ReturnArray extends L.List = readonly []
 > = {
-  0: L.Prepend<ReturnArray, undefined>
+  0: L.Append<ReturnArray, undefined>
   1: GetDims<
     T,
     Length,
     I.Prev<Iter>,
-    L.Prepend<
+    L.Append<
       ReturnArray,
-      T[I.Pos<I.Prev<Iter>>] extends readonly [infer Dim, any]
+      T[I.Pos<I.Prev<Iter>>] extends [infer Dim, any]
         ? Dim
         : T[I.Pos<I.Prev<Iter>>]
     >
   >
 }[N.Greater<I.Pos<Iter>, 0>]
+export type DimsDepthObject<
+  T extends ReadonlyArray<any | readonly [any, any]>,
+  Length extends L.Length<T>
+> = {
+  [K in keyof GetDims<T, Length>]: GetDims<T, Length>[K]
+}
+export type DimsDimObject<
+  T extends ReadonlyArray<any | readonly [any, any]>,
+  Length extends L.Length<T>
+> = O.Invert<DimsDepthObject<T, Length>>
 export type KeyFn<T> =
-  | readonly [any, (datum: T, idx?: number, vals?: T[]) => ValueOf<T>]
+  | [string, (datum: T, idx?: number, vals?: T[]) => ValueOf<T>]
   | keyof T
 
 type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -63,7 +69,7 @@ type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 export type FilteredDepthList<
   MinVal extends number = 0,
   MaxVal extends number = L.Last<DepthAndHeightOptions>,
-  Ln extends number[] = [],
+  Ln extends L.List<number> = [],
   Idx extends I.Iteration = I.IterationOf<0>
 > = {
   0: Ln[number]

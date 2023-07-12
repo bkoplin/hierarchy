@@ -101,6 +101,7 @@ describe(
       'ancestors tests',
       () => {
         const [ level1Child, ] = groupByAge.leaves()
+        const groupAncestor = groupByAge.ancestors()
         const ancestors = level1Child.ancestors()
         const [
           firstAncestor,
@@ -112,7 +113,7 @@ describe(
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         expect(thirdAncestor.dims).toBe(true)
-        expect(firstAncestor.ancestorAt({ dim: 'state_letter' }).depth).toBe(true)
+        expect(firstAncestor.ancestorAt({ dim: 'state', }).depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
       }

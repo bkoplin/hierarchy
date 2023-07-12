@@ -15,19 +15,21 @@ import type {
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import type {
-  I, L, N,
+  I, N,
 } from 'ts-toolbelt'
 import type {
   AncestorArray,
   DescendantArray,
+  DimsDepthObject,
+  DimsDimObject,
   GetDims,
   KeyFn,
   NumRange,
 } from './types'
 
 export abstract class Node<
-  Datum,
-  KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = [],
+  Datum = any,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = ReadonlyArray<KeyFn<Datum>>,
   Iter extends I.Iteration = I.IterationOf<0>,
   Depth extends number = I.Pos<Iter>
 > {
@@ -39,17 +41,19 @@ export abstract class Node<
   ) {
     this.dims = keyFns.reduce(
       (acc, keyFn) => {
+        if (acc.length === 0)
+          acc.push(undefined)
         if (
           typeof keyFn !== 'string' &&
-          typeof keyFn !== 'number' &&
-          typeof keyFn !== 'symbol'
+        typeof keyFn !== 'number' &&
+        typeof keyFn !== 'symbol'
         )
           acc.push(keyFn[0])
         else acc.push(keyFn)
         return acc
       },
-      [ undefined, ]
-    ) as unknown as GetDims<KeyFuncs, KeyFuncs['length']>
+      [] as unknown as GetDims<KeyFuncs, KeyFuncs['length']>
+    )
 
     const keyFn: KeyFuncs[Depth] = keyFns[depth - 1]
 
@@ -85,7 +89,9 @@ export abstract class Node<
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
 
-  dim: GetDims<KeyFuncs, KeyFuncs['length']>[Depth]
+  dim: KeyFuncs[I.Pos<I.Prev<Iter>>] extends readonly [infer Dim, any]
+    ? Dim
+    : KeyFuncs[I.Pos<I.Prev<Iter>>]
 
   dims: GetDims<KeyFuncs, KeyFuncs['length']>
 
@@ -154,27 +160,26 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
+    ThisDims extends DimsDimObject<KeyFuncs, KeyFuncs['length']>,
+    ThisDepths extends DimsDepthObject<KeyFuncs, KeyFuncs['length']>,
     Param extends RequireExactlyOne<{
-      depth: NumRange<0, Depth>
-      dim: L.Take<
-        GetDims<KeyFuncs, KeyFuncs['length']>,
-        N.Add<Depth, 1>
-      >[number]
+      depth: NumRange<0, I.Pos<Iter>>
+      dim: keyof ThisDims
     }>
   >(depthOrDim: Param) {
     let node = this
     let test = false
 
-    while (typeof test === false && typeof node !== 'undefined') {
+    while (test === false && typeof node !== 'undefined') {
       test = node.dim === depthOrDim.dim || node.depth === depthOrDim.depth
       node = node.parent
     }
 
-    return node as this extends { parent: infer Parent }
-      ? Parent extends { depth: Param['depth'] } | { dim: Param['dim'] }
-        ? Parent
-        : undefined
-      : undefined
+    return node as unknown as Param['depth'] extends undefined
+      ? Param['dim'] extends undefined
+        ? Node<Datum, KeyFuncs, I.IterationOf<0>>
+        : Node<Datum, KeyFuncs, I.IterationOf<ThisDims[Param['dim']]>>
+      : Node<Datum, KeyFuncs, I.IterationOf<Param['depth']>>
   }
 
   /**
