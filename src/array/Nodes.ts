@@ -103,7 +103,7 @@ export abstract class Node<
     0: undefined
   }[N.Greater<Depth, 0>]
 
-  parent: this['depth'] extends 0
+  parent: N.Greater<Depth, 0> extends 0
     ? undefined
     : Node<Datum, KeyFuncs, I.Prev<Iter>>
 

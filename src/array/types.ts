@@ -1,15 +1,13 @@
-import type {
-  B, I, L, N, S,
-} from 'ts-toolbelt'
-import type {
-  JsonPrimitive, ValueOf,
-} from 'type-fest'
+import type { B, I, L, N, S } from 'ts-toolbelt'
+import type { JsonPrimitive, ValueOf } from 'type-fest'
 
 export type AncestorArray<T, Arr extends L.List = []> = T extends {
-  parent: infer Parent
+  parent: infer P
 }
-  ? [T, Parent, ...AncestorArray<Parent, [T, Parent, ...Arr]>]
-  : [T, ...Arr]
+  ? P extends undefined
+    ? [...Arr, T]
+    : [...Arr, ...AncestorArray<P, Arr>]
+  : [...Arr, T]
 export type DescendantArray<T, Arr extends L.List = [T]> = T extends {
   children: Array<infer P>
 }
