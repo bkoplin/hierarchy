@@ -1,18 +1,15 @@
 import type {
-  B, I, L, N, O, S,
+  B, I, L, N, S,
 } from 'ts-toolbelt'
 import type {
-  ConditionalExcept,
-  ConditionalKeys,
-  ConditionalPick,
-  Simplify, ValueOf,
+  JsonPrimitive, ValueOf,
 } from 'type-fest'
 
-export type AncestorArray<T, Arr extends any[] = []> = T extends {
-  parent: infer P
+export type AncestorArray<T, Arr extends L.List = []> = T extends {
+  parent: infer Parent
 }
-  ? [T, ...AncestorArray<P, Arr>]
-  : Arr
+  ? [T, Parent, ...AncestorArray<Parent, [T, Parent, ...Arr]>]
+  : [T, ...Arr]
 export type DescendantArray<T, Arr extends L.List = [T]> = T extends {
   children: Array<infer P>
 }
@@ -32,34 +29,67 @@ export type NumRange<
   ? N.Range<TrueMin, TrueMax>[number]
   : TrueMin
 export type GetDims<
-  T extends ReadonlyArray<any | readonly [any, any]>,
-  Length extends L.Length<T>,
-  Iter extends I.Iteration = I.IterationOf<Length>,
+  T,
   ReturnArray extends L.List = readonly []
-> = {
-  0: L.Append<ReturnArray, undefined>
-  1: GetDims<
-    T,
-    Length,
-    I.Prev<Iter>,
-    L.Append<
-      ReturnArray,
-      T[I.Pos<I.Prev<Iter>>] extends [infer Dim, any]
-        ? Dim
-        : T[I.Pos<I.Prev<Iter>>]
-    >
-  >
-}[N.Greater<I.Pos<Iter>, 0>]
+> = T extends ReadonlyArray<infer Dim>
+  ? Dim extends readonly any[]
+    ? [...ReturnArray, Dim[0]]
+    : [...ReturnArray, Dim]
+  : ReturnArray
+export type DescendantDepths<T, Arr extends L.List = []> = T extends {
+  depth: infer Depth extends number
+  children?: Array<infer Child>
+}
+  ? Child extends undefined
+    ? [...Arr, Depth]
+    : [...Arr, ...DescendantDepths<Child, Arr>]
+  : Arr
+export type DescendantDims<T, Arr extends L.List = []> = T extends {
+  dim: infer Dim
+  children?: Array<infer Child>
+}
+  ? Child extends undefined
+    ? [...Arr, Dim extends readonly any[] ? Dim[0] : Dim]
+    : [...Arr, ...DescendantDims<Child, Arr>]
+  : Arr
+export type AncestorDepths<T, Arr extends L.List = []> = T extends {
+  depth: infer Depth extends number
+  parent?: infer Parent
+}
+  ? Parent extends undefined
+    ? [...Arr, Depth]
+    : [...Arr, ...AncestorDepths<Parent, Arr>]
+  : Arr
+export type AncestorDims<T, Arr extends L.List = []> = T extends {
+  dim: infer Dim
+  parent?: infer Parent
+}
+  ? Parent extends undefined
+    ? [...Arr, Dim extends readonly any[] ? Dim[0] : Dim]
+    : [...Arr, ...AncestorDims<Parent, Arr>]
+  : Arr
 export type DimsDepthObject<
   T extends ReadonlyArray<any | readonly [any, any]>,
-  Length extends L.Length<T>
-> = {
-  [K in keyof GetDims<T, Length>]: GetDims<T, Length>[K]
-}
+  Iter extends I.Iteration = I.IterationOf<0>
+> = Record<
+  I.Pos<Iter>,
+  T[I.Pos<Iter>] extends [infer Dim, any]
+    ? Dim extends JsonPrimitive
+      ? `${Dim}`
+      : never
+    : T[I.Pos<I.Prev<Iter>>]
+>
 export type DimsDimObject<
   T extends ReadonlyArray<any | readonly [any, any]>,
-  Length extends L.Length<T>
-> = O.Invert<DimsDepthObject<T, Length>>
+  Iter extends I.Iteration = I.IterationOf<0>
+> = Record<
+  T[I.Pos<Iter>] extends [infer Dim, any]
+    ? Dim extends JsonPrimitive
+      ? `${Dim}`
+      : never
+    : T[I.Pos<I.Prev<Iter>>],
+  I.Pos<Iter>
+>
 export type KeyFn<T> =
   | [string, (datum: T, idx?: number, vals?: T[]) => ValueOf<T>]
   | keyof T

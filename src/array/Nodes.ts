@@ -18,7 +18,11 @@ import type {
 } from 'ts-toolbelt'
 import type {
   AncestorArray,
+  AncestorDepths,
+  AncestorDims,
   DescendantArray,
+  DescendantDepths,
+  DescendantDims,
   GetDims,
   KeyFn,
   NumRange,
@@ -36,7 +40,8 @@ export abstract class Node<
     public records: Datum[],
     public id: N.Greater<Depth, 0> extends 1 ? ValueOf<Datum> : undefined
   ) {
-    this.dims = keyFns.reduce(
+    const keyFn: KeyFuncs[Depth] = keyFns[depth - 1]
+    const dims: GetDims<KeyFuncs> = keyFns.reduce(
       (acc, keyFn) => {
         if (acc.length === 0)
           acc.push(undefined)
@@ -49,10 +54,10 @@ export abstract class Node<
         else acc.push(keyFn)
         return acc
       },
-      [] as unknown as GetDims<KeyFuncs, KeyFuncs['length']>
+      [] as unknown as GetDims<KeyFuncs>
     )
 
-    const keyFn: KeyFuncs[Depth] = keyFns[depth - 1]
+    this.dims = dims
 
     this.dim = this.dims[this.depth]
     this.parent = undefined as unknown as (typeof this)['parent']
@@ -90,7 +95,7 @@ export abstract class Node<
     ? Dim
     : KeyFuncs[I.Pos<I.Prev<Iter>>]
 
-  dims: GetDims<KeyFuncs, KeyFuncs['length']>
+  dims: GetDims<KeyFuncs>
 
   height: N.Sub<KeyFuncs['length'], Depth>
   name: {
@@ -157,21 +162,26 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
+    AncsDepths extends AncestorDepths<this>,
+    AncsDims extends AncestorDims<this>,
     Param extends RequireExactlyOne<{
-      depth: NumRange<0, I.Pos<Iter>>
-      dim: IterableElement<GetDims<KeyFuncs, I.Pos<Iter>>>
+      depth: IterableElement<AncsDepths>
+      dim: IterableElement<AncsDims>
     }>
   >(depthOrDim: Param) {
+    type AncestorAt<T> = Param['depth'] extends number
+      ? T extends { depth: Param['depth'] }
+        ? T
+        : T extends { parent: infer Parent }
+          ? AncestorAt<Parent>
+          : never
+      : T extends { dim: Param['dim'] }
+        ? T
+        : T extends { parent: infer Parent }
+          ? AncestorAt<Parent>
+          : never
     let node = this
     let test = false
-
-    type AncestorAt<T> = T extends {
-      parent?: infer P
-    }
-      ? P extends { dim: Param['dim'] } | { depth: Param['depth'] }
-        ? P
-        : AncestorAt<P>
-      : T
 
     while (test === false && typeof node !== 'undefined') {
       test = node.dim === depthOrDim.dim || node.depth === depthOrDim.depth
@@ -210,22 +220,24 @@ export abstract class Node<
   }
 
   descendantsAt<
+    DescDepths extends DescendantDepths<this>,
+    DescDims extends DescendantDims<this>,
     Param extends RequireExactlyOne<{
-      depth: NumRange<I.Pos<Iter>, KeyFuncs['length']>
-      dim: IterableElement<GetDims<KeyFuncs, KeyFuncs['length']>>
+      depth: IterableElement<DescDepths>
+      dim: IterableElement<DescDims>
     }>
   >(depthOrDim: Param) {
-    type DescendantAt<T> = T extends {
-      children?: Array<infer P>
-    }
-      ? P extends { depth: Param['depth'] }
-        ? P
-        : P extends { dim: Param['dim'] }
-          ? P
-          : DescendantAt<P>
-      : T extends { dim: Param['dim'] } | { depth: Param['depth'] }
+    type DescendantAt<T> = Param['depth'] extends number
+      ? T extends { depth: Param['depth'] }
         ? T
-        : never
+        : T extends { children: Array<infer Child> }
+          ? DescendantAt<Child>
+          : never
+      : T extends { dim: Param['dim'] }
+        ? T
+        : T extends { children: Array<infer Child> }
+          ? DescendantAt<Child>
+          : never
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
