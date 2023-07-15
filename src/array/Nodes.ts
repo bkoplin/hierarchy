@@ -25,7 +25,7 @@ import type {
   NumRange,
 } from './types'
 
-export abstract class Node<
+export class Node<
   Datum = any,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = ReadonlyArray<KeyFn<Datum>>,
   Iter extends I.Iteration = I.IterationOf<0>,
@@ -587,26 +587,23 @@ export class RootNode<
     delete this.dim
   }
 
-  type = 'root' as const
 }
 export class HierarchyNode<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
 > extends Node<
   Datum,
-  KeyFuncs,
-  I.IterationOf<NumRange<1, KeyFuncs['length']>>,
-  NumRange<1, KeyFuncs['length']>
+  KeyFuncs
 > {
   constructor(
     keyFns: KeyFuncs,
-    depth: Depth,
+    depth: number,
     records: Datum[],
     id: ValueOf<Datum>
   ) {
     super(
       keyFns,
-      depth,
+      depth as this['depth'],
       records,
       id as unknown as this['id']
     )

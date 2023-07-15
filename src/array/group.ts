@@ -1,25 +1,27 @@
 import { objectEntries, } from '@antfu/utils'
 import { groupBy, } from 'rambdax'
 
-import type { JsonObject, Simplify } from 'type-fest'
+import type { JsonObject, } from 'type-fest'
 
 import type {
   I, L, N,
 } from 'ts-toolbelt'
 import { isArray, } from 'lodash-es'
 import type { KeyFn, } from './types'
-import type { Node, } from './Nodes'
 import {
-  HierarchyNode, LeafNode, RootNode,
+  HierarchyNode,
+  LeafNode, Node,
 } from './Nodes'
 
 export function group<
   Input extends JsonObject | String,
   KeyFunctions extends L.List<KeyFn<Input>>
 >(values: Input[], ...keys: KeyFunctions): Node<Input, KeyFunctions> {
-  const root = new RootNode(
+  const root = new Node(
     keys,
-    values
+    0,
+    values,
+    undefined
   )
   const thisNode = regroupFn(root)
   let children
