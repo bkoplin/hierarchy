@@ -36,11 +36,10 @@ export abstract class Node<
 > {
   constructor(
     public keyFns: KeyFuncs,
-    public depth: Depth,
+    public depth: I.Pos<Iter>,
     public records: Datum[],
     public id: N.Greater<Depth, 0> extends 1 ? ValueOf<Datum> : undefined
   ) {
-    const keyFn: KeyFuncs[Depth] = keyFns[depth - 1]
     const dims: GetDims<KeyFuncs> = keyFns.reduce(
       (acc, keyFn) => {
         if (acc.length === 0)
@@ -73,7 +72,7 @@ export abstract class Node<
       this.type = 'leaf' as unknown as (typeof this)['type']
   }
 
-  children: Depth extends KeyFuncs['length']
+  children: this extends { depth: KeyFuncs['length'] }
     ? undefined
     : Array<Node<Datum, KeyFuncs, I.Next<Iter>, I.Pos<I.Next<Iter>>>>
 
@@ -98,14 +97,13 @@ export abstract class Node<
   dims: GetDims<KeyFuncs>
 
   height: N.Sub<KeyFuncs['length'], Depth>
+  keyFn: KeyFuncs[I.Pos<I.Prev<Iter>>]
   name: {
     1: ValueOf<Datum>
     0: undefined
   }[N.Greater<Depth, 0>]
 
-  parent: N.Greater<Depth, 0> extends 0
-    ? undefined
-    : Node<Datum, KeyFuncs, I.Prev<Iter>>
+  parent: this extends { depth: 0 } ? undefined : Node<Datum, KeyFuncs, I.Prev<Iter>, I.Pos<I.Prev<Iter>>>
 
   type: Depth extends 0
     ? 'root'

@@ -109,7 +109,7 @@ describe(
           thirdAncestor,
           root,
         ] = ancestors
-        const d = root.descendantsAt({ dim: 'state', })[0].depth
+        const d = root.descendants()
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
