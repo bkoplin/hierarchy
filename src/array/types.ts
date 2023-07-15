@@ -2,25 +2,39 @@ import type {
   B, I, L, N, S,
 } from 'ts-toolbelt'
 import type {
-  JsonPrimitive, ValueOf,
+  IterableElement, JsonPrimitive, ValueOf,
 } from 'type-fest'
 
-export type AncestorArray<
-  T,
-  Arr extends L.List = []
-> = T extends { parent: { children: T[] } }
+export type AncestorArray<T, Arr extends L.List = []> = T extends {
+  parent: { children: T[] }
+}
   ? AncestorArray<T['parent'], [...Arr, T]>
   : [...Arr, T]
-export type DescendantArray<
-  T,
-  Descendants extends L.List = []
-> = T extends { children: Array<{ parent: T }> }
+export type DescendantArray<T, Descendants extends L.List = []> = T extends {
+  children: Array<{ parent: T }>
+}
   ? DescendantArray<T['children'][number], [...Descendants, T]>
   : [...Descendants, T]
+export type NodeLinks<
+  T extends { children?: unknown[]; parent?: unknown },
+  Links extends L.List = []
+> = {
+  1: Links
+  0: T['children'] extends Array<{ parent: T }>
+    ? NodeLinks<
+        T['children'][number],
+        [...Links, { source: T['parent']; target: T }]
+      >
+    : never
+}[T['children'] extends undefined ? 1 : 0]
 export type NodeArray<
   T,
-  Direction extends 'ancestors' | 'descendants' = 'descendants'
-> = Direction extends 'ancestors' ? AncestorArray<T> : DescendantArray<T>
+  Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
+> = Direction extends 'ancestors'
+  ? AncestorArray<T>
+  : Direction extends 'a'
+    ? AncestorArray<T>
+    : DescendantArray<T>
 export type NumRange<
   Min extends number = 0,
   Max extends number = N.Add<Min, 1>,
@@ -44,38 +58,25 @@ export type GetDims<KeyFunctions> = KeyFunctions extends unknown[]
       }
     ]
   : [undefined]
-export type DescendantDepths<T, Arr extends L.List = []> = T extends {
-  depth: infer Depth extends number
-  children?: Array<infer Child>
-}
-  ? Child extends undefined
-    ? [...Arr, Depth]
-    : [...Arr, ...DescendantDepths<Child, Arr>]
-  : Arr
-export type DescendantDims<T, Arr extends L.List = []> = T extends {
-  dim: infer Dim
-  children?: Array<infer Child>
-}
-  ? Child extends undefined
-    ? [...Arr, Dim extends readonly any[] ? Dim[0] : Dim]
-    : [...Arr, ...DescendantDims<Child, Arr>]
-  : Arr
-export type AncestorDepths<T, Arr extends L.List = []> = T extends {
-  depth: infer Depth extends number
-  parent?: infer Parent
-}
-  ? Parent extends undefined
-    ? [...Arr, Depth]
-    : [...Arr, ...AncestorDepths<Parent, Arr>]
-  : Arr
-export type AncestorDims<T, Arr extends L.List = []> = T extends {
-  dim: infer Dim
-  parent?: infer Parent
-}
-  ? Parent extends undefined
-    ? [...Arr, Dim extends readonly any[] ? Dim[0] : Dim]
-    : [...Arr, ...AncestorDims<Parent, Arr>]
-  : Arr
+export type DescendantDepths<T extends { depth: unknown }> = IterableElement<
+  NodeArray<T>
+>['depth']
+export type DescendantDims<T extends { dim: unknown }> = IterableElement<
+  NodeArray<T>
+>['dim']
+export type AncestorDepths<T extends { depth: unknown }> = IterableElement<
+  NodeArray<T, 'ancestors'>
+>['depth']
+export type AncestorDims<T extends { dim: unknown }> = IterableElement<
+  NodeArray<T, 'ancestors'>
+>['dim']
+export type NodeArrayKey<
+  T,
+  Key,
+  Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
+> = Key extends keyof NodeArray<T, Direction>[number]
+  ? NodeArray<T, Direction>[number][Key]
+  : never
 export type DimsDepthObject<
   T extends ReadonlyArray<any | readonly [any, any]>,
   Iter extends I.Iteration = I.IterationOf<0>

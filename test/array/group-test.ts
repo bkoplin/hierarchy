@@ -54,7 +54,7 @@ describe(
     test(
       'second level child has no children',
       () => {
-        const [ child, ] = groupByAge.children[0].children
+        const [ child, ] = groupByAge.leaves()
 
         expect(child.hasChildren()).toBe(false)
         expect(child.hasParent()).toBeTruthy()
@@ -227,7 +227,7 @@ describe(
       'find returns the correct node',
       () => {
         const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state', })
-        const found2 = groupByAge.descendantsAt({ depth: 2, })
+        const found2 = groupByAge.descendantsAt({ depth: -1, })
 
         expect(found[0].depth).toBe(2)
         expect(found2.map(n => [

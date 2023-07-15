@@ -17,7 +17,7 @@ import type {
   I, L, N,
 } from 'ts-toolbelt'
 import type {
-  GetDims, KeyFn, NodeArray, NumRange,
+  GetDims, KeyFn, NodeArray, NodeArrayKey, NodeLinks, NumRange,
 } from './types'
 
 export abstract class Node<
@@ -225,8 +225,8 @@ export abstract class Node<
   descendantsAt<
     ThisNode extends this,
     Param extends RequireExactlyOne<{
-      depth: IterableElement<NodeArray<ThisNode>>['depth']
-      dim: IterableElement<NodeArray<ThisNode>>['dim']
+      depth: NodeArrayKey<ThisNode, 'depth'>
+      dim: NodeArrayKey<ThisNode, 'dim'>
     }>
   >(depthOrDim: Param) {
     type DescendantAt<T> = Param['depth'] extends number
@@ -342,9 +342,7 @@ export abstract class Node<
     }
   }
 
-  hasChildren(): this is Depth extends KeyFuncs['length']
-    ? never
-    : Node<Datum, KeyFuncs, Iter, I.Pos<Iter>> {
+  hasChildren(): this is this extends { depth: KeyFuncs['length'] } ? never : this {
     return this?.height > 0
   }
   // hasChildren(): this is Merge<
@@ -361,7 +359,7 @@ export abstract class Node<
   //   return this?.height > 0
   // }
 
-  hasParent(): this is Depth extends 0 ? never : Node<Datum, KeyFuncs, Iter> {
+  hasParent(): this is this extends { depth: 0 } ? never : this {
     return this?.depth > 0
   }
 
@@ -370,10 +368,8 @@ export abstract class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<
-    Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>, KeyFuncs['length']>
-    > {
-    const leaves = []
+  leaves() {
+    const leaves = [] as unknown as Array<Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>, KeyFuncs['length']>>
 
     this.eachBefore((node) => {
       if (!node.children)
@@ -387,17 +383,7 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    * @see {@link path}
    */
-  links<
-    Target extends Node<
-      Datum,
-      KeyFuncs,
-      I.IterationOf<NumRange<Depth, KeyFuncs['length']>>,
-      NumRange<Depth, KeyFuncs['length']>
-    >
-  >(): Array<{
-    source: Get<Target, 'parent'>
-    target: Target
-  }> {
+  links(): NodeLinks<this> {
     const links = []
 
     this.each((node) => {
