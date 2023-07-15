@@ -5,20 +5,22 @@ import type {
   JsonPrimitive, ValueOf,
 } from 'type-fest'
 
-export type AncestorArray<T, Arr extends L.List = []> = T extends {
-  parent: infer P
-}
-  ? P extends undefined
-    ? [...Arr, T]
-    : AncestorArray<P, [...Arr, T]>
-  : Arr
-export type DescendantArray<T, Descendants extends L.List = [T]> = T extends {
-  children: Array<infer Child>
-}
-  ? Child extends undefined
-    ? Descendants
-    : DescendantArray<Child, [...Descendants, ...T['children']]>
-  : Descendants
+export type AncestorArray<
+  T,
+  Arr extends L.List = []
+> = T extends { parent: { children: T[] } }
+  ? AncestorArray<T['parent'], [...Arr, T]>
+  : [...Arr, T]
+export type DescendantArray<
+  T,
+  Descendants extends L.List = []
+> = T extends { children: Array<{ parent: T }> }
+  ? DescendantArray<T['children'][number], [...Descendants, T]>
+  : [...Descendants, T]
+export type NodeArray<
+  T,
+  Direction extends 'ancestors' | 'descendants' = 'descendants'
+> = Direction extends 'ancestors' ? AncestorArray<T> : DescendantArray<T>
 export type NumRange<
   Min extends number = 0,
   Max extends number = N.Add<Min, 1>,
@@ -32,14 +34,16 @@ export type NumRange<
 > = N.Greater<TrueMax, TrueMin> extends 1
   ? N.Range<TrueMin, TrueMax>[number]
   : TrueMin
-export type GetDims<
-  T,
-  ReturnArray extends L.List = readonly []
-> = T extends ReadonlyArray<infer Dim>
-  ? Dim extends readonly any[]
-    ? [...ReturnArray, Dim[0]]
-    : [...ReturnArray, Dim]
-  : ReturnArray
+export type GetDims<KeyFunctions> = KeyFunctions extends unknown[]
+  ? [
+      undefined,
+      ...{
+        [K in keyof KeyFunctions]: KeyFunctions[K] extends L.List
+          ? KeyFunctions[K][0]
+          : KeyFunctions[K]
+      }
+    ]
+  : [undefined]
 export type DescendantDepths<T, Arr extends L.List = []> = T extends {
   depth: infer Depth extends number
   children?: Array<infer Child>

@@ -123,8 +123,8 @@ describe(
       'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
       () => {
         const [ leaf, ] = groupByAge.children
-        const ancestor = leaf.ancestorAt({ dim: 'state', })
-        const depth2 = leaf.ancestorAt({ depth: 1, })
+        const ancestor = leaf.ancestorAt({ dim: 'booya', })
+        const depth2 = leaf.ancestorAt({ depth: 2, })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()

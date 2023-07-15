@@ -14,31 +14,23 @@ import type {
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import type {
-  I, N,
+  I, L, N,
 } from 'ts-toolbelt'
 import type {
-  AncestorArray,
-  AncestorDepths,
-  AncestorDims,
-  DescendantArray,
-  DescendantDepths,
-  DescendantDims,
-  GetDims,
-  KeyFn,
-  NumRange,
+  GetDims, KeyFn, NodeArray, NumRange,
 } from './types'
 
 export abstract class Node<
   Datum = any,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = ReadonlyArray<KeyFn<Datum>>,
   Iter extends I.Iteration = I.IterationOf<0>,
-  Depth extends I.Pos<Iter> = 0
+  Depth extends number = I.Pos<Iter>
 > {
   constructor(
     public keyFns: KeyFuncs,
     public depth: I.Pos<Iter>,
     public records: Datum[],
-    public id: N.Greater<Depth, 0> extends 1 ? ValueOf<Datum> : undefined
+    id: any
   ) {
     const dims: GetDims<KeyFuncs> = keyFns.reduce(
       (acc, keyFn) => {
@@ -56,15 +48,17 @@ export abstract class Node<
       [] as unknown as GetDims<KeyFuncs>
     )
 
+    this.id = id
     this.dims = dims
 
     this.dim = this.dims[this.depth]
+    this.keyFn = keyFns[this.depth - 1]
+    this.height = keyFns.length - this.depth
     this.parent = undefined as unknown as (typeof this)['parent']
     this.children = undefined as unknown as (typeof this)['children']
     this.type = 'node' as unknown as (typeof this)['type']
     this.name = id
     this.value = records.length
-    this.height = (keyFns.length - depth) as unknown as (typeof this)['height']
     this.colorScaleNum = records.length
     if (depth === 0)
       this.type = 'root' as unknown as (typeof this)['type']
@@ -90,24 +84,30 @@ export abstract class Node<
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
 
-  dim: KeyFuncs[I.Pos<I.Prev<Iter>>] extends readonly [infer Dim, any]
-    ? Dim
-    : KeyFuncs[I.Pos<I.Prev<Iter>>]
+  dim: GetDims<KeyFuncs>[this['depth']]
 
   dims: GetDims<KeyFuncs>
 
-  height: N.Sub<KeyFuncs['length'], Depth>
-  keyFn: KeyFuncs[I.Pos<I.Prev<Iter>>]
-  name: {
-    1: ValueOf<Datum>
-    0: undefined
-  }[N.Greater<Depth, 0>]
+  height: LiteralUnion<N.Sub<KeyFuncs['length'], this['depth']>, number>
+  id: this extends { depth: 0 }
+    ? undefined
+    : KeyFuncs[I.Pos<I.Prev<Iter>>] extends Exclude<
+        KeyFn<Datum>,
+        ValueOf<Datum>
+      >
+      ? ReturnType<KeyFuncs[I.Pos<I.Prev<Iter>>][1]>
+      : Get<Datum, KeyFuncs[I.Pos<I.Prev<Iter>>]>
 
-  parent: this extends { depth: 0 } ? undefined : Node<Datum, KeyFuncs, I.Prev<Iter>, I.Pos<I.Prev<Iter>>>
+  keyFn: KeyFuncs[N.Sub<this['depth'], 1>]
+  name: this['id']
 
-  type: Depth extends 0
+  parent: this extends { depth: 0 }
+    ? undefined
+    : Node<Datum, KeyFuncs, I.Prev<Iter>, I.Pos<I.Prev<Iter>>>
+
+  type: this extends { depth: 0 }
     ? 'root'
-    : Depth extends KeyFuncs['length']
+    : this extends { depth: KeyFuncs['length'] }
       ? 'leaf'
       : 'node'
 
@@ -123,7 +123,7 @@ export abstract class Node<
   );
 
   *[Symbol.iterator](): Generator<
-    IterableElement<DescendantArray<this>>,
+    IterableElement<NodeArray<this>>,
     void,
     unknown
     > {
@@ -160,11 +160,10 @@ export abstract class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    AncsDepths extends AncestorDepths<this>,
-    AncsDims extends AncestorDims<this>,
+    ThisNode extends this,
     Param extends RequireExactlyOne<{
-      depth: IterableElement<AncsDepths>
-      dim: IterableElement<AncsDims>
+      depth: L.UnionOf<N.Range<0, Depth>>
+      dim: IterableElement<NodeArray<ThisNode, 'ancestors'>>['dim']
     }>
   >(depthOrDim: Param) {
     type AncestorAt<T> = Param['depth'] extends number
@@ -196,15 +195,21 @@ export abstract class Node<
    * @see {ancestorAt}
    */
   ancestors() {
-    const nodes: any[] = [ this, ]
+    const nodes = []
+
+    nodes.push(this)
     let node = this
 
-    while (typeof node !== 'undefined' && typeof node.parent !== 'undefined') {
-      nodes.push(node.parent)
+    while (
+      typeof node !== 'undefined' &&
+      'parent' in node &&
+      typeof node.parent !== 'undefined'
+    ) {
+      nodes.push(parent)
       node = node.parent
     }
 
-    return nodes as unknown as AncestorArray<this>
+    return nodes as unknown as NodeArray<this, 'ancestors'>
   }
 
   /**
@@ -213,16 +218,15 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#descendants}
    * @see {@link ancestors}
    */
-  descendants(): DescendantArray<this> {
+  descendants() {
     return Array.from(this)
   }
 
   descendantsAt<
-    DescDepths extends DescendantDepths<this>,
-    DescDims extends DescendantDims<this>,
+    ThisNode extends this,
     Param extends RequireExactlyOne<{
-      depth: IterableElement<DescDepths>
-      dim: IterableElement<DescDims>
+      depth: IterableElement<NodeArray<ThisNode>>['depth']
+      dim: IterableElement<NodeArray<ThisNode>>['dim']
     }>
   >(depthOrDim: Param) {
     type DescendantAt<T> = Param['depth'] extends number
