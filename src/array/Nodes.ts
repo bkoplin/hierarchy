@@ -17,7 +17,12 @@ import type {
   I, L, N,
 } from 'ts-toolbelt'
 import type {
-  GetDims, KeyFn, NodeArray, NodeArrayKey, NodeLinks, NumRange,
+  GetDims,
+  KeyFn,
+  NodeArray,
+  NodeArrayKey,
+  NodeLinks,
+  NumRange,
 } from './types'
 
 export abstract class Node<
@@ -122,11 +127,7 @@ export abstract class Node<
     length
   );
 
-  *[Symbol.iterator](): Generator<
-    IterableElement<NodeArray<this>>,
-    void,
-    unknown
-    > {
+  *[Symbol.iterator](): Generator<NodeArray<this>[number], void, unknown> {
     let node = this
     let current
     let next = [ node, ]
@@ -342,7 +343,9 @@ export abstract class Node<
     }
   }
 
-  hasChildren(): this is this extends { depth: KeyFuncs['length'] } ? never : this {
+  hasChildren(): this is this extends { depth: KeyFuncs['length'] }
+    ? never
+    : this {
     return this?.height > 0
   }
   // hasChildren(): this is Merge<
@@ -369,7 +372,14 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
   leaves() {
-    const leaves = [] as unknown as Array<Node<Datum, KeyFuncs, I.IterationOf<KeyFuncs['length']>, KeyFuncs['length']>>
+    const leaves = [] as unknown as Array<
+      Node<
+        Datum,
+        KeyFuncs,
+        I.IterationOf<KeyFuncs['length']>,
+        KeyFuncs['length']
+      >
+    >
 
     this.eachBefore((node) => {
       if (!node.children)
@@ -403,14 +413,26 @@ export abstract class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path<EndNode>(end: EndNode): Array<
-    Node<
-      Datum,
-      KeyFuncs,
-      I.IterationOf<N.Range<0, Depth | Get<EndNode, 'depth'>>[number]>,
-      N.Range<0, Depth | Get<EndNode, 'depth'>>[number]
-    >
-  > {
+  path<ThisNode extends this, EndNode extends { depth: number }>(end: EndNode) {
+    type ReturnPath<
+      ThisIter extends I.Iteration = I.IterationOf<ThisNode['depth']>,
+      EndIter extends I.Iteration = I.IterationOf<0>,
+      PathArray extends L.List = []
+    > = {
+      0: {
+        0: PathArray
+        1: ReturnPath<
+          ThisIter,
+          I.Next<EndIter>,
+          [...PathArray, Node<Datum, KeyFuncs, EndIter, I.Pos<EndIter>>]
+        >
+      }[N.LowerEq<I.Pos<EndIter>, EndNode['depth']>]
+      1: ReturnPath<
+        I.Prev<ThisIter>,
+        EndIter,
+        [...PathArray, Node<Datum, KeyFuncs, ThisIter, I.Pos<ThisIter>>]
+      >
+    }[N.Greater<I.Pos<ThisIter>, 0>]
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -432,7 +454,7 @@ export abstract class Node<
       )
       end = end.parent
     }
-    return nodes
+    return nodes as unknown as ReturnPath
   }
 
   setColor(

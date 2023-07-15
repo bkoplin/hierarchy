@@ -205,11 +205,10 @@ describe(
           first,
           last,
         ] = groupByAge.children
+        const paths = last.leaves()[0].path(first.leaves()[0])
+        const l= paths.length
 
-        expect(last
-          .leaves()[0]
-          .path(first.leaves()[0])
-          .map(node => node.depth)).toStrictEqual([
+        expect(paths.map(node => node.depth)).toStrictEqual([
           2,
           1,
           0,
