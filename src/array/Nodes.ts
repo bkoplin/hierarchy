@@ -67,8 +67,6 @@ export class Node<
   ) {
     const dims: GetDims<KeyFuncs> = keyFns.reduce(
       (acc, keyFn) => {
-        if (acc.length === 0)
-          acc.push(undefined)
         if (
           typeof keyFn !== 'string' &&
         typeof keyFn !== 'number' &&
@@ -78,7 +76,7 @@ export class Node<
         else acc.push(keyFn)
         return acc
       },
-      [] as unknown as GetDims<KeyFuncs>
+      [ undefined, ] as unknown as GetDims<KeyFuncs>
     )
 
     this.id = id
