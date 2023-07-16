@@ -2,46 +2,46 @@ import type {
   B, I, L, N, S,
 } from 'ts-toolbelt'
 import type {
-  IterableElement, JsonObject, JsonPrimitive,
+  IterableElement,
+  JsonObject,
+  JsonPrimitive,
+  LiteralUnion,
 } from 'type-fest'
 
-export type AncestorArray<T, Ancestors extends L.List = []> = T extends {
+export type AncestorArray<T extends object = { height: number; depth: number; dim: unknown }, Ancestors extends L.List = []> = T extends {
   height: number
+  depth: LiteralUnion<0, number>
+  dim: unknown
+}
+  ? T['depth'] extends 0
+    ? [...Ancestors, T]
+    : T extends {
+      parent: {
+        height: N.Add<T['height'], 1>
+        depth: N.Sub<T['depth'], 1>
+        dim: unknown
+      }
+    }
+      ? AncestorArray<T['parent'], [...Ancestors, T]>
+      : [...Ancestors, T]
+  : never
+export type DescendantArray<T extends object = { height: number; depth: number; dim: unknown }, Descendants extends L.List = []> = T extends {
+  height: LiteralUnion<0, number>
   depth: number
   dim: unknown
 }
-  ? T extends {
-    parent: {
-      height: N.Add<T['height'], 1>
-      depth: N.Sub<T['depth'], 1>
-      dim: unknown
+  ? N.Greater<T['height'], 0> extends 0
+    ? [...Descendants, T]
+    : T extends {
+      children: Array<{
+        height: N.Sub<T['height'], 1>
+        depth: N.Add<T['depth'], 1>
+        dim: unknown
+      }>
     }
-  }
-    ? AncestorArray<T['parent'], [...Ancestors, T]>
-    : [...Ancestors, T]
+      ? DescendantArray<T['children'][number], [...Descendants, T]>
+      : [...Descendants, T]
   : never
-export type DescendantArray<
-  T extends {
-    height: number
-    depth: number
-    dim: unknown
-  } = {
-    height: 1
-    depth: 0
-    dim: unknown
-  },
-  Descendants extends L.List = []
-> = T['height'] extends 0
-  ? [...Descendants, T]
-  : T extends {
-    children: Array<{
-      height: N.Sub<T['height'], 1>
-      depth: N.Add<T['depth'], 1>
-      dim: unknown
-    }>
-  }
-    ? DescendantArray<T['children'][number], [...Descendants, T]>
-    : [...Descendants, T]
 export type NodeLinks<
   T extends { children?: unknown[]; parent?: unknown },
   Links extends L.List = []
@@ -101,8 +101,8 @@ export type NodeArrayKey<
   T,
   Key,
   Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
-> = Key extends keyof NodeArray<T, Direction>[number]
-  ? NodeArray<T, Direction>[number][Key]
+> = Key extends keyof IterableElement<NodeArray<T, Direction>>
+  ? IterableElement<NodeArray<T, Direction>>[Key]
   : never
 export type DimsDepthObject<
   T extends ReadonlyArray<any | readonly [any, any]>,
