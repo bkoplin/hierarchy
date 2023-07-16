@@ -2,19 +2,46 @@ import type {
   B, I, L, N, S,
 } from 'ts-toolbelt'
 import type {
-  IterableElement, JsonPrimitive, ValueOf,
+  IterableElement, JsonObject, JsonPrimitive,
 } from 'type-fest'
 
-export type AncestorArray<T, Arr extends L.List = []> = T extends {
-  parent: { children: T[] }
+export type AncestorArray<T, Ancestors extends L.List = []> = T extends {
+  height: number
+  depth: number
+  dim: unknown
 }
-  ? AncestorArray<T['parent'], [...Arr, T]>
-  : [...Arr, T]
-export type DescendantArray<T, Descendants extends L.List = []> = T extends {
-  children: Array<{ parent: T }>
-}
-  ? DescendantArray<T['children'][number], [...Descendants, T]>
-  : [...Descendants, T]
+  ? T extends {
+    parent: {
+      height: N.Add<T['height'], 1>
+      depth: N.Sub<T['depth'], 1>
+      dim: unknown
+    }
+  }
+    ? AncestorArray<T['parent'], [...Ancestors, T]>
+    : [...Ancestors, T]
+  : never
+export type DescendantArray<
+  T extends {
+    height: number
+    depth: number
+    dim: unknown
+  } = {
+    height: 1
+    depth: 0
+    dim: unknown
+  },
+  Descendants extends L.List = []
+> = T['height'] extends 0
+  ? [...Descendants, T]
+  : T extends {
+    children: Array<{
+      height: N.Sub<T['height'], 1>
+      depth: N.Add<T['depth'], 1>
+      dim: unknown
+    }>
+  }
+    ? DescendantArray<T['children'][number], [...Descendants, T]>
+    : [...Descendants, T]
 export type NodeLinks<
   T extends { children?: unknown[]; parent?: unknown },
   Links extends L.List = []
@@ -99,9 +126,35 @@ export type DimsDimObject<
     : T[I.Pos<I.Prev<Iter>>],
   I.Pos<Iter>
 >
-export type KeyFn<T> =
-  | [string, (datum: T, idx?: number, vals?: T[]) => ValueOf<T>]
-  | keyof T
+export type KeyFnTuple<T> = readonly [
+  string,
+  (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
+]
+export type KeyFnKey<T> = keyof T
+export type KeyFn<T> = KeyFnTuple<T> | keyof T
+export type GetIdFromKey<K> = K extends undefined
+  ? undefined
+  : K extends KeyFn<infer Datum>
+    ? Datum extends JsonObject | string
+      ? K extends KeyFnTuple<Datum>
+        ? ReturnType<K[1]>
+        : K extends KeyFnKey<Datum>
+          ? Datum[K]
+          : undefined
+      : undefined
+    : undefined
+export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
+export type GetKeyFn<K> = K extends undefined
+  ? () => undefined
+  : K extends KeyFn<infer Datum>
+    ? Datum extends JsonObject | string
+      ? K extends KeyFnTuple<Datum>
+        ? K[1]
+        : K extends KeyFnKey<Datum>
+          ? (datum: Datum) => Datum[K]
+          : () => undefined
+      : () => undefined
+    : () => undefined
 
 type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
