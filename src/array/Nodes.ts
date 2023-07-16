@@ -149,13 +149,15 @@ export class Node<
     length
   );
 
-  *[Symbol.iterator](): Generator<IterableElement<
-    NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>
-  >, void, unknown> {
+  *[Symbol.iterator](): Generator<
+    IterableElement<NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>>,
+    void,
+    unknown
+    > {
     // type ThisNode = Node<Datum, KeyFuncs, Iter, Depth>
-    let node: ThisNode | IterableElement<NodeArray<ThisNode>> = this
-    let current: ThisNode[]
-    let next = [ node, ] as unknown as ThisNode[]
+    let node: IterableElement<NodeArray<this>> = this
+    let current: NodeArray<this>
+    let next = [ node, ] as unknown as NodeArray<this>
     let children
     let i
     let n
@@ -171,7 +173,7 @@ export class Node<
     } while (next.length)
   }
 
-  addChild(child: Node<Datum, KeyFuncs, I.Next<Iter>, I.Pos<I.Next<Iter>>>) {
+  addChild(child: IterableElement<this['children']>) {
     if (typeof this.children === 'undefined')
       this.children = [] as unknown as (typeof this)['children']
     this.children!.push(child)
@@ -186,13 +188,12 @@ export class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    ThisNode extends Node<Datum, KeyFuncs, Iter, Depth>,
     Param extends RequireExactlyOne<{
       depth: L.KeySet<0, Depth>
-      dim: NodeArrayKey<ThisNode, 'dim', 'ancestors'>
+      dim: NodeArrayKey<Node<Datum, KeyFuncs, Iter, Depth>, 'dim', 'ancestors'>
     }>
-  >(this: ThisNode, depthOrDim: Param) {
-    type AncestorAt<T> = T extends IterableElement<NodeArray<ThisNode, 'a'>>
+  >(depthOrDim: Param) {
+    type AncestorAt<T> = T extends IterableElement<NodeArray<this, 'a'>>
       ? Param['depth'] extends number
         ? T['depth'] extends Param['depth']
           ? T
@@ -261,7 +262,7 @@ export class Node<
             : DescendantAt<T>
           : never
       : never
-    return this.descendants().filter((node) => {
+    return this.descendants().filter((node: unknown) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim
@@ -278,10 +279,10 @@ export class Node<
    * @see {@link eachBefore}
    * @see {@link eachAfter}
    */
-  each(
-    this: this,
-    callback: (node: IterableElement<this>, index?: number) => void
-  ): this {
+  each(callback: (
+    node: IterableElement<NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>>,
+    index?: number
+  ) => void): this {
     let index = -1
 
     for (const node of this) {
@@ -300,10 +301,10 @@ export class Node<
    * visited. The specified function is passed the current descendant, the zero-based traversal
    * index, and this node. If that is specified, it is the this context of the callback.
    */
-  eachAfter(
-    this: this,
-    callback: (node: IterableElement<this>, index?: number) => void
-  ): this {
+  eachAfter(callback: (
+    node: IterableElement<NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>>,
+    index?: number
+  ) => void): this {
     const nodes = [ this, ]
     const next = []
     let children
@@ -335,10 +336,10 @@ export class Node<
    * @see {@link each}
    * @see {@link eachAfter}
    */
-  eachBefore(
-    this: this,
-    callback: (node: IterableElement<this>, index?: number) => void
-  ): this {
+  eachBefore(callback: (
+    node: IterableElement<NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>>,
+    index?: number
+  ) => void): this {
     const nodes = [ this, ]
     let children
     let i
@@ -359,8 +360,7 @@ export class Node<
   /**
    * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
    * @see {@link https://github.com/d3/d3-hierarchy#find}
-   */
-  find(callback: (node: IterableElement<this>, index?: number) => boolean): this | undefined {
+  find(callback: (node: IterableElement<NodeArray<Node<Datum, KeyFuncs, Iter, Depth>>>, index?: number) => boolean): this | undefined {
     let index = -1
 
     for (const node of this) {
@@ -411,7 +411,7 @@ export class Node<
     >
 
     this.eachBefore((node) => {
-      if (!node.children)
+      if (node.height === 0)
         leaves.push(node)
     })
     return leaves
