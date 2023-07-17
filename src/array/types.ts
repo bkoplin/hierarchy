@@ -47,17 +47,13 @@ export type NodeArray<
   Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
 > = Direction extends 'ancestors' | 'a' ? AncestorArray<T> : DescendantArray<T>
 export type GetDims<
-  KeyFunctions extends readonly any[],
-  Iter extends I.Iteration = I.IterationOf<0>,
-  Arr extends L.List = []
-> = {
-  0: Arr
-  1: GetDims<
-    KeyFunctions,
-    I.Next<Iter>,
-    [...Arr, GetDim<KeyFunctions, I.Pos<Iter>>]
-  >
-}[N.LowerEq<I.Pos<Iter>, KeyFunctions['length']>]
+  KeyFunctions,
+  Arr extends L.List = [undefined]
+> = KeyFunctions extends readonly [infer KeyFn, ...infer Rest]
+  ? KeyFn extends readonly [infer Dim, any]
+    ? GetDims<Rest, [...Arr, Dim]>
+    : GetDims<Rest, [...Arr, KeyFn]>
+  : Arr
 export type NodeArrayKey<
   T,
   Key,

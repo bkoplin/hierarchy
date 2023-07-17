@@ -201,18 +201,18 @@ export class Node<
     Param extends RequireExactlyOne<
       {
         depth: L.KeySet<0, Depth>
-        dim: GetDims<KeyFuncs>[L.KeySet<1, Depth>]
+        dim: L.Take<GetDims<KeyFuncs>, Depth>
       },
       'depth' | 'dim'
     >
   >(
     this: T,
     depthOrDim: Param
-  ): Param extends { depth: L.KeySet<0, Depth> }
-      ? Node<Datum, KeyFuncs, Param['depth']>
-      : Param extends { dim: undefined }
-        ? never
-        : Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim']>> {
+  ): Param extends { depth: undefined; dim: undefined }
+      ? never
+      : Param extends { depth: L.KeySet<0, Depth> }
+        ? Node<Datum, KeyFuncs, Param['depth']>
+        : Param extends { dim: Param['dim'] } ? Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim']>> : never {
     let node = this
     let test = false
 
@@ -437,7 +437,10 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path<ThisNode extends this, EndNode extends { depth: number }>(this: ThisNode, end: EndNode) {
+  path<ThisNode extends this, EndNode extends { depth: number }>(
+    this: ThisNode,
+    end: EndNode
+  ) {
     type ReturnPath<
       ThisIter extends I.Iteration = I.IterationOf<ThisNode['depth']>,
       EndIter extends I.Iteration = I.IterationOf<0>,
