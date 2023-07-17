@@ -24,7 +24,7 @@ describe(
     test(
       'root tests',
       () => {
-        expect(groupByAge.dim).toBeUndefined()
+        expect(groupByAge.dims).toBeUndefined()
         expect(groupByAge.depth).toBe(0)
         expect(groupByAge.parent).toBeUndefined()
       }
@@ -110,10 +110,12 @@ describe(
           root,
         ] = ancestors
         const d = root.descendants()
+
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        expect(thirdAncestor.dims).toBe(true)
-        expect(firstAncestor.ancestorAt({ dim: 'state', }).depth).toBe(true)
+        const ansc = thirdAncestor.ancestorAt({ dim: 'state_letter', })
+
+        expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
       }
@@ -205,7 +207,7 @@ describe(
           last,
         ] = groupByAge.children
         const paths = last.leaves()[0].path(first.leaves()[0])
-        const l= paths.length
+        const l = paths.length
 
         expect(paths.map(node => node.depth)).toStrictEqual([
           2,
@@ -224,15 +226,15 @@ describe(
     test(
       'find returns the correct node',
       () => {
-        const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state', })
-        const found2 = groupByAge.descendantsAt({ depth: 2 })
+        const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state_letter', })
+        const found2 = groupByAge.descendantsAt({ depth: 2, })
 
         expect(found[0].depth).toBe(2)
         expect(found2.map(n => [
           n.id,
           n.value,
           n.color,
-          n.depth
+          n.depth,
         ])).toMatchInlineSnapshot(`
           [
             [

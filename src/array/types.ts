@@ -1,120 +1,75 @@
 import type {
-  B, I, L, N, S,
+  I, L, N,
 } from 'ts-toolbelt'
 import type {
+  Get,
   IterableElement,
   JsonObject,
   JsonPrimitive,
-  LiteralUnion,
+  StringKeyOf,
 } from 'type-fest'
 
-export type AncestorArray<T extends object = { height: number; depth: number; dim: unknown }, Ancestors extends L.List = []> = T extends {
-  height: number
-  depth: LiteralUnion<0, number>
-  dim: unknown
+export type AncestorArray<
+  Node,
+  AncestorList extends L.List = []
+> = Node extends {
+  dim: infer NodeDim
+  depth: infer NodeDepth
+  height: infer NodeHeight
+  parent?: infer Parent
+  children?: Array<infer Child>
 }
-  ? T['depth'] extends 0
-    ? [...Ancestors, T]
-    : T extends {
-      parent: {
-        height: N.Add<T['height'], 1>
-        depth: N.Sub<T['depth'], 1>
-        dim: unknown
-      }
-    }
-      ? AncestorArray<T['parent'], [...Ancestors, T]>
-      : [...Ancestors, T]
+  ? Node['parent'] extends undefined
+    ? [...AncestorList, Node]
+    : AncestorArray<Parent, [...AncestorList, Node]>
   : never
-export type DescendantArray<T extends object = { height: number; depth: number; dim: unknown }, Descendants extends L.List = []> = T extends {
-  height: LiteralUnion<0, number>
-  depth: number
-  dim: unknown
+export type DescendantArray<
+  Node,
+  DescendantList extends L.List = []
+> = Node extends {
+  dim: infer NodeDim
+  depth: infer NodeDepth
+  height: infer NodeHeight
+  parent?: infer Parent
+  children?: Array<infer Child>
 }
-  ? N.Greater<T['height'], 0> extends 0
-    ? [...Descendants, T]
-    : T extends {
-      children: Array<{
-        height: N.Sub<T['height'], 1>
-        depth: N.Add<T['depth'], 1>
-        dim: unknown
-      }>
-    }
-      ? DescendantArray<T['children'][number], [...Descendants, T]>
-      : [...Descendants, T]
+  ? Node['children'] extends undefined
+    ? [...DescendantList, Node]
+    : DescendantArray<Child, [...DescendantList, Node]>
   : never
-export type NodeLinks<
-  T extends { children?: unknown[]; parent?: unknown },
-  Links extends L.List = []
-> = {
-  1: Links
-  0: T['children'] extends Array<{ parent: T }>
-    ? NodeLinks<
-        T['children'][number],
-        [...Links, { source: T['parent']; target: T }]
-      >
-    : never
-}[T['children'] extends undefined ? 1 : 0]
+export type NodeLinks<T, Links extends L.List = []> = T extends {
+  children: Array<infer Child>
+}
+  ? NodeLinks<Child, [...Links, { source: Get<T, ['parent']>; target: T }]>
+  : [...Links, { source: Get<T, ['parent']>; target: T }]
 export type NodeArray<
   T,
   Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
-> = Direction extends 'ancestors'
-  ? AncestorArray<T>
-  : Direction extends 'a'
-    ? AncestorArray<T>
-    : DescendantArray<T>
-export type NumRange<
-  Min extends number = 0,
-  Max extends number = N.Add<Min, 1>,
-  Rules extends `${'[' | '('}${']' | ')'}` = '[]',
-  TrueMin extends number = S.Split<Rules, ''>[0] extends '['
-    ? Min
-    : N.Add<Min, 1>,
-  TrueMax extends number = S.Split<Rules, ''>[1] extends ']'
-    ? Max
-    : N.Sub<Max, 1>
-> = N.Greater<TrueMax, TrueMin> extends 1
-  ? N.Range<TrueMin, TrueMax>[number]
-  : TrueMin
-export type GetDims<KeyFunctions> = KeyFunctions extends unknown[]
-  ? [
-      undefined,
-      ...{
-        [K in keyof KeyFunctions]: KeyFunctions[K] extends L.List
-          ? KeyFunctions[K][0]
-          : KeyFunctions[K]
-      }
-    ]
-  : [undefined]
-export type DescendantDepths<T extends { depth: unknown }> = IterableElement<
-  NodeArray<T>
->['depth']
-export type DescendantDims<T extends { dim: unknown }> = IterableElement<
-  NodeArray<T>
->['dim']
-export type AncestorDepths<T extends { depth: unknown }> = IterableElement<
-  NodeArray<T, 'ancestors'>
->['depth']
-export type AncestorDims<T extends { dim: unknown }> = IterableElement<
-  NodeArray<T, 'ancestors'>
->['dim']
+> = Direction extends 'ancestors' | 'a' ? AncestorArray<T> : DescendantArray<T>
+export type GetDims<
+  KeyFunctions extends readonly any[],
+  Iter extends I.Iteration = I.IterationOf<0>,
+  Arr extends L.List = []
+> = {
+  0: Arr
+  1: GetDims<
+    KeyFunctions,
+    I.Next<Iter>,
+    [...Arr, GetDim<KeyFunctions, I.Pos<Iter>>]
+  >
+}[N.LowerEq<I.Pos<Iter>, KeyFunctions['length']>]
 export type NodeArrayKey<
   T,
   Key,
   Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
-> = Key extends keyof IterableElement<NodeArray<T, Direction>>
-  ? IterableElement<NodeArray<T, Direction>>[Key]
+> = Key extends StringKeyOf<T>
+  ? Get<IterableElement<NodeArray<T, Direction>>, [Key]>
   : never
-export type DimsDepthObject<
-  T extends ReadonlyArray<any | readonly [any, any]>,
-  Iter extends I.Iteration = I.IterationOf<0>
-> = Record<
-  I.Pos<Iter>,
-  T[I.Pos<Iter>] extends [infer Dim, any]
-    ? Dim extends JsonPrimitive
-      ? `${Dim}`
-      : never
-    : T[I.Pos<I.Prev<Iter>>]
->
+export type DimsDepthObject<T> = Get<T, ['dims']> extends any[]
+  ? {
+      [K in keyof Get<T, ['dims']> as `${K & number}`]: Get<T, ['dims', K]>
+    }
+  : never
 export type DimsDimObject<
   T extends ReadonlyArray<any | readonly [any, any]>,
   Iter extends I.Iteration = I.IterationOf<0>
@@ -126,6 +81,27 @@ export type DimsDimObject<
     : T[I.Pos<I.Prev<Iter>>],
   I.Pos<Iter>
 >
+export type DepthFromDim<
+  Node,
+  Dim,
+  Direction extends 'a' | 'ascending' | 'd' | 'descending' = 'a'
+> = Node extends {
+  dim: infer NodeDim
+  depth: infer NodeDepth
+  height: infer NodeHeight
+  parent?: infer Parent
+  children?: Array<infer Child>
+}
+  ? Dim extends NodeDim
+    ? NodeDepth
+    : Direction extends 'a' | 'ascending'
+      ? Node['parent'] extends undefined
+        ? never
+        : DepthFromDim<Parent, Dim, Direction>
+      : Node['children'] extends undefined
+        ? never
+        : DepthFromDim<Child, Dim, Direction>
+  : never
 export type KeyFnTuple<T> = readonly [
   string,
   (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
@@ -144,7 +120,11 @@ export type GetIdFromKey<K> = K extends undefined
       : undefined
     : undefined
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
-export type GetKeyFn<K> = K extends undefined
+export type GetKeyFn<
+  KeyFuncs extends readonly any[],
+  D extends number,
+  K = Get<KeyFuncs, [`${N.Sub<D, 1>}`]>
+> = K extends undefined
   ? () => undefined
   : K extends KeyFn<infer Datum>
     ? Datum extends JsonObject | string
@@ -155,25 +135,13 @@ export type GetKeyFn<K> = K extends undefined
           : () => undefined
       : () => undefined
     : () => undefined
-
-type DepthAndHeightOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-
-export type FilteredDepthList<
-  MinVal extends number = 0,
-  MaxVal extends number = L.Last<DepthAndHeightOptions>,
-  Ln extends L.List<number> = [],
-  Idx extends I.Iteration = I.IterationOf<0>
-> = {
-  0: Ln[number]
-  1: FilteredDepthList<
-    MinVal,
-    MaxVal,
-    B.And<
-      N.LowerEq<DepthAndHeightOptions[I.Pos<Idx>], MaxVal>,
-      N.GreaterEq<DepthAndHeightOptions[I.Pos<Idx>], MinVal>
-    > extends 1
-      ? [...Ln, DepthAndHeightOptions[I.Pos<Idx>]]
-      : Ln,
-    I.Next<Idx>
-  >
-}[N.Lower<I.Pos<I.Next<Idx>>, L.Length<DepthAndHeightOptions>>]
+export type GetDim<
+  KeyFuncs extends readonly any[],
+  Depth extends L.KeySet<0, KeyFuncs['length']> = 0
+> = Depth extends 0
+  ? undefined
+  : KeyFuncs[N.Sub<Depth, 1>] extends readonly [infer Dim, any]
+    ? Dim
+    : KeyFuncs[N.Sub<Depth, 1>] extends JsonPrimitive
+      ? KeyFuncs[N.Sub<Depth, 1>]
+      : undefined
