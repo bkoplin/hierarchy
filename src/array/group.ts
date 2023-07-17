@@ -42,7 +42,14 @@ export function group<
 
   return root
 
-  function regroupFn<NodeType extends Node<Input, KeyFunctions>>(node: NodeType) {
+  function regroupFn<
+    NodeType extends Node<
+      Input,
+      KeyFunctions,
+      L.KeySet<0, KeyFunctions['length']>,
+      L.KeySet<0, KeyFunctions['length']>
+    >
+  >(node: NodeType) {
     objectEntries(groupBy(
       x => node.keyFn(x),
       node.records

@@ -77,7 +77,7 @@ export class Node<
     public depth: Depth,
     id?: any
   ) {
-    const dims: GetDims<KeyFuncs> = [ undefined, ]
+    const dims = [ undefined, ] as unknown as GetDims<KeyFuncs>
 
     this.height = (keyFns.length - depth) as Height
     keyFns.forEach((keyFn) => {
@@ -128,7 +128,7 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: GetDims<KeyFuncs>[Depth]
+  dim: this['dims'][this['depth']]
 
   dims: GetDims<KeyFuncs>
 
@@ -201,7 +201,7 @@ export class Node<
     Param extends RequireExactlyOne<
       {
         depth: L.KeySet<0, Depth>
-        dim: L.Take<GetDims<KeyFuncs>, Depth>
+        dim: GetDims<KeyFuncs, 1, Depth>[number]
       },
       'depth' | 'dim'
     >
@@ -212,7 +212,7 @@ export class Node<
       ? never
       : Param extends { depth: L.KeySet<0, Depth> }
         ? Node<Datum, KeyFuncs, Param['depth']>
-        : Param extends { dim: Param['dim'] } ? Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim']>> : never {
+        : Param extends { dim: GetDims<KeyFuncs, 1, Depth>[number] } ? Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim']>> : never {
     let node = this
     let test = false
 
@@ -263,7 +263,7 @@ export class Node<
     Param extends RequireExactlyOne<
       {
         depth: L.KeySet<Depth, KeyFuncs['length']>
-        dim: GetDims<KeyFuncs>[L.KeySet<Depth, KeyFuncs['length']>]
+        dim: GetDims<KeyFuncs, Depth>[number]
       },
       'depth' | 'dim'
     >
@@ -272,9 +272,9 @@ export class Node<
     depthOrDim: Param
   ): Param extends { depth: L.KeySet<Depth, KeyFuncs['length']> }
       ? Array<Node<Datum, KeyFuncs, Param['depth']>>
-      : Param extends { dim: undefined }
-        ? never
-        : Array<Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim'], 'd'>>> {
+      : Param extends { dim: GetDims<KeyFuncs, Depth>[number] }
+        ? Array<Node<Datum, KeyFuncs, DepthFromDim<T, Param['dim'], 'd'>>>
+        : never {
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
