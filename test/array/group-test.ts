@@ -13,7 +13,7 @@ const groupByAge = group(
   'education_level',
   [
     'state_letter' as const,
-    x => x.state[0],
+    (x) => x.state[0],
   ],
   'state'
 )
@@ -25,14 +25,14 @@ describe(
       'root tests',
       () => {
         expect(groupByAge.dims).toBeUndefined()
-        expect(groupByAge.depth).toBe(0)
+        expect(groupByAge.height).toBe(0)
         expect(groupByAge.parent).toBeUndefined()
       }
     )
     test(
       'first level child tests',
       () => {
-        const [ child, ] = groupByAge.children
+        const [ child, ] = groupByAge.children[0].children
 
         expect(child.dim).toEqual('education_level')
         expect(child.depth).toEqual(1)
@@ -109,11 +109,11 @@ describe(
           thirdAncestor,
           root,
         ] = ancestors
-        const d = root.descendants()
-
+        const [root, desc] = root.descendants()
+        const dep = desc.depth
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        const ansc = thirdAncestor.ancestorAt({ dim: 'state_letter', })
+        const ansc = thirdAncestor.ancestorAt({ depth: 4, })
 
         expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
@@ -125,7 +125,10 @@ describe(
       () => {
         const [ leaf, ] = groupByAge.children
         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
-        const depth2 = leaf.ancestorAt({ depth: 2, })
+        const depth2 = leaf.ancestorAt({
+          depth: 2,
+          dim: 'education_level',
+        })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()
@@ -140,6 +143,7 @@ describe(
   'leaf node tests',
   () => {
     const [ leaf, ] = groupByAge.leaves()
+    const ancestor = leaf.ancestorAt({ dim: 'state_letter', })
 
     test(
       'first leaf node of root has depth of 2 and haschildren of false',
@@ -209,7 +213,7 @@ describe(
         const paths = last.leaves()[0].path(first.leaves()[0])
         const l = paths.length
 
-        expect(paths.map(node => node.depth)).toStrictEqual([
+        expect(paths.map((node) => node.depth)).toStrictEqual([
           2,
           1,
           0,
@@ -230,7 +234,7 @@ describe(
         const found2 = groupByAge.descendantsAt({ depth: 2, })
 
         expect(found[0].depth).toBe(2)
-        expect(found2.map(n => [
+        expect(found2.map((n) => [
           n.id,
           n.value,
           n.color,

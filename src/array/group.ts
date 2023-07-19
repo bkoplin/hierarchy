@@ -11,16 +11,15 @@ import { Node, } from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
-  KeyFunctions extends FixedLengthArray<KeyFn<Input>, L.KeySet<1, 12>>
+  KeyFunctions extends ReadonlyArray<KeyFn<Input>>
 >(
   values: Input[],
   ...keys: KeyFunctions
-): Node<Input, KeyFunctions, 0, KeyFunctions['length']> {
+): Node<Input, KeyFunctions, 0> {
   const root = new Node(
     keys,
     values,
-    0 as const,
-    keys.length
+    0 as const
   )
 
   regroupFn(root)
@@ -31,9 +30,9 @@ export function group<
 
   root
     .eachBefore((node) => {
-      if (node.hasChildren()) {
-        node.children!.forEach((child) => {
-          if (child.hasParent())
+      if (typeof node.children !== 'undefined') {
+        node.children.forEach((child) => {
+          if (child.parent)
             child.parent = node
         })
       }
@@ -46,12 +45,11 @@ export function group<
     NodeType extends Node<
       Input,
       KeyFunctions,
-      L.KeySet<0, KeyFunctions['length']>,
       L.KeySet<0, KeyFunctions['length']>
     >
   >(node: NodeType) {
     objectEntries(groupBy(
-      x => node.keyFn(x),
+      (x) => node.keyFn(x),
       node.records
     )).forEach((vals) => {
       const [

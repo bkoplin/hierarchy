@@ -1,23 +1,28 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["vitest/globals", "vitest/importMeta"],
+    "lib": ["ES2021"],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": false,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "esnext",
+    "outDir": "./dist",
     "paths": {
       "~/": ["./src/"]
-    }
+    },
+    "pretty": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2021",
+    "types": ["vitest/globals", "vitest/importMeta"],
   },
-  "include": ["./src/**/*.ts", "./test/**/*.ts"],
-  "exclude": ["./dist", "./**/*.js", "src/index.js"]
+  "exclude": ["./dist", "./src/index.js"]
 }
