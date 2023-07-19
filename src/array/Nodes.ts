@@ -24,6 +24,7 @@ import type {
   AncestorArray,
   AncestorFromDim,
   DescendantArray,
+  DescendantFromDim,
   GetDims,
   GetIdFromKey,
   KeyFn,
@@ -47,16 +48,6 @@ function isKeyofKeyFn<Datum>(keyFn: unknown): keyFn is KeyFnKey<Datum> {
   )
 }
 
-type AncestorAtParams<NodeType> = {
-  0: never
-  1:
-    | {
-        depth?: L.KeySet<0, NodeType['depth']>
-      }
-    | {
-        dim?: L.UnionOf<GetDims<NodeType['keyFns'], 1, NodeType['depth']>>
-      }
-}[B.And<A.Is<NodeType, object>, O.HasPath<NodeType, ['depth', 'keyFns']>>]
 export class Node<
   Datum extends JsonObject | string,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>,
@@ -196,10 +187,10 @@ export class Node<
   }
 
   *[Symbol.iterator](): Generator<
-    IterableElement<DescendantArray<Node<Datum, KeyFuncs, Depth>>>,
+    L.UnionOf<DescendantArray<Node<Datum, KeyFuncs, Depth>>>,
     void,
     unknown
-  > {
+    > {
     let node = this
     let current: DescendantArray<Node<Datum, KeyFuncs, Depth>>
     let next: DescendantArray<Node<Datum, KeyFuncs, Depth>> = [ node, ]
@@ -218,7 +209,7 @@ export class Node<
     } while (next.length)
   }
 
-  addChild(child: IterableElement<Exclude<this['_children'], undefined>>) {
+  addChild(child: L.UnionOf<Exclude<this['_children'], undefined>>) {
     if (typeof this.children !== 'undefined')
       this.children = [
         ...this._children,
@@ -234,7 +225,13 @@ export class Node<
    * @param depthOrDim.depth The depth of the ancestor to return.
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
-  ancestorAt<Params extends AncestorAtParams<Node<Datum, KeyFuncs, Depth>>>(
+  ancestorAt<Params extends RequireExactlyOne<
+    {
+      depth: L.KeySet<0, Depth>
+      dim: L.UnionOf<GetDims<KeyFuncs, 1, Depth>>
+    },
+    'depth' | 'dim'
+  >>(
     this: Node<Datum, KeyFuncs, Depth>,
     depthOrDim: Params
   ) {
@@ -243,11 +240,14 @@ export class Node<
       0: {
         0: {
           0: never
-          1: AncestorFromDim<Node<Datum, KeyFuncs, Depth>, Get<Params, ['dim']>>
-        }[O.HasPath<Params, ['dim']>]
-        1: Node<Datum, KeyFuncs, Get<Params, ['depth']>>
-      }[O.Has<Params, 'depth', L.KeySet<0, Depth>, '<-contains'>]
-    }[B.And<O.HasPath<Params, ['depth']>, O.HasPath<Params, ['dim']>>]
+          1: AncestorFromDim<Node<Datum, KeyFuncs, Depth>, Params['dim']>
+        }[L.Includes<GetDims<KeyFuncs>, Params['dim'], '<-contains'>]
+        1: Node<Datum, KeyFuncs, Params['depth']>
+      }[A.Contains<Params['depth'], L.KeySet<Depth, KeyFuncs['length']>>]
+    }[B.And<
+      B.Not<O.Has<Params, 'depth', undefined>>,
+      B.Not<O.Has<Params, 'dim', undefined>>
+    >]
 
     return this.ancestors().find((node) => {
       if (typeof depthOrDim.depth === 'number')
@@ -288,23 +288,36 @@ export class Node<
     return Array.from(this)
   }
 
-  descendantsAt(
-    this: Node<Datum, KeyFuncs, Depth>,
-    depthOrDim:
-      | {
-          depth: L.KeySet<Depth, KeyFuncs['length']>
-          dim?: never
-        }
-      | {
-          depth?: never
-          dim: L.UnionOf<GetDims<KeyFuncs, Depth, KeyFuncs['length']>>
-        }
-  ) {
+  descendantsAt<
+    Params extends RequireExactlyOne<
+      {
+        depth: L.KeySet<Depth, KeyFuncs['length']>
+        dim: L.UnionOf<GetDims<KeyFuncs, Depth>>
+      },
+      'depth' | 'dim'
+    >
+  >(this: Node<Datum, KeyFuncs, Depth>, depthOrDim: Params) {
+    type ReturnNodes = {
+      1: never
+      0: {
+        0: {
+          0: never
+          1: L.Filter<
+          DescendantArray<Node<Datum, KeyFuncs, Depth>>,
+          { dim: Params['dim'] },
+          '<-contains'
+        >}[L.Includes<GetDims<KeyFuncs>, Params['dim'], '<-contains'>]
+        1: Array<Node<Datum, KeyFuncs, Params['depth']>>
+      }[A.Contains<Params['depth'], L.KeySet<Depth, KeyFuncs['length']>>]
+    }[B.And<
+      B.Not<O.Has<Params, 'depth', undefined>>,
+      B.Not<O.Has<Params, 'dim', undefined>>
+    >]
     return this.descendants().filter((node) => {
       if (typeof depthOrDim.depth === 'number')
         return node.depth === depthOrDim.depth
       else return node.dim === depthOrDim.dim
-    })
+    }) as unknown as ReturnNodes
   }
 
   /**

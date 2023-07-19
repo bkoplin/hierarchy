@@ -10,7 +10,7 @@ import type {
 } from 'type-fest'
 
 export type AncestorArray<Node, AncestorList extends L.List = []> = {
-  0: never
+  0: readonly [Node]
   1: {
     0: AncestorArray<A.At<Node & object, 'parent'>, [...AncestorList, Node]>
     1: [...AncestorList, Node]
@@ -24,18 +24,15 @@ export type AncestorFromDim<Node, Dim> = {
   }[O.Has<Node & object, 'dim', Dim>]
 }[B.And<A.Extends<Node, object>, O.HasPath<Node & object, ['dim']>>]
 export type DescendantArray<Node, DescendantList extends L.List = []> = {
-  0: never
+  0: readonly [Node]
   1: {
-    0: [...DescendantList, ...Node[]]
-    1: {
-      0: DescendantArray<
-        IterableElement<A.At<Node, 'children'>>,
-        [...DescendantList, ...Node[]]
-      >
-      1: [...DescendantList, ...Node[]]
-    }[O.Has<Node & object, 'children', undefined>]
-  }[O.HasPath<Node & object, ['children']>]
-}[A.Extends<Node, object>]
+    0: DescendantArray<
+      A.At<Node, 'children'>[number],
+      L.Append<DescendantList, L.List<Node>>
+    >
+    1: L.Flatten<L.Append<DescendantList, [Node]>>
+  }[O.Has<Node, 'children', undefined, 'extends->'>]
+}[B.And<O.HasPath<Node & object, ['children']>, A.Extends<Node, object>>]
 export type NodeLinks<T, Links extends L.List = []> = T extends {
   children: Array<infer Child>
 }

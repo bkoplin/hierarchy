@@ -109,7 +109,7 @@ describe(
           thirdAncestor,
           root,
         ] = ancestors
-        const [root, desc] = root.descendants()
+        const [r, desc] = root.descendants()
         const dep = desc.depth
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
@@ -230,8 +230,8 @@ describe(
     test(
       'find returns the correct node',
       () => {
-        const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state_letter', })
-        const found2 = groupByAge.descendantsAt({ depth: 2, })
+        const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state', })
+        const found2 = groupByAge.descendantsAt({ depth: 1, })
 
         expect(found[0].depth).toBe(2)
         expect(found2.map((n) => [
