@@ -333,7 +333,7 @@ export class Node<
   each<T extends Node<Datum, KeyFuncs, Depth>>(
     this: T,
     callback: (node: IterableElement<T>, index?: number) => void
-  ): this {
+  ): T {
     let index = -1
 
     for (const node of this) {
@@ -355,7 +355,7 @@ export class Node<
   eachAfter<T extends Node<Datum, KeyFuncs, Depth>>(
     this: T,
     callback: (node: IterableElement<T>, index?: number) => void
-  ): this {
+  ): T {
     const nodes = [ this, ]
     const next = []
     let children
@@ -390,7 +390,7 @@ export class Node<
   eachBefore<T extends Node<Datum, KeyFuncs, Depth>>(
     this: T,
     callback: (node: IterableElement<T>, index?: number) => void
-  ): this {
+  ): T {
     const nodes = [ this, ]
     let children
     let i
