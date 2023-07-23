@@ -1,0 +1,19 @@
+[
+  {
+    "source": undefined,
+    "target": {
+      "dim": "root",
+      "id": "root",
+    },
+  },
+  {
+    "source": {
+      "dim": "root",
+      "id": "root",
+    },
+    "target": {
+      "dim": "state_letter",
+      "id": "M",
+    },
+  },
+]

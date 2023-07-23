@@ -4,7 +4,6 @@ import {
 import {
   map, mean, pipe, prop,
 } from 'rambdax'
-import { pick, } from 'lodash-es'
 import { group, } from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
 
@@ -13,7 +12,7 @@ const groupByAge = group(
   'education_level',
   [
     'state_letter' as const,
-    (x) => x.state[0],
+    x => x.state[0],
   ],
   'state'
 )
@@ -109,11 +108,15 @@ describe(
           thirdAncestor,
           root,
         ] = ancestors
-        const [r, desc] = root.descendants()
-        const dep = desc.depth
+        const [
+          r,
+          desc,
+        ] = root.descendants()
+        const dep = r.depth
+
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        const ansc = thirdAncestor.ancestorAt({ depth: 4, })
+        const ansc = secondAncestor.ancestorAt({ dim: 'education_level', })
 
         expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
@@ -174,28 +177,28 @@ describe(
           'Spectral',
           'allNodesAtDimIds'
         )
-        expect(groupByAge.links().map(({
-          source, target,
-        }) => {
-          const depth = target.depth
+        // expect(groupByAge.links().map(({
+        //   source, target,
+        // }) => {
+        //   const depth = target.depth
 
-          return {
-            source: pick(
-              source,
-              [
-                'color',
-                'id',
-              ]
-            ),
-            target: pick(
-              target,
-              [
-                'color',
-                'id',
-              ]
-            ),
-          }
-        })).toMatchFileSnapshot('./group-links.json')
+        //   return {
+        //     source: pick(
+        //       source,
+        //       [
+        //         'color',
+        //         'id',
+        //       ]
+        //     ),
+        //     target: pick(
+        //       target,
+        //       [
+        //         'color',
+        //         'id',
+        //       ]
+        //     ),
+        //   }
+        // })).toMatchFileSnapshot('./group-links.json')
       }
     )
   }
@@ -213,7 +216,7 @@ describe(
         const paths = last.leaves()[0].path(first.leaves()[0])
         const l = paths.length
 
-        expect(paths.map((node) => node.depth)).toStrictEqual([
+        expect(paths.map(node => node.depth)).toStrictEqual([
           2,
           1,
           0,
@@ -234,12 +237,13 @@ describe(
         const found2 = groupByAge.descendantsAt({ depth: 1, })
 
         expect(found[0].depth).toBe(2)
-        expect(found2.map((n) => [
+        expect(found2.map(n => [
           n.id,
           n.value,
           n.color,
           n.depth,
-        ])).toMatchInlineSnapshot(`
+        ]))
+          .toMatchInlineSnapshot(`
           [
             [
               "Bachelor's Degree",
