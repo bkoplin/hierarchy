@@ -1,27 +1,35 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "declaration": true,
-    "declarationMap": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["esnext"],
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmit": false,
     "outDir": "./dist",
     "paths": {
       "~/": ["./src/"]
     },
-    "pretty": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "sourceMap": true,
     "strict": true,
     "target": "esnext",
-    "types": ["vitest/globals", "vitest/importMeta"],
+    "types": ["vitest/globals", "vitest/importMeta", ]
   },
-  "exclude": ["./dist", "./src/index.js"]
+  "exclude": ["./dist/**/*.*", "./test/**/*.json"],
+  "include": [
+    "./.eslintrc.cjs",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.jsx",
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.js",
+    "./**/*.jsx",
+    "./**/*.mjs"
+  ]
 }

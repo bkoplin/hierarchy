@@ -1,28 +1,21 @@
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked',
-  ],
-  env: {
-    es2020: true,
-    node: true,
-  },
+  extends: [ '@antfu', ],
   parser: '@typescript-eslint/parser',
   plugins: [ '@typescript-eslint', ],
+  ignorePatterns: [
+    '**/*.js',
+    '**/*.json',
+  ],
   parserOptions: {
     sourceType: 'module',
-    project: './tsconfig.eslint.json',
-    allowAutomaticSingleRunInference: true,
-    tsconfigRootDir: __dirname,
+    project: ['./tsconfig.json'],
     warnOnUnsupportedTypeScriptVersion: false,
-    cacheLifetime: {
-      // we pretty well never create/change tsconfig structure - so need to ever evict the cache
-      // in the rare case that we do - just need to manually restart their IDE.
-      glob: 'Infinity',
-    },
+    extraFileExtensions: [
+      '.vue',
+      '.json',
+      '.cjs',
+    ],
   },
-  root: true,
   rules: {
     '@typescript-eslint/comma-dangle': [
       'error',
@@ -52,7 +45,7 @@ module.exports = {
         blankLine: 'always',
         next: [
           'interface',
-          'type', 
+          'type',
         ],
         prev: '*',
       },
@@ -63,8 +56,8 @@ module.exports = {
         allowedNames: [
           'node',
           'start',
-          'end', 
-        ], 
+          'end',
+        ],
       },
     ],
     '@typescript-eslint/ban-ts-comment': 'off',
@@ -72,7 +65,7 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'error',
     '@typescript-eslint/array-type': [
       'error',
-      { default: 'array-simple', }, 
+      { default: 'array-simple', },
     ],
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
@@ -93,26 +86,26 @@ module.exports = {
     // ],
     'array-bracket-spacing': [
       'error',
-      'always', 
+      'always',
     ],
     'array-bracket-newline': [
       'error',
-      { minItems: 2, }, 
+      { minItems: 2, },
     ],
     'array-element-newline': [
       'error',
       'always',
-      { minItems: 2, }, 
+      { minItems: 2, },
     ],
     'arrow-parens': 'error',
     'comma-dangle': 'off',
     'function-call-argument-newline': [
       'error',
-      'always', 
+      'always',
     ],
     'function-paren-newline': 'error',
     'no-cond-assign': 'off',
-    indent: [
+    'indent': [
       'error',
       2,
       {
@@ -122,7 +115,7 @@ module.exports = {
     ],
     'newline-per-chained-call': [
       'error',
-      { ignoreChainWithDepth: 2, }, 
+      { ignoreChainWithDepth: 2, },
     ],
     'no-console': 'warn',
     'object-curly-newline': [
@@ -139,12 +132,12 @@ module.exports = {
     'prefer-template': 'error',
     'prefer-const': [
       1,
-      { destructuring: 'all', }, 
+      { destructuring: 'all', },
     ],
     'sort-keys': 0,
     'operator-linebreak': [
       'error',
-      'after', 
+      'after',
     ],
     'padding-line-between-statements': [
       'error',
@@ -154,7 +147,7 @@ module.exports = {
           'const',
           'let',
           'var',
-          'export', 
+          'export',
         ],
         next: '*',
       },
@@ -163,12 +156,12 @@ module.exports = {
         prev: [
           'const',
           'let',
-          'var', 
+          'var',
         ],
         next: [
           'const',
           'let',
-          'var', 
+          'var',
         ],
       },
       {
@@ -180,7 +173,7 @@ module.exports = {
     'comma-spacing': 'off',
     'max-statements-per-line': [
       'error',
-      { max: 2, }, 
+      { max: 2, },
     ],
   },
 }

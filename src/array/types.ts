@@ -23,16 +23,10 @@ export type AncestorFromDim<Node, Dim> = {
     1: Node
   }[O.Has<Node & object, 'dim', Dim>]
 }[B.And<A.Extends<Node, object>, O.HasPath<Node & object, ['dim']>>]
-export type DescendantArray<Node, DescendantList extends L.List = []> = {
-  0: readonly [Node]
-  1: {
-    0: DescendantArray<
-      A.At<Node, 'children'>[number],
-      L.Append<DescendantList, L.List<Node>>
-    >
-    1: L.Flatten<L.Append<DescendantList, [Node]>>
-  }[O.Has<Node, 'children', undefined, 'extends->'>]
-}[B.And<O.HasPath<Node & object, ['children']>, A.Extends<Node, object>>]
+// export type DescendantArray<Node extends {depth: number}, DescendantList extends any[] = []> = {
+//   0: [...DescendantList, ...Node[]]
+//   1: DescendantArray<Node['children']>
+// }[Node['depth'] extends unknown[] ? 1 : 0 ]
 export type NodeLinks<T, Links extends L.List = []> = T extends {
   children: Array<infer Child>
 }
@@ -46,12 +40,12 @@ export type GetDims<
   KeyFunctions extends readonly any[],
   Start extends number = 0,
   End extends number = KeyFunctions['length'],
-  Arr extends L.List = []
+  Arr extends L.List = readonly [undefined]
 > = KeyFunctions extends readonly [infer KeyFn, ...infer Rest]
   ? KeyFn extends readonly [infer Dim, any]
     ? GetDims<Rest, Start, End, [...Arr, Dim]>
     : GetDims<Rest, Start, End, [...Arr, KeyFn]>
-  : L.Extract<[undefined, ...Arr], Start, End>
+  : L.Extract<Arr, Start, End>
 export type GetIdFromKey<K> = K extends KeyFn<infer Datum>
   ? Datum extends JsonObject | string
     ? K extends KeyFnTuple<Datum>
@@ -94,7 +88,10 @@ export type KeyFnTuple<T> = readonly [
   (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
 ]
 export type KeyFnKey<T> = keyof T
-export type KeyFn<T> = KeyFnTuple<T> | keyof T
+export type KeyFn<T> = readonly [
+  string,
+  (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
+] | keyof T
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
 export type GetKeyFn<
   KeyFuncs extends readonly any[],
