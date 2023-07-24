@@ -1,35 +1,28 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "declaration": true,
-    "esModuleInterop": true,
-    "lib": ["esnext"],
-    "module": "esnext",
-    "moduleResolution": "node",
-    "outDir": "./dist",
-    "paths": {
-      "~/": ["./src/"]
-    },
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
+    "strictNullChecks": true,
     "target": "esnext",
-    "types": ["vitest/globals", "vitest/importMeta", ]
+    "module": "commonjs",
+    "allowUmdGlobalAccess": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "importHelpers": true,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noStrictGenericChecks": true,
+    "noImplicitThis": true,
+    "lib": [
+      "dom",
+      "dom.iterable"
+    ],
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
   },
-  "exclude": ["./dist/**/*.*", "./test/**/*.json"],
-  "include": [
-    "./.eslintrc.cjs",
-    "./**/*.ts",
-    "./**/*.tsx",
-    "./**/*.jsx",
-    "./**/*.ts",
-    "./**/*.tsx",
-    "./**/*.js",
-    "./**/*.jsx",
-    "./**/*.mjs"
-  ]
+  "exclude": ["./dist"]
 }

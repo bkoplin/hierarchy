@@ -1,6 +1,4 @@
-import {
-  A, B, type I, type L, type N, type O, 
-} from 'ts-toolbelt'
+import { A, B, I, L, N, O, S } from 'ts-toolbelt'
 import type {
   Get,
   IterableElement,
@@ -41,11 +39,15 @@ export type GetDims<
   Start extends number = 0,
   End extends number = KeyFunctions['length'],
   Arr extends L.List = readonly [undefined]
-> = KeyFunctions extends readonly [infer KeyFn, ...infer Rest]
-  ? KeyFn extends readonly [infer Dim, any]
-    ? GetDims<Rest, Start, End, [...Arr, Dim]>
-    : GetDims<Rest, Start, End, [...Arr, KeyFn]>
-  : L.Extract<Arr, Start, End>
+> = KeyFunctions extends readonly [infer Head, ...infer Tail]
+  ? Tail['length'] extends 0
+    ? L.Extract<Arr, Start, End>
+    : Head extends readonly [infer Dim, any]
+    ? GetDims<Tail, Start, End, [...Arr, Dim]>
+    : Head extends JsonPrimitive
+    ? GetDims<Tail, Start, End, [...Arr, Head]>
+    : never
+  : never
 export type GetIdFromKey<K> = K extends KeyFn<infer Datum>
   ? Datum extends JsonObject | string
     ? K extends KeyFnTuple<Datum>
@@ -85,13 +87,14 @@ export type DepthFromDim<
   : never
 export type KeyFnTuple<T> = readonly [
   string,
-  (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
+  (datum: T, idx?: number, vals?: T[]) => string | number | undefined
 ]
-export type KeyFnKey<T> = keyof T
-export type KeyFn<T> = readonly [
-  string,
-  (datum: T, idx?: number, vals?: T[]) => JsonPrimitive
-] | keyof T
+export type KeyFnKey<T> = T extends JsonObject
+  ? StringKeyOf<T>
+  : T extends string
+  ? StringKeyOf<L.ObjectOf<S.Split<T, ''>>>
+  : undefined
+export type KeyFn<T> = KeyFnTuple<T> | KeyFnKey<T>
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
 export type GetKeyFn<
   KeyFuncs extends readonly any[],

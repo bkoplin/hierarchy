@@ -1,21 +1,12 @@
 module.exports = {
-  extends: [ '@antfu', ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
-  plugins: [ '@typescript-eslint', ],
+  plugins: ['@typescript-eslint'],
+  root: true,
   ignorePatterns: [
     '**/*.js',
     '**/*.json',
   ],
-  parserOptions: {
-    sourceType: 'module',
-    project: ['./tsconfig.json'],
-    warnOnUnsupportedTypeScriptVersion: false,
-    extraFileExtensions: [
-      '.vue',
-      '.json',
-      '.cjs',
-    ],
-  },
   rules: {
     '@typescript-eslint/comma-dangle': [
       'error',
