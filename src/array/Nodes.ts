@@ -51,6 +51,7 @@ export class LeafNode<
     public depth: Depth,
     public id: string
   ) {
+    this.height = keyFns.length
     this.name = id
     this.keyFns = [undefined, ...keyFns]
     this.value = records.length
