@@ -2,6 +2,7 @@ import { always, filterObject, uniq, zipObj } from 'rambdax'
 import type {
   ConditionalExcept,
   Get,
+  IsNever,
   IterableElement,
   JsonObject,
   JsonPrimitive,
@@ -127,7 +128,14 @@ export class LeafNode<
   }
 
   get type() {
-    return 'leaf' as const
+    type ReturnType = this['depth'] extends 0
+      ? `root`
+      : this[`height`] extends 0
+      ? `leaf`
+      : `node`
+    if (this.depth === 0) return `leaf` as ReturnType
+    else if (this.height === 0) return `root` as ReturnType
+    else return `node` as ReturnType
   }
 
   *[Symbol.iterator]() {
@@ -522,9 +530,6 @@ export class Node<
 
   set children(children) {
     this._children = children
-  }
-  get type() {
-    return 'node' as const
   }
 }
 export class RootNode<

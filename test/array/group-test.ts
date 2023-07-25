@@ -100,7 +100,7 @@ describe(
       'ancestors tests',
       () => {
         const [ level1Child, ] = groupByAge.leaves()
-        const groupAncestor = groupByAge.ancestors()
+        const groupAncestor = groupByAge.children[0].ancestors()
         const ancestors = level1Child.ancestors()
         const [
           firstAncestor,
