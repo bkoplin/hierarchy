@@ -40,14 +40,12 @@ export type GetDims<
   End extends number = KeyFunctions['length'],
   Arr extends L.List = readonly [undefined]
 > = KeyFunctions extends readonly [infer Head, ...infer Tail]
-  ? Tail['length'] extends 0
-    ? L.Extract<Arr, Start, End>
-    : Head extends readonly [infer Dim, any]
+  ? Head extends readonly [infer Dim, any]
     ? GetDims<Tail, Start, End, [...Arr, Dim]>
     : Head extends JsonPrimitive
     ? GetDims<Tail, Start, End, [...Arr, Head]>
     : never
-  : never
+  : L.Extract<Arr, Start, End>
 export type GetIdFromKey<K> = K extends KeyFn<infer Datum>
   ? Datum extends JsonObject | string
     ? K extends KeyFnTuple<Datum>

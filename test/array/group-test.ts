@@ -31,7 +31,7 @@ describe(
     test(
       'first level child tests',
       () => {
-        const [ child, ] = groupByAge.children[0].children
+        const [ child, ] = groupByAge.children
 
         expect(child.dim).toEqual('education_level')
         expect(child.depth).toEqual(1)
