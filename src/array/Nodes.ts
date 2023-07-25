@@ -1,6 +1,7 @@
 import { always, filterObject, uniq, zipObj } from 'rambdax'
 import type {
   ConditionalExcept,
+  ConditionalKeys,
   Get,
   IsNever,
   IterableElement,
@@ -63,7 +64,7 @@ export class Node<
         if (typeof fn === 'function') acc.push(dim)
       }
       return acc
-    }, [])
+    }, []) as unknown as GetDims<KeyFuncs>
     this.dim = this.dims[depth]
 
     function isKeyofKeyFn(
@@ -89,26 +90,31 @@ export class Node<
   dim: GetDims<KeyFuncs>[Depth]
   dims: GetDims<KeyFuncs>
   name: this['id']
-  _parent = {} as unknown as N.Greater<this['depth'], 0> extends 1
-    ? N.Greater<this['depth'], 1> extends 1
-      ? Node<Datum, KeyFuncs, N.Sub<this['depth'], 1>, 1>
+  _parent = {} as unknown as N.Greater<Depth, 0> extends 1
+    ? N.Greater<Depth, 1> extends 1
+      ? Node<Datum, KeyFuncs, N.Sub<Depth, 1>, N.Add<Height, 1>>
       : RootNode<Datum, KeyFuncs>
     : never
   value: number
 
-  _children = [] as unknown as N.Greater<this['height'], 0> extends 1
-    ? N.Greater<KeyFuncs['length'], 1> extends 1
-      ? Node<Datum, KeyFuncs, 1, N.Sub<KeyFuncs['length'], 1>>[]
+  _children = [] as unknown as N.Greater<Height, 0> extends 1
+    ? N.Greater<Height, 1> extends 1
+      ? Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>[]
       : LeafNode<Datum, KeyFuncs>[]
-    : never
-
+    : never[]
 
   // public _parent = {} as unknown as N.Greater<this['depth'], 1> extends 1
   //   ? Node<Datum, KeyFuncs, N.Sub<Depth, 1>, N.Add<Height, 1>>
   //   : RootNode<Datum, KeyFuncs>
 
-  addChild(child) {
-    this._children.push(child as unknown as this['_children'][number])
+  addChild(
+    child: N.Greater<Height, 0> extends 1
+      ? N.Greater<Height, 1> extends 1
+        ? Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>
+        : LeafNode<Datum, KeyFuncs>
+      : never
+  ) {
+    this._children.push(child)
   }
 
   get children() {
@@ -172,28 +178,41 @@ export class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    ThisType extends this,
     Params extends RequireExactlyOne<
       {
-        depth: L.KeySet<0, ThisType['depth']>
-        dim: L.UnionOf<GetDims<KeyFuncs, 1, ThisType['depth']>>
+        depth: L.KeySet<0, Depth>
+        dim: L.UnionOf<GetDims<KeyFuncs, 1, Depth>>
       },
       'depth' | 'dim'
     >
   >(depthOrDim: Params) {
-    type ReturnNode = {
-      1: never
+    type DimKey<
+      DimVal extends L.UnionOf<GetDims<KeyFuncs, 1, Depth>>,
+      Iter extends I.Iteration = I.IterationOf<Depth>
+    > = {
       0: {
-        0: {
-          0: never
-          1: AncestorFromDim<Node<Datum, KeyFuncs, Depth>, Params['dim']>
-        }[L.Includes<GetDims<KeyFuncs>, Params['dim'], '<-contains'>]
-        1: Node<Datum, KeyFuncs, Params['depth']>
-      }[A.Contains<Params['depth'], L.KeySet<Depth, KeyFuncs['length']>>]
-    }[B.And<
-      B.Not<O.Has<Params, 'depth', undefined>>,
-      B.Not<O.Has<Params, 'dim', undefined>>
-    >]
+        0: DimKey<DimVal, I.Prev<Iter>>
+        1: I.Pos<Iter>
+      }[GetDims<KeyFuncs>[I.Pos<Iter>] extends DimVal ? 1 : 0]
+      1: -1
+    }[I.Pos<I.Prev<Iter>> extends -1 ? 1 : 0]
+    type ReturnNode = Params['dim'] extends L.UnionOf<
+      GetDims<KeyFuncs, 1, Depth>
+    >
+      ? Node<
+          Datum,
+          KeyFuncs,
+          DimKey<Params['dim']>,
+          N.Sub<KeyFuncs['length'], DimKey<Params['dim']>>
+        >
+      : Params['depth'] extends L.KeySet<0, Depth>
+      ? Node<
+          Datum,
+          KeyFuncs,
+          Params['depth'],
+          N.Sub<KeyFuncs['length'], Params['depth']>
+        >
+      : never
 
     return this.ancestors().find((node) => {
       if (typeof depthOrDim.depth === 'number')
@@ -367,19 +386,19 @@ export class Node<
   //   return this?.depth > 0
   // }
 
-  // /**
-  //  * @description Returns the array of leaf nodes for this node
-  //  *
-  //  * @see {@link https://github.com/d3/d3-hierarchy#leaves}
-  //  */
-  // leaves(this: this): Array<Node<Datum, KeyFuncs, KeyFuncs['length']>> {
-  //   const leaves = []
+  /**
+   * @description Returns the array of leaf nodes for this node
+   *
+   * @see {@link https://github.com/d3/d3-hierarchy#leaves}
+   */
+  leaves(this: this): LeafNode<Datum, KeyFuncs>[] {
+    const leaves = []
 
-  //   this.eachBefore((node) => {
-  //     if (node.height === 0) leaves.push(node)
-  //   })
-  //   return leaves
-  // }
+    this.eachBefore((node) => {
+      if (node.height === 0) leaves.push(node)
+    })
+    return leaves
+  }
 
   // /**
   //  * Returns an array of links for this node and its descendants, where each *link* is an object that defines source and target properties. The source of each link is the parent node, and the target is a child node.
@@ -519,11 +538,7 @@ export class LeafNode<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>> = readonly [KeyFn<Datum>]
 > extends Node<Datum, KeyFuncs, KeyFuncs['length'], 0> {
-  constructor(
-    keyFns: KeyFuncs,
-    records: Datum[],
-    id: string
-  ) {
+  constructor(keyFns: KeyFuncs, records: Datum[], id: string) {
     super(keyFns, records, keyFns.length, 0, id)
   }
 }

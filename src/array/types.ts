@@ -1,26 +1,30 @@
 import { A, B, I, L, N, O, S } from 'ts-toolbelt'
 import type {
   Get,
+  IsNever,
   IterableElement,
   JsonObject,
   JsonPrimitive,
   StringKeyOf,
 } from 'type-fest'
 
-export type AncestorArray<Node, AncestorList extends L.List = []> = {
-  0: readonly [Node]
-  1: {
-    0: AncestorArray<A.At<Node & object, 'parent'>, [...AncestorList, Node]>
-    1: [...AncestorList, Node]
-  }[O.Has<Node & object, 'parent', undefined, 'equals'>]
-}[B.And<O.HasPath<Node & object, ['parent']>, A.Extends<Node, object>>]
-export type AncestorFromDim<Node, Dim> = {
-  0: never
-  1: {
-    0: AncestorFromDim<A.At<Node & object, 'parent'>, Dim>
-    1: Node
-  }[O.Has<Node & object, 'dim', Dim>]
-}[B.And<A.Extends<Node, object>, O.HasPath<Node & object, ['dim']>>]
+export type AncestorArray<
+  Node,
+  AncestorList extends L.List = []
+> = Node extends {
+  parent: infer Parent
+}
+  ? IsNever<Parent> extends true
+    ? [...AncestorList, Node]
+    : AncestorArray<Parent, [...AncestorList, Node]>
+  : never
+export type AncestorFromDim<Node, Dim> = IsNever<Node> extends true
+  ? never
+  : Node extends { dim: Dim }
+  ? Node
+  : Node extends { parent: infer Parent }
+  ? AncestorFromDim<Parent, Dim>
+  : never
 // export type DescendantArray<Node extends {depth: number}, DescendantList extends any[] = []> = {
 //   0: [...DescendantList, ...Node[]]
 //   1: DescendantArray<Node['children']>
@@ -30,10 +34,6 @@ export type NodeLinks<T, Links extends L.List = []> = T extends {
 }
   ? NodeLinks<Child, [...Links, { source: Get<T, ['parent']>; target: T }]>
   : [...Links, { source: Get<T, ['parent']>; target: T }]
-export type NodeArray<
-  T,
-  Direction extends 'ancestors' | 'descendants' | 'a' | 'd' = 'descendants'
-> = Direction extends 'ancestors' | 'a' ? AncestorArray<T> : DescendantArray<T>
 export type GetDims<
   KeyFunctions extends readonly any[],
   Start extends number = 0,
