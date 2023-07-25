@@ -88,33 +88,32 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: GetDims<KeyFuncs>[Depth]
+  dim: GetDims<KeyFuncs>[this['depth']]
   dims: GetDims<KeyFuncs>
   name: this['id']
-  _parent = {} as unknown as N.Greater<Depth, 0> extends 1
-    ? N.Greater<Depth, 1> extends 1
-      ? Node<Datum, KeyFuncs, N.Sub<Depth, 1>, N.Add<Height, 1>>
+  _parent = {} as unknown as N.Greater<this['depth'], 0> extends 1
+    ? N.Greater<this['depth'], 1> extends 1
+      ? Node<Datum, KeyFuncs, N.Sub<this['depth'], 1>, N.Add<this['height'], 1>>
       : RootNode<Datum, KeyFuncs>
     : never
   value: number
 
-  _children = [] as unknown as N.Greater<Height, 0> extends 1
-    ? N.Greater<Height, 1> extends 1
-      ? Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>[]
+  _children: N.Lower<this['depth'], KeyFuncs['length']> extends 1
+    ? N.Greater<this['height'], 1> extends 1
+      ? Node<
+          Datum,
+          KeyFuncs,
+          N.Add<this['depth'], 1>,
+          N.Sub<this['height'], 1>
+        >[]
       : LeafNode<Datum, KeyFuncs>[]
-    : never[]
+    : never[] = []
 
   // public _parent = {} as unknown as N.Greater<this['depth'], 1> extends 1
-  //   ? Node<Datum, KeyFuncs, N.Sub<Depth, 1>, N.Add<Height, 1>>
+  //   ? Node<Datum, KeyFuncs, N.Sub<this['depth'], 1>, N.Add<this['height'], 1>>
   //   : RootNode<Datum, KeyFuncs>
 
-  addChild(
-    child: N.Greater<Height, 0> extends 1
-      ? N.Greater<Height, 1> extends 1
-        ? Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>
-        : LeafNode<Datum, KeyFuncs>
-      : never
-  ) {
+  addChild(child) {
     this._children.push(child)
   }
 
@@ -166,8 +165,12 @@ export class Node<
     else return `node` as ReturnType
   }
 
-  *[Symbol.iterator]() {
-    let node: IterableElement<DescendantArray<this>> = this
+  *[Symbol.iterator](): Generator<
+    IterableElement<DescendantArray<Node<Datum, KeyFuncs, Depth, Height>>>,
+    void,
+    unknown
+  > {
+    let node = this
     let current
     let next = [node]
     let children: typeof current
@@ -195,16 +198,19 @@ export class Node<
    */
   ancestorAt<
     Dims extends GetDims<KeyFuncs>,
-    Depths extends L.KeySet<0, Depth>,
+    Depths extends L.KeySet<0, this['depth']>,
     Params extends RequireExactlyOne<
       {
         depth: Depths
-        dim: L.Extract<Dims, 1, Depth>[number]
+        dim: Dims[Depths]
       },
       'depth' | 'dim'
     >
   >(depthOrDim: Params) {
-    type DimKey<DimVal, Iter extends I.Iteration = I.IterationOf<Depth>> = {
+    type DimKey<
+      DimVal,
+      Iter extends I.Iteration = I.IterationOf<this['depth']>
+    > = {
       0: {
         0: DimKey<DimVal, I.Prev<Iter>>
         1: I.Pos<Iter>
@@ -268,7 +274,7 @@ export class Node<
 
   descendantsAt<
     Dims extends GetDims<KeyFuncs>,
-    Depths extends L.KeySet<Depth, KeyFuncs['length']>,
+    Depths extends L.KeySet<this['depth'], KeyFuncs['length']>,
     Params extends RequireExactlyOne<
       {
         depth: Depths
@@ -303,103 +309,105 @@ export class Node<
     }) as unknown as ReturnType
   }
 
-  // /**
-  //  * Invokes the specified function for node and each descendant in breadth-first order,
-  //  * such that a given node is only visited if all nodes of lesser depth have already been
-  //  * visited, as well as all preceding nodes of the same depth. The specified function is
-  //  * passed the current descendant, the zero-based traversal index, and this node. If that
-  //  * is specified, it is the this context of the callback.
-  //  * @see {@link https://github.com/d3/d3-hierarchy#each}
-  //  * @see {@link eachBefore}
-  //  * @see {@link eachAfter}
-  //  */
-  // each<T extends Node<Datum, KeyFuncs, Depth>>(
-  //   this: T,
-  //   callback: (node: IterableElement<T>, index?: number) => void
-  // ): T {
-  //   let index = -1
+  /**
+   * Invokes the specified function for node and each descendant in breadth-first order,
+   * such that a given node is only visited if all nodes of lesser depth have already been
+   * visited, as well as all preceding nodes of the same depth. The specified function is
+   * passed the current descendant, the zero-based traversal index, and this node. If that
+   * is specified, it is the this context of the callback.
+   * @see {@link https://github.com/d3/d3-hierarchy#each}
+   * @see {@link eachBefore}
+   * @see {@link eachAfter}
+   */
+  each(
+    callback: <T extends this>(node: IterableElement<T>, index?: number) => void
+  ): this {
+    let index = -1
 
-  //   for (const node of this) {
-  //     callback(node, ++index)
-  //   }
+    for (const node of this) {
+      callback(node, ++index)
+    }
 
-  //   return this
-  // }
+    return this
+  }
 
-  // /**
-  //  * Invokes the specified function for node and each descendant in post-order traversal,
-  //  * such that a given node is only visited after all of its descendants have already been
-  //  * visited. The specified function is passed the current descendant, the zero-based traversal
-  //  * index, and this node. If that is specified, it is the this context of the callback.
-  //  */
-  // eachAfter<T extends Node<Datum, KeyFuncs, Depth>>(
-  //   this: T,
-  //   callback: (node: IterableElement<T>, index?: number) => void
-  // ): T {
-  //   const nodes = [this]
-  //   const next = []
-  //   let children
-  //   let i
-  //   let index = -1
-  //   let node
+  /**
+   * Invokes the specified function for node and each descendant in post-order traversal,
+   * such that a given node is only visited after all of its descendants have already been
+   * visited. The specified function is passed the current descendant, the zero-based traversal
+   * index, and this node. If that is specified, it is the this context of the callback.
+   */
+  eachAfter(
+    callback: <T extends this>(node: IterableElement<T>, index?: number) => void
+  ): this {
+    const nodes = [this]
+    const next = []
+    let children
+    let i
+    let index = -1
+    let node
 
-  //   while ((node = nodes.pop()) !== undefined) {
-  //     next.push(node)
-  //     if ((children = node?.children) !== undefined)
-  //       for (i = 0, n = children.length; i < n; ++i) nodes.push(children[i])
-  //   }
-  //   while ((node = next.pop()) !== undefined) {
-  //     callback(node, ++index)
-  //   }
+    while ((node = nodes.pop()) !== undefined) {
+      next.push(node)
+      if ((children = node?.children) !== undefined)
+        for (i = 0, n = children.length; i < n; ++i) nodes.push(children[i])
+    }
+    while ((node = next.pop()) !== undefined) {
+      callback(node, ++index)
+    }
 
-  //   return this
-  // }
+    return this
+  }
 
-  // /**
-  //  * Invokes the specified function for node and each descendant in pre-order traversal, such
-  //  * that a given node is only visited after all of its ancestors have already been visited.
-  //  * The specified function is passed the current descendant, the zero-based traversal index,
-  //  * and this node. If that is specified, it is the this context of the callback.
-  //  * @see {@link https://github.com/d3/d3-hierarchy#eachBefore}
-  //  * @see {@link each}
-  //  * @see {@link eachAfter}
-  //  */
-  // eachBefore<T extends Node<Datum, KeyFuncs, Depth>>(
-  //   this: T,
-  //   callback: (node: IterableElement<T>, index?: number) => void
-  // ): T {
-  //   const nodes = [this]
-  //   let children
-  //   let i
-  //   let index = -1
-  //   let node
+  /**
+   * Invokes the specified function for node and each descendant in pre-order traversal, such
+   * that a given node is only visited after all of its ancestors have already been visited.
+   * The specified function is passed the current descendant, the zero-based traversal index,
+   * and this node. If that is specified, it is the this context of the callback.
+   * @see {@link https://github.com/d3/d3-hierarchy#eachBefore}
+   * @see {@link each}
+   * @see {@link eachAfter}
+   */
+  eachBefore<T extends this>(
+    callback: (
+      node: IterableElement<T>,
+      index?: number
+    ) => void
+  ): this {
+    const nodes = [this]
+    let children
+    let i
+    let index = -1
+    let node
 
-  //   while ((node = nodes.pop()) !== undefined) {
-  //     callback(node, ++index)
-  //     if ((children = node?.children) !== undefined)
-  //       for (i = children.length - 1; i >= 0; --i) nodes.push(children[i])
-  //   }
-  //   return this
-  // }
+    while ((node = nodes.pop()) !== undefined) {
+      callback(node, ++index)
+      if ((children = node?.children) !== undefined)
+        for (i = children.length - 1; i >= 0; --i) nodes.push(children[i])
+    }
+    return this
+  }
 
-  // /**
-  //  * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
-  //  * @see {@link https://github.com/d3/d3-hierarchy#find}
-  //  */
-  // find<T extends Node<Datum, KeyFuncs, Depth>>(
-  //   this: T,
-  //   callback: (node: IterableElement<T>, index?: number) => boolean
-  // ): IterableElement<T> | undefined {
-  //   for (const node of this) {
-  //     if (callback(node, ++index)) return node
-  //   }
-  // }
+  /**
+   * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
+   * @see {@link https://github.com/d3/d3-hierarchy#find}
+   */
+  find(
+    callback: <T extends this>(
+      node: IterableElement<T>,
+      index?: number
+    ) => boolean
+  ): this | undefined {
+    for (const node of this) {
+      if (callback(node, ++index)) return node
+    }
+  }
 
-  // hasChildren(): this is Depth extends KeyFuncs['length'] ? never : this {
+  // hasChildren(): this is this['depth'] extends KeyFuncs['length'] ? never : this {
   //   return this?.height > 0
   // }
 
-  // hasParent(): this is Depth extends 0 ? never : this {
+  // hasParent(): this is this['depth'] extends 0 ? never : this {
   //   return this?.depth > 0
   // }
 
@@ -539,7 +547,7 @@ export class Node<
   //   return this
   // }
 
-  // toJSON(this: Node<Datum, KeyFuncs, Depth>) {
+  // toJSON(this: Node<Datum, KeyFuncs, this['depth']>) {
   //   const node = filterObject<ConditionalExcept<this, undefined | Function>>(
   //     (v): v is JsonValue => v !== undefined && typeof v !== 'function',
   //     this
@@ -562,7 +570,7 @@ export class LeafNode<
 export class RootNode<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
-> extends Node<Datum, KeyFuncs, 0, KeyFuncs['length']> {
+> extends Node<Datum, KeyFuncs, 0, KeyFuncs['length']> implements Node<Datum, KeyFuncs, 0, KeyFuncs['length']> {
   constructor(keyFns: KeyFuncs, records: Datum[]) {
     super(keyFns, records, 0, keyFns.length, undefined)
   }

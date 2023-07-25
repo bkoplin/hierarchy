@@ -24,7 +24,7 @@ describe('group function', () => {
     if (child.hasChildren()) expect(child.children).toBeTruthy()
 
     expect(child.parent.depth).toEqual(0)
-    child.eachBefore((node) => {
+    child.each((node) => {
       expect(node.dim).toBeGreaterThan(0)
     })
   })

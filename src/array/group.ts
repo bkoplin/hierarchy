@@ -11,7 +11,7 @@ export function group<
   Input extends JsonObject | string,
   KeyFunctions extends ReadonlyArray<KeyFn<Input>>
 >(values: Input[], ...keys: KeyFunctions): RootNode<Input, KeyFunctions> {
-  const root = new RootNode(keys, values, 0, keys.length)
+  const root = new RootNode(keys, values)
 
   regroupFn(root)
   let children
@@ -19,15 +19,13 @@ export function group<
   while ((children = root?.children) !== undefined)
     for (const child of children) regroupFn(child)
 
-  // root
-  //   .eachBefore((node) => {
-  //     if (typeof node.children !== 'undefined') {
-  //       node.children.forEach((child) => {
-  //         if (child.parent) child.parent = node
-  //       })
-  //     }
-  //   })
-  //   .setColor()
+  root
+    .eachBefore((node) => {
+      node.children.forEach((child) => {
+        if (typeof child === 'object' && child.parent) child.parent = node
+      })
+    })
+    .setColor()
 
   return root
 
