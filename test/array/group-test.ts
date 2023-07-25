@@ -142,7 +142,7 @@ describe('path tests', () => {
 })
 describe('find tests', () => {
   test('find returns the correct node', () => {
-    const found = groupByAge.leaves()[0].descendantsAt({ dim: 'state' })
+    const found = groupByAge.descendantsAt({dim: 'state'})
     const found2 = groupByAge.descendantsAt({ depth: 1 })
 
     expect(found[0].depth).toBe(2)

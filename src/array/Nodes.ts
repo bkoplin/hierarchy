@@ -20,6 +20,7 @@ import { get, isArray, noop } from 'lodash-es'
 import type {
   AncestorArray,
   AncestorFromDim,
+  DescendantArray,
   // DescendantArray,
   DescendantFromDim,
   GetDims,
@@ -166,7 +167,22 @@ export class Node<
   }
 
   *[Symbol.iterator]() {
-    yield this
+    let node: IterableElement<DescendantArray<this>> = this
+    let current
+    let next = [node]
+    let children: typeof current
+    let i: number
+    let n: number
+
+    do {
+      current = next.reverse()
+      next = []
+      while ((node = current.pop()) !== undefined) {
+        yield node
+        if ((children = node?.children) !== undefined)
+          for (i = 0, n = children.length; i < n; ++i) next.push(children[i])
+      }
+    } while (next.length)
   }
 
   /**
@@ -178,34 +194,31 @@ export class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
+    Dims extends GetDims<KeyFuncs>,
+    Depths extends L.KeySet<0, Depth>,
     Params extends RequireExactlyOne<
       {
-        depth: L.KeySet<0, Depth>
-        dim: L.UnionOf<GetDims<KeyFuncs, 1, Depth>>
+        depth: Depths
+        dim: L.Extract<Dims, 1, Depth>[number]
       },
       'depth' | 'dim'
     >
   >(depthOrDim: Params) {
-    type DimKey<
-      DimVal extends L.UnionOf<GetDims<KeyFuncs, 1, Depth>>,
-      Iter extends I.Iteration = I.IterationOf<Depth>
-    > = {
+    type DimKey<DimVal, Iter extends I.Iteration = I.IterationOf<Depth>> = {
       0: {
         0: DimKey<DimVal, I.Prev<Iter>>
         1: I.Pos<Iter>
-      }[GetDims<KeyFuncs>[I.Pos<Iter>] extends DimVal ? 1 : 0]
+      }[Dims[I.Pos<Iter>] extends DimVal ? 1 : 0]
       1: -1
     }[I.Pos<I.Prev<Iter>> extends -1 ? 1 : 0]
-    type ReturnNode = Params['dim'] extends L.UnionOf<
-      GetDims<KeyFuncs, 1, Depth>
-    >
+    type ReturnNode = Params['dim'] extends Dims[number]
       ? Node<
           Datum,
           KeyFuncs,
           DimKey<Params['dim']>,
           N.Sub<KeyFuncs['length'], DimKey<Params['dim']>>
         >
-      : Params['depth'] extends L.KeySet<0, Depth>
+      : Params['depth'] extends Depths
       ? Node<
           Datum,
           KeyFuncs,
@@ -253,38 +266,42 @@ export class Node<
     return Array.from(this)
   }
 
-  // descendantsAt<
-  //   Params extends RequireExactlyOne<
-  //     {
-  //       depth: L.KeySet<Depth, KeyFuncs['length']>
-  //       dim: L.UnionOf<GetDims<KeyFuncs, Depth>>
-  //     },
-  //     'depth' | 'dim'
-  //   >
-  // >(this: Node<Datum, KeyFuncs, Depth>, depthOrDim: Params) {
-  //   type ReturnNodes = {
-  //     1: never
-  //     0: {
-  //       0: {
-  //         0: never
-  //         1: L.Filter<
-  //           DescendantArray<Node<Datum, KeyFuncs, Depth>>,
-  //           { dim: Params['dim'] },
-  //           '<-contains'
-  //         >
-  //       }[L.Includes<GetDims<KeyFuncs>, Params['dim'], '<-contains'>]
-  //       1: Array<Node<Datum, KeyFuncs, Params['depth']>>
-  //     }[A.Contains<Params['depth'], L.KeySet<Depth, KeyFuncs['length']>>]
-  //   }[B.And<
-  //     B.Not<O.Has<Params, 'depth', undefined>>,
-  //     B.Not<O.Has<Params, 'dim', undefined>>
-  //   >]
-  //   return this.descendants().filter((node) => {
-  //     if (typeof depthOrDim.depth === 'number')
-  //       return node.depth === depthOrDim.depth
-  //     else return node.dim === depthOrDim.dim
-  //   }) as unknown as ReturnNodes
-  // }
+  descendantsAt<
+    Dims extends GetDims<KeyFuncs>,
+    Depths extends L.KeySet<Depth, KeyFuncs['length']>,
+    Params extends RequireExactlyOne<
+      {
+        depth: Depths
+        dim: Dims[Depths]
+      },
+      'depth' | 'dim'
+    >
+  >(depthOrDim: Params) {
+    type DimKey = L.ZipObj<
+      GetDims<KeyFuncs, 1, KeyFuncs['length']>,
+      N.Range<1, KeyFuncs['length']>
+    >
+    type ReturnType = DimKey[Params['dim']] extends number
+      ? Node<
+          Datum,
+          KeyFuncs,
+          DimKey[Params['dim']],
+          N.Sub<KeyFuncs['length'], DimKey[Params['dim']]>
+        >[]
+      : Params['depth'] extends number
+      ? Node<
+          Datum,
+          KeyFuncs,
+          Params['depth'],
+          N.Sub<KeyFuncs['length'], Params['depth']>
+        >[]
+      : never
+    return this.descendants().filter((node) => {
+      if (typeof depthOrDim.depth === 'number')
+        return node.depth === depthOrDim.depth
+      else return node.dim === depthOrDim.dim
+    }) as unknown as ReturnType
+  }
 
   // /**
   //  * Invokes the specified function for node and each descendant in breadth-first order,

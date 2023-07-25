@@ -25,15 +25,13 @@ export type AncestorFromDim<Node, Dim> = IsNever<Node> extends true
   : Node extends { parent: infer Parent }
   ? AncestorFromDim<Parent, Dim>
   : never
-// export type DescendantArray<Node extends {depth: number}, DescendantList extends any[] = []> = {
-//   0: [...DescendantList, ...Node[]]
-//   1: DescendantArray<Node['children']>
-// }[Node['depth'] extends unknown[] ? 1 : 0 ]
-export type NodeLinks<T, Links extends L.List = []> = T extends {
+export type DescendantArray<Node, DescendantList extends any[] = []> = Node extends {
   children: Array<infer Child>
 }
-  ? NodeLinks<Child, [...Links, { source: Get<T, ['parent']>; target: T }]>
-  : [...Links, { source: Get<T, ['parent']>; target: T }]
+  ? IsNever<Child> extends true
+    ? [...DescendantList, Node]
+    : DescendantArray<Child, [...DescendantList, Node]>
+  : never
 export type GetDims<
   KeyFunctions extends readonly any[],
   Start extends number = 0,
