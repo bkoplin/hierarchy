@@ -1,6 +1,10 @@
-import { L, S } from 'ts-toolbelt'
+import {
+  A, I, L, N, O, S, 
+} from 'ts-toolbelt'
 import type {
-  IsNever, JsonObject, StringKeyOf
+  ConditionalKeys,
+  Get,
+  IsNever, JsonObject, StringKeyOf,
 } from 'type-fest'
 
 export type AncestorArray<
@@ -20,23 +24,23 @@ export type AncestorFromDim<Node, Dim> = IsNever<Node> extends true
   : Node extends { parent: infer Parent }
   ? AncestorFromDim<Parent, Dim>
   : never
-export type DescendantFromDim<Node, Dim> = IsNever<Node> extends true
+export type DescendantFromDim<Node, Dim extends string> = IsNever<Node> extends true
   ? never
-  : Node extends { dim: Dim }
-  ? Node[]
+  : Node extends { dim: `${Dim}` }
+  ? Node
   : Node extends { children: Array<infer Child> }
   ? DescendantFromDim<Child, Dim>
   : never
 export type DescendantArray<
   Node,
   DescendantList extends L.List = []
-> = IsNever<Node> extends true
-  ? DescendantList
-  : Node extends {
+> = Node extends {
       children: Array<infer Child>
     }
-  ? DescendantArray<Child, [...DescendantList, Node]>
-  : never[]
+  ? IsNever<Child> extends true 
+    ? [...DescendantList, Node]
+    : DescendantArray<Child, [...DescendantList, Node]>
+  : DescendantList
 export type GetDims<
   KeyFunctions extends L.List,
   Start extends number = 0,
@@ -46,7 +50,7 @@ export type GetDims<
   ? Head extends readonly [infer Dim, unknown]
     ? GetDims<Tail, Start, End, [...Arr, Dim]>
     : GetDims<Tail, Start, End, [...Arr, Head]>
-  : Pick<Arr, L.KeySet<Start, End>>
+  : L.Extract<Arr, Start, End>
 export type KeyFnTuple<T> = readonly [
   string,
   (datum: T, idx?: number, vals?: T[]) => string | number | undefined
@@ -58,3 +62,15 @@ export type KeyFnKey<T> = T extends JsonObject
   : undefined
 export type KeyFn<T> = KeyFnTuple<T> | KeyFnKey<T>
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
+export type IndexOfElement<
+  Arr extends L.List,
+  Elem,
+  Iter extends I.Iteration = I.IterationOf<0>
+> = {
+  1: {
+    1: I.Pos<Iter>
+    0: IndexOfElement<Arr, Elem, I.Next<Iter>>
+  }[A.Contains<L.ObjectOf<Arr>, Record<I.Key<Iter>, Elem>>]
+  0: never
+}[N.Lower<I.Pos<Iter>, L.Length<Arr>>]
+
