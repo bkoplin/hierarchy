@@ -38,7 +38,7 @@ describe(
         if (child.hasChildren()) expect(child.children).toBeTruthy()
 
         expect(child.parent.depth).toEqual(0)
-        child.each((node) => {
+        child.eachBefore((node) => {
           expect(node.dim).toBeGreaterThan(0)
         })
       }
@@ -109,12 +109,12 @@ describe(
         const [
           r,
           desc, 
-        ] = root.descendants()
+        ] = secondAncestor.descendants()
         const dep = r.depth
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        const ansc = secondAncestor.ancestorAt({ dim: 'education_level' as const, })
+        const ansc = secondAncestor.ancestorAt({ dim: 'education_level'  })
 
         expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
