@@ -1,4 +1,6 @@
-import { A, B, I, L, N, O, S } from 'ts-toolbelt'
+import {
+  A, B, I, L, N, O, S, 
+} from 'ts-toolbelt'
 import type {
   Get,
   IsNever,
@@ -25,18 +27,25 @@ export type AncestorFromDim<Node, Dim> = IsNever<Node> extends true
   : Node extends { parent: infer Parent }
   ? AncestorFromDim<Parent, Dim>
   : never
+export type DescendantFromDim<Node, Dim> = IsNever<Node> extends true
+  ? never
+  : Node extends { dim: Dim }
+  ? Node[]
+  : Node extends { children: Array<infer Child> }
+  ? DescendantFromDim<Child, Dim>
+  : never
 export type DescendantArray<
   Node,
-  DescendantList extends any[] = []
+  DescendantList extends L.List = []
 > = Node extends {
-  children: never[]
+  height: number
 }
-  ? [...DescendantList, Node]
-  : Node extends { children: Array<infer Child> }
-  ? DescendantArray<Child, [...DescendantList, Node]>
+  ? N.Greater<Node['height'], 0> extends 1
+    ? DescendantArray<IterableElement<Get<Node, 'children'>>, [...DescendantList, Node]>
+    : [...DescendantList, Node]
   : never[]
 export type GetDims<
-  KeyFunctions extends readonly any[],
+  KeyFunctions extends L.List,
   Start extends number = 0,
   End extends number = KeyFunctions['length'],
   Arr extends L.List = readonly [undefined]
@@ -96,7 +105,7 @@ export type KeyFnKey<T> = T extends JsonObject
 export type KeyFn<T> = KeyFnTuple<T> | KeyFnKey<T>
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
 export type GetKeyFn<
-  KeyFuncs extends readonly any[],
+  KeyFuncs extends L.List,
   D extends number,
   K = Get<KeyFuncs, [`${N.Sub<D, 1>}`]>
 > = K extends undefined
