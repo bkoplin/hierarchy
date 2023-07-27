@@ -114,8 +114,8 @@ describe(
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        const ansc = secondAncestor.ancestorAt({ dim: 'education_level'  })
-
+        const ansc = secondAncestor.ancestorAt({ dim: 'state_letter'  })
+        const ansc2 = firstAncestor.ancestorAt({dim: 'education_level'})
         expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
@@ -128,7 +128,6 @@ describe(
         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
         const depth2 = leaf.ancestorAt({
           depth: 2,
-          dim: 'education_level',
         })
 
         expect(ancestor).toBeTruthy()
