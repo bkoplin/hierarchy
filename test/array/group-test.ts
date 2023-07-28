@@ -33,7 +33,7 @@ describe(
         `)
         expect(groupByAge.height).toBe(3)
         expect(groupByAge.parent).toBeUndefined()
-        expect(groupByAge.descendants().map(d => d.id)).toMatchFileSnapshot('./group-children.json')
+        expect(groupByAge.descendants().map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
       }
     )
     // test(

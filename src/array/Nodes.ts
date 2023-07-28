@@ -19,7 +19,7 @@ import type {
 import type {
   AncestorArray,
   IndexOfElement,
-  // DescendantArray,
+  DescendantArray,
   // DescendantFromDim,
   GetDims,
   KeyFn,
@@ -35,7 +35,7 @@ type ChildType<
   Height extends L.KeySet<0, KeyFuncs['length']>
 > = B.And<N.Greater<Height, 0>, N.Lower<Depth, L.Length<KeyFuncs>>> extends 1
   ? Height extends 1
-    ? Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
+    ? LeafNode<Datum, KeyFuncs>
     : Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>
   : never
 
@@ -46,7 +46,7 @@ type ParentType<
 > = Depth extends 0
   ? never
   : Depth extends 1
-  ? Node<Datum, KeyFuncs, 0, N.Sub<L.Length<KeyFuncs>, 0>>
+  ? RootNode<Datum, KeyFuncs>
   : Node<
       Datum,
       KeyFuncs,
@@ -126,10 +126,10 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: GetDimOptions<KeyFuncs, Depth, Depth>
+  dim: GetDims<KeyFuncs>[Depth]
   dims: GetDims<KeyFuncs>
   name: this['id']
-  #parent: ParentType<Datum, KeyFuncs, Depth> = undefined
+  #parent = undefined as unknown as ParentType<Datum, KeyFuncs, Depth>
 
   value: number
 
@@ -139,11 +139,13 @@ export class Node<
     this: Node<Datum, KeyFuncs, Depth, Height>,
     child: ChildType<Datum, KeyFuncs, Depth, Height>
   ) {
-    child.parent = this
-    if (this.height > 0) this.children = [
-      ...this.children,
-      child, 
-    ]
+    if (this.height > 0 && !!child) {
+      this.children = [
+        ...this.children,
+        child, 
+      ]
+      child.parent = this
+    }
   }
 
   /**
@@ -151,7 +153,7 @@ export class Node<
    * @default
    * pipe(prop('records'), length)
    */
-  valueFunction = (rec: this) => rec.records.length
+  valueFunction = (rec: unknown) => rec.records.length
 
   get parent() {
     return this.#parent
@@ -314,7 +316,7 @@ export class Node<
   each(callback: (
       node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
       index?: number
-    ) => void): this {
+    ) => void): Node<Datum, KeyFuncs, Depth, Height> {
     let index = -1
 
     for (const node of this) {
@@ -336,7 +338,7 @@ export class Node<
   eachAfter(callback: (
       node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
       index?: number
-    ) => void): this {
+    ) => void): Node<Datum, KeyFuncs, Depth, Height> {
     const nodes = [ this, ]
     const next = []
     let children
@@ -371,7 +373,7 @@ export class Node<
   eachBefore(callback: (
       node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
       index?: number
-    ) => void): this {
+    ) => void): Node<Datum, KeyFuncs, Depth, Height> {
     const nodes = [ this, ]
     let children
     let i
@@ -396,7 +398,7 @@ export class Node<
   find(callback: (
       node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
       index?: number
-    ) => boolean): this | undefined {
+    ) => boolean): Node<Datum, KeyFuncs, Depth, Height> | undefined {
     for (const node of this) {
       const test = callback(node)
 
@@ -404,15 +406,15 @@ export class Node<
     }
   }
 
-  hasChildren(): this is this['depth'] extends KeyFuncs['length']
+  hasChildren(): this is Depth extends KeyFuncs['length']
     ? LeafNode<Datum, KeyFuncs>
-    : this {
+    : Node<Datum, KeyFuncs, Depth, Height> {
     return this?.height > 0
   }
 
-  hasParent(): this is this['depth'] extends 0
+  hasParent(): this is Depth extends 0
     ? RootNode<Datum, KeyFuncs>
-    : this {
+    : Node<Datum, KeyFuncs, Depth, Height> {
     return this?.depth > 0
   }
 
@@ -439,7 +441,7 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    * @see {@link path}
    */
-  links(this: this) {
+  links(this: Node<Datum, KeyFuncs, Depth, Height>) {
     const links = []
 
     this.each((node) => {
@@ -490,7 +492,7 @@ export class Node<
     scaleBy?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleBy'],
     scaleMode?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleMode'],
     scaleNum?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleNum']
-  ): this {
+  ): Node<Datum, KeyFuncs, Depth, Height> {
     this.each((node) => {
       if (typeof node === 'undefined' || node === null) return
       else {
@@ -548,7 +550,7 @@ export class Node<
    * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
    * @param valueFn a function that receives a node and returns a numeric value
    */
-  setValueFunction(valueFn: this['valueFunction']) {
+  setValueFunction(valueFn: Node<Datum, KeyFuncs, Depth, Height>['valueFunction']) {
     this.each((node) => (node.valueFunction = valueFn))
     this.setValues()
     return this
@@ -568,7 +570,7 @@ export class Node<
     const node = filterObject<ConditionalExcept<this, undefined>>(
       (v): v is JsonValue => {
         // if (Array.isArray(v)) return v.length > 0
-        // else 
+        // else
         return v !== undefined && typeof v !== 'function'
       },
       this
@@ -600,6 +602,7 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
     this.children = undefined
   }
 
+  public children: undefined
   // #children = undefined
 
   // declare children: never[]
@@ -623,6 +626,8 @@ export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
       id
     )
   }
+
+  #parent: undefined
 
   // #parent = undefined
 
