@@ -1,89 +1,55 @@
-import { objectEntries, } from '@antfu/utils'
-import {
-  groupBy, propOr, 
-} from 'rambdax'
+import { objectEntries } from '@antfu/utils'
+import { groupBy, propOr } from 'rambdax'
 
-import type {
-  FixedLengthArray, JsonObject, 
-} from 'type-fest'
+import type { JsonObject } from 'type-fest'
 
-import type {
-  L, N, 
-} from 'ts-toolbelt'
-import type {
-  KeyFn, KeyFnTuple, 
-} from './types'
-import {
-  Node, RootNode, LeafNode, 
-} from './Nodes'
+import type { N } from 'ts-toolbelt'
+import type { KeyFn, KeyFnTuple } from './types'
+import { Node, RootNode, LeafNode } from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
   KeyFunctions extends ReadonlyArray<KeyFn<Input>>
 >(values: Input[], ...keys: KeyFunctions): RootNode<Input, KeyFunctions> {
-  const root = new RootNode(
-    keys,
-    values
-  )
+  const root = new RootNode(keys, values)
 
-  regroupFn(root)
-  let children
+  for (let child of root) {
+    child = regroupFn(child)
+  }
 
-  while ((children = root?.children) !== undefined)
-    for (const child of children) regroupFn(child)
-
-  root
-    .eachBefore((node) => {
-      if (!node) return
-      const d = node.depth
-
-      node.children.forEach((child) => {
-        if (!(child instanceof RootNode)) child.parent = node
-      })
-    })
+  // root.eachBefore((node) => {
+  //   if (node.children)
+  //     node.children.forEach((child) => {
+  //       child.parent = node
+  //     })
+  // })
 
   return root
 
   function regroupFn<
-    GroupNode extends {
-      depth: number
-      height: number
-      records: Input[]
-      keyFns: KeyFunctions
-    }
+    GroupNode extends Node<Input, KeyFunctions> | RootNode<Input, KeyFunctions>
   >(node: GroupNode) {
-    const {
-      keyFns, depth, height, 
-    } = node
+    const { keyFns, depth, height } = node
     const childDepth = (depth + 1) as N.Add<GroupNode['depth'], 1>
     const childHeight = (height - 1) as N.Sub<GroupNode['height'], 1>
     const keyFn = keyFns[depth] as KeyFn<Input>
 
-    objectEntries(groupBy(
-      (x: JsonObject | string) => {
+    objectEntries(
+      groupBy((x) => {
         if (
           typeof keyFn === 'string' ||
           typeof keyFn === 'number' ||
           typeof keyFn === 'symbol'
         ) {
-          if (typeof x === 'string') return x[keyFn as unknown as number]
-          else return propOr(
-            '',
-            keyFn,
-            x
-          )
-        } else {
+          return propOr('', keyFn, x)
+        } else if (typeof keyFn?.[1] === 'function') {
           return (keyFn as KeyFnTuple<Input>)[1](x)
-        }
-      },
-      node.records
-    )).forEach((vals) => {
-      const [
-        key,
-        records, 
-      ] = vals
+        } else return undefined
+      }, node.records)
+    ).forEach((vals) => {
+      const [key, records] = vals
 
-      if (childHeight > 1) {
+      if (childHeight >= 1) {
         const child = new Node(
           keyFns,
           records,
@@ -93,13 +59,8 @@ export function group<
         )
 
         node.addChild(child)
-      } else if (childHeight === 0) {
-        const child = new LeafNode(
-          keyFns,
-          records,
-          keyFns.length,
-          `${key}`
-        )
+      } else {
+        const child = new LeafNode(keyFns, records, `${key}`)
 
         node.addChild(child)
       }

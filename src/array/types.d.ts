@@ -1,11 +1,7 @@
-import { A, I, L, N, S, B, O } from 'ts-toolbelt'
+import { A, I, L, N, S } from 'ts-toolbelt'
 import type {
   Get,
-  IsNever,
-  IterableElement,
-  JsonObject,
-  JsonPrimitive,
-  StringKeyOf,
+  IsNever, JsonObject, StringKeyOf
 } from 'type-fest'
 
 export type AncestorArray<Node, AncestorList extends L.List = []> = IsNever<
@@ -79,7 +75,6 @@ export type KeyFnKey<T> = T extends JsonObject
   ? StringKeyOf<L.ObjectOf<S.Split<T, ''>>>
   : undefined
 export type KeyFn<T> = KeyFnTuple<T> | KeyFnKey<T>
-export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
 export type GetDimFromKeyFn<
   KeyFunctions extends L.List,
   Idx extends number
@@ -106,8 +101,3 @@ export type IndexOfElement<
     }[N.Lower<I.Pos<Iter>, L.Length<Arr>>]
   : never
 
-type GD = GetDims<
-  readonly ['ben', readonly ['guiia', () => undefined], 'eli', 'phin', 'ava'],
-  0,
-  4
->

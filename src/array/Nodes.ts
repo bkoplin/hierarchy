@@ -1,20 +1,24 @@
 import {
-  filterObject, uniq, zipObj, 
+  filterObject, uniq, zipObj, anyPass, is, omit, 
 } from 'rambdax'
 import type {
-  ConditionalExcept, IsNever,
-  IterableElement, JsonValue,
-  LiteralUnion, RequireExactlyOne,
+  ConditionalExcept,
+  IsNever,
+  IterableElement,
+  JsonValue,
+  LiteralUnion,
+  RequireExactlyOne,
 } from 'type-fest'
 import type {
-  ChromaStatic, Color,
+  ChromaStatic, Color, 
 } from 'chroma-js'
 import chroma from 'chroma-js'
 import type {
   L, N, B, 
 } from 'ts-toolbelt'
 import type {
-  AncestorArray, IndexOfElement,
+  AncestorArray,
+  IndexOfElement,
   // DescendantArray,
   // DescendantFromDim,
   GetDims,
@@ -23,8 +27,6 @@ import type {
   KeyFnTuple,
   GetDimOptions,
 } from './types.d'
-import { anyPass, } from 'rambdax'
-import { is, } from 'rambdax'
 
 type ChildType<
   Datum,
@@ -127,28 +129,21 @@ export class Node<
   dim: GetDimOptions<KeyFuncs, Depth, Depth>
   dims: GetDims<KeyFuncs>
   name: this['id']
-  _parent = undefined as unknown as ParentType<Datum, KeyFuncs, Depth>
+  #parent: ParentType<Datum, KeyFuncs, Depth> = undefined
 
   value: number
 
-  _children = [] as unknown as Array<ChildType<Datum, KeyFuncs, Depth, Height>>
+  children: Array<ChildType<Datum, KeyFuncs, Depth, Height>> = []
 
   addChild(
     this: Node<Datum, KeyFuncs, Depth, Height>,
     child: ChildType<Datum, KeyFuncs, Depth, Height>
   ) {
-    if (this.height > 0) this._children = [
-      ...this._children,
+    child.parent = this
+    if (this.height > 0) this.children = [
+      ...this.children,
       child, 
     ]
-  }
-
-  get children() {
-    return this._children ?? []
-  }
-
-  set children(children) {
-    this._children = children
   }
 
   /**
@@ -159,11 +154,11 @@ export class Node<
   valueFunction = (rec: this) => rec.records.length
 
   get parent() {
-    return this._parent
+    return this.#parent
   }
 
   set parent(parent) {
-    this._parent = parent
+    this.#parent = parent
   }
 
   get type() {
@@ -183,8 +178,12 @@ export class Node<
     unknown
     > {
     let node = this
-    let current: Array<Node<Datum, KeyFuncs, L.KeySet<Depth, L.Length<KeyFuncs>>>>
-    let next = [ node, ] as unknown as Array<Node<Datum, KeyFuncs, L.KeySet<Depth, L.Length<KeyFuncs>>>>
+    let current: Array<
+      Node<Datum, KeyFuncs, L.KeySet<Depth, L.Length<KeyFuncs>>>
+    >
+    let next = [ node, ] as unknown as Array<
+      Node<Datum, KeyFuncs, L.KeySet<Depth, L.Length<KeyFuncs>>>
+    >
     let children: typeof current
     let i: number
     let n: number
@@ -251,7 +250,7 @@ export class Node<
     while (
       typeof node !== 'undefined' &&
       'parent' in node &&
-      typeof node._parent !== 'undefined'
+      typeof node.#parent !== 'undefined'
     ) {
       nodes.push(node.parent)
       node = node.parent
@@ -462,8 +461,11 @@ export class Node<
    */
   path() {
     let start = this
-    const ancestor = leastCommonAncestor(start, end)
-    const nodes = [start]
+    const ancestor = leastCommonAncestor(
+      start,
+      end
+    )
+    const nodes = [ start, ]
 
     while (start !== ancestor) {
       start = start.parent
@@ -472,7 +474,11 @@ export class Node<
     const k = nodes.length
 
     while (end !== ancestor) {
-      nodes.splice(k, 0, end)
+      nodes.splice(
+        k,
+        0,
+        end
+      )
       end = end.parent
     }
     return nodes
@@ -560,7 +566,11 @@ export class Node<
 
   toJSON(this: Node<Datum, KeyFuncs, Depth, Height>) {
     const node = filterObject<ConditionalExcept<this, undefined>>(
-      (v): v is JsonValue => v !== undefined && typeof v !== 'function',
+      (v): v is JsonValue => {
+        // if (Array.isArray(v)) return v.length > 0
+        // else 
+        return v !== undefined && typeof v !== 'function'
+      },
       this
     )
 
@@ -574,11 +584,11 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
   implements Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
 {
   constructor(
-    public keyFns: KeyFuncs,
-    public records: Datum[],
-    public id: string,
-    public depth = keyFns.length,
-    public height = 0 as const
+    readonly keyFns: KeyFuncs,
+    readonly records: Datum[],
+    readonly id: string,
+    readonly depth = keyFns.length,
+    readonly height = 0 as const
   ) {
     super(
       keyFns,
@@ -587,25 +597,36 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
       0,
       id
     )
+    this.children = undefined
   }
 
-  // declare _children: never[]
+  // #children = undefined
+
+  // declare children: never[]
 }
 export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
   extends Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>
   implements Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>
 {
-  constructor(public keyFns: KeyFuncs, public records: Datum[]) {
+  constructor(
+    readonly keyFns: KeyFuncs,
+    readonly records: Datum[],
+    readonly id = undefined,
+    readonly depth = 0 as const,
+    readonly height = keyFns.length as L.Length<KeyFuncs>
+  ) {
     super(
       keyFns,
       records,
       0,
       keyFns.length,
-      undefined
+      id
     )
   }
 
-  // declare _parent: never
+  // #parent = undefined
+
+  // declare #parent: never
 }
 
 function leastCommonAncestor(a, b) {
