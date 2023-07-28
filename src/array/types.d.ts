@@ -2,29 +2,24 @@ import { A, I, L, N, S, B, O } from 'ts-toolbelt'
 import type {
   Get,
   IsNever,
+  IterableElement,
   JsonObject,
   JsonPrimitive,
   StringKeyOf,
 } from 'type-fest'
 
-export type AncestorArray<
-  Node,
-  AncestorList extends L.List = []
-> = Node extends { parent: unknown }
-  ? Node['parent'] extends never
-    ? [...AncestorList, Node]
-    : AncestorArray<Node['parent'], [...AncestorList, Node]>
-  : AncestorList
+export type AncestorArray<Node, AncestorList extends L.List = []> = IsNever<
+  Get<Node, 'parent'>
+> extends false
+  ? AncestorArray<Get<Node, 'parent'>, [...AncestorList, Node]>
+  : [...AncestorList, Node]
 export type DescendantArray<
   Node,
   DescendantList extends L.List = []
-> = Node extends { children: unknown[] }
-  ? Node['children'][number] extends never
-    ? [...DescendantList, Node]
-    : DescendantArray<
-        Node['children'][number],
-        [...DescendantList, Node]
-      >
+> = Node extends { children: Array<infer Child> }
+  ? IsNever<Child> extends false
+    ? DescendantArray<Child, [...DescendantList, ...L.List<Node>]>
+    : [...DescendantList, ...L.List<Node>]
   : DescendantList
 export type GetDims<
   KeyFunctions extends L.List,
@@ -34,7 +29,7 @@ export type GetDims<
   Arr extends L.List = readonly []
 > = {
   1: {
-    0: L.Append<Arr, GetDimFromKeyFn<KeyFunctions[I.Pos<I.Prev<Iter>>]>>
+    0: L.Append<Arr, GetDimFromKeyFn<KeyFunctions, I.Pos<I.Prev<Iter>>>>
     1: {
       0: GetDims<KeyFunctions, StartDepth, EndDepth, I.Next<Iter>, Arr>
       1: GetDims<
@@ -44,11 +39,11 @@ export type GetDims<
         I.Next<Iter>,
         I.Pos<Iter> extends 0
           ? L.Prepend<Arr, undefined>
-          : L.Append<Arr, GetDimFromKeyFn<KeyFunctions[I.Pos<I.Prev<Iter>>]>>
+          : L.Append<Arr, GetDimFromKeyFn<KeyFunctions, I.Pos<I.Prev<Iter>>>>
       >
     }[N.GreaterEq<I.Pos<Iter>, StartDepth>]
   }[N.Lower<I.Pos<Iter>, EndDepth>]
-  0: L.List<GetDimFromKeyFn<KeyFunctions[N.Sub<StartDepth, 1>]>>
+  0: L.List<GetDimFromKeyFn<KeyFunctions, N.Sub<StartDepth, 1>>>
 }[N.Greater<EndDepth, StartDepth>]
 export type GetDimOptions<
   KeyFunctions extends L.List,
@@ -59,7 +54,7 @@ export type GetDimOptions<
 > = {
   1: {
     0: L.UnionOf<
-      L.Append<Arr, GetDimFromKeyFn<KeyFunctions[I.Pos<I.Prev<Iter>>]>>
+      L.Append<Arr, GetDimFromKeyFn<KeyFunctions, I.Pos<I.Prev<Iter>>>>
     >
     1: {
       0: GetDimOptions<KeyFunctions, StartDepth, EndDepth, I.Next<Iter>, Arr>
@@ -68,11 +63,11 @@ export type GetDimOptions<
         StartDepth,
         EndDepth,
         I.Next<Iter>,
-        L.Append<Arr, GetDimFromKeyFn<KeyFunctions[I.Pos<I.Prev<Iter>>]>>
+        L.Append<Arr, GetDimFromKeyFn<KeyFunctions, I.Pos<I.Prev<Iter>>>>
       >
     }[N.GreaterEq<I.Pos<Iter>, StartDepth>]
   }[N.Lower<I.Pos<Iter>, EndDepth>]
-  0: GetDimFromKeyFn<KeyFunctions[N.Sub<StartDepth, 1>]>
+  0: GetDimFromKeyFn<KeyFunctions, N.Sub<StartDepth, 1>>
 }[N.Greater<EndDepth, StartDepth>]
 export type KeyFnTuple<T> = readonly [
   string,
@@ -85,27 +80,34 @@ export type KeyFnKey<T> = T extends JsonObject
   : undefined
 export type KeyFn<T> = KeyFnTuple<T> | KeyFnKey<T>
 export type GetDatumFromKeyFn<K> = K extends KeyFn<infer T> ? T : never
-export type GetDimFromKeyFn<K> = K extends readonly [infer Dim, unknown]
-  ? Dim extends JsonPrimitive
+export type GetDimFromKeyFn<
+  KeyFunctions extends L.List,
+  Idx extends number
+> = A.At<KeyFunctions, Idx> extends undefined
+  ? never
+  : A.At<KeyFunctions, Idx> extends readonly [infer Dim, unknown]
+  ? Dim extends string
     ? Dim
     : never
-  : K extends JsonPrimitive
-  ? K
-  : undefined
+  : A.At<KeyFunctions, Idx> extends `${infer StringDim}`
+  ? StringDim
+  : never
 export type IndexOfElement<
   Arr,
   Elem,
   Iter extends I.Iteration = I.IterationOf<0>
-> = Arr extends readonly unknown[]
+> = Arr extends L.List
   ? {
       1: {
         0: IndexOfElement<Arr, Elem, I.Next<Iter>>
         1: I.Pos<Iter>
-      }[Get<Arr, I.Key<Iter>> extends Elem ? 1 : 0]
+      }[A.Equals<Elem, A.At<Arr, I.Key<Iter>>>]
       0: L.KeySet<0, N.Sub<L.Length<Arr>, 1>>
     }[N.Lower<I.Pos<Iter>, L.Length<Arr>>]
-  : number
+  : never
 
 type GD = GetDims<
-  readonly ['ben', readonly ['guiia', () => undefined], 'eli', 'phin', 'ava']
+  readonly ['ben', readonly ['guiia', () => undefined], 'eli', 'phin', 'ava'],
+  0,
+  4
 >
