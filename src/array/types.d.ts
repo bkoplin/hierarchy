@@ -10,28 +10,22 @@ import type {
 export type AncestorArray<
   Node,
   AncestorList extends L.List = []
-> = IsNever<Node> extends true
-  ? AncestorList
-  : Node extends { parent: infer Parent }
-  ? AncestorArray<Parent, [...AncestorList, Node]>
-  : [...AncestorList, Node]
-export type AncestorFromDim<Node, Dim> = IsNever<Node> extends true
-  ? never
-  : Node extends { dim: Dim }
-  ? Node
-  : Node extends { parent: infer Parent }
-  ? AncestorFromDim<Parent, Dim>
-  : never
+> = Node extends { parent: unknown }
+  ? Node['parent'] extends never
+    ? [...AncestorList, Node]
+    : AncestorArray<Node['parent'], [...AncestorList, Node]>
+  : AncestorList
 export type DescendantArray<
   Node,
   DescendantList extends L.List = []
-> = Node extends object
-  ? Node extends { height: 0 }
+> = Node extends { children: unknown[] }
+  ? Node['children'][number] extends never
     ? [...DescendantList, Node]
-    : Node extends { children: Array<infer Child> }
-    ? DescendantArray<Child, [...DescendantList, Node]>
-    : [...DescendantList, Node]
-  : never[]
+    : DescendantArray<
+        Node['children'][number],
+        [...DescendantList, Node]
+      >
+  : DescendantList
 export type GetDims<
   KeyFunctions extends L.List,
   StartDepth extends number = 0,
@@ -108,9 +102,9 @@ export type IndexOfElement<
         0: IndexOfElement<Arr, Elem, I.Next<Iter>>
         1: I.Pos<Iter>
       }[Get<Arr, I.Key<Iter>> extends Elem ? 1 : 0]
-      0: never
+      0: L.KeySet<0, N.Sub<L.Length<Arr>, 1>>
     }[N.Lower<I.Pos<Iter>, L.Length<Arr>>]
-  : never
+  : number
 
 type GD = GetDims<
   readonly ['ben', readonly ['guiia', () => undefined], 'eli', 'phin', 'ava']

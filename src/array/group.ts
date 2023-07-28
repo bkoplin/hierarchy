@@ -34,13 +34,13 @@ export function group<
 
   root
     .eachBefore((node) => {
+      if (!node) return
       const d = node.depth
 
       node.children.forEach((child) => {
         if (!(child instanceof RootNode)) child.parent = node
       })
     })
-    .setColor()
 
   return root
 

@@ -44,7 +44,7 @@ export class Node<
   Datum,
   KeyFuncs extends ReadonlyArray<KeyFn<Datum>>,
   Depth extends L.KeySet<0, KeyFuncs['length']>,
-  Height extends N.Sub<L.Length<KeyFuncs>, Depth>
+  Height extends L.KeySet<0, KeyFuncs['length']>
 > {
   constructor(
     public keyFns: KeyFuncs,
@@ -105,7 +105,7 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: Get<GetDims<KeyFuncs>, `${Depth}`>
+  dim: GetDimOptions<KeyFuncs, Depth, Depth>
   dims: GetDims<KeyFuncs>
   name: this['id']
   _parent = undefined as unknown as B.And<
@@ -169,10 +169,12 @@ export class Node<
     else return `node` as ReturnType
   }
 
-  *[Symbol.iterator]() {
-    let node = this as unknown as DescendantArray<
-      Node<Datum, KeyFuncs, Depth, Height>
-    >[number]
+  *[Symbol.iterator](): Generator<
+    L.UnionOf<DescendantArray<Node<Datum, KeyFuncs, Depth, Height>>>,
+    void,
+    unknown
+    > {
+    let node = this
     let current
     let next = [ node, ]
     let children: typeof current
@@ -183,9 +185,7 @@ export class Node<
       current = next.reverse()
       next = []
       while ((node = current.pop()) !== undefined) {
-        yield node as unknown as DescendantArray<
-          Node<Datum, KeyFuncs, Depth, Height>
-        >[number]
+        yield node
         if ((children = node?.children) !== undefined)
           for (i = 0, n = children.length; i < n; ++i) next.push(children[i])
       }
@@ -205,7 +205,7 @@ export class Node<
     Params extends RequireExactlyOne<
       {
         depth: Depths
-        dim: GetDimOptions<KeyFuncs, 0, Depth>
+        dim: GetDims<KeyFuncs>[Depths]
       },
       'depth' | 'dim'
     >
@@ -219,7 +219,7 @@ export class Node<
           Params['depth'],
           N.Sub<KeyFuncs['length'], Params['depth']>
         >
-      : DimKey extends Depths
+      : DimKey extends L.KeySet<0, Depth>
       ? Node<Datum, KeyFuncs, DimKey, N.Sub<L.Length<KeyFuncs>, DimKey>>
       : never
 
@@ -258,7 +258,7 @@ export class Node<
    * @description Returns the array of descendant nodes, starting with this node.
    *
    */
-  descendants() {
+  descendants(): DescendantArray<Node<Datum, KeyFuncs, Depth, Height>> {
     return Array.from(this)
   }
 
@@ -304,7 +304,7 @@ export class Node<
    * @see {@link eachBefore}
    * @see {@link eachAfter}
    */
-  each(callback: (node: IterableElement<this>, index?: number) => void): this {
+  each(callback: (node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>, index?: number) => void): this {
     let index = -1
 
     for (const node of this) {
@@ -323,7 +323,7 @@ export class Node<
    * visited. The specified function is passed the current descendant, the zero-based traversal
    * index, and this node. If that is specified, it is the this context of the callback.
    */
-  eachAfter(callback: (node: IterableElement<this>, index?: number) => void): this {
+  eachAfter(callback: (node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>, index?: number) => void): this {
     const nodes = [ this, ]
     const next = []
     let children
@@ -355,7 +355,7 @@ export class Node<
    * @see {@link each}
    * @see {@link eachAfter}
    */
-  eachBefore(callback: (node: IterableElement<this>, index?: number) => void): this {
+  eachBefore(callback: (node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>, index?: number) => void): this {
     const nodes = [ this, ]
     let children
     let i
@@ -377,7 +377,7 @@ export class Node<
    * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
    * @see {@link https://github.com/d3/d3-hierarchy#find}
    */
-  find(callback: (node: IterableElement<this>, index?: number) => boolean): this | undefined {
+  find(callback: (node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>, index?: number) => boolean): this | undefined {
     for (const node of this) {
       const test = callback(node)
 
@@ -385,13 +385,13 @@ export class Node<
     }
   }
 
-  // hasChildren(): this is this['depth'] extends KeyFuncs['length'] ? never : this {
-  //   return this?.height > 0
-  // }
+  hasChildren(): this is this['depth'] extends KeyFuncs['length'] ? LeafNode<Datum, KeyFuncs> : this {
+    return this?.height > 0
+  }
 
-  // hasParent(): this is this['depth'] extends 0 ? never : this {
-  //   return this?.depth > 0
-  // }
+  hasParent(): this is this['depth'] extends 0 ? RootNode<Datum, KeyFuncs> : this {
+    return this?.depth > 0
+  }
 
   /**
    * @description Returns the array of leaf nodes for this node
@@ -506,40 +506,40 @@ export class Node<
   //   })
   // }
 
-  // /**
-  //  * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
-  //  * @param valueFn a function that receives a node and returns a numeric value
-  //  */
-  // setValueFunction(valueFn: this['valueFunction']) {
-  //   this.each((node) => (node.valueFunction = valueFn))
-  //   this.setValues()
-  //   return this
-  // }
+  /**
+   * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
+   * @param valueFn a function that receives a node and returns a numeric value
+   */
+  setValueFunction(valueFn: this['valueFunction']) {
+    this.each((node) => (node.valueFunction = valueFn))
+    this.setValues()
+    return this
+  }
 
-  // /**
-  //  * Sets the value of this node and its descendants, and returns this node.
-  //  */
-  // setValues() {
-  //   this.each((node) => {
-  //     node.value = node.valueFunction(node)
-  //   })
-  //   return this
-  // }
+  /**
+   * Sets the value of this node and its descendants, and returns this node.
+   */
+  setValues(this: Node<Datum, KeyFuncs, Depth, Height>) {
+    this.each((node) => {
+      node.value = node.valueFunction(node)
+    })
+    return this
+  }
 
-  // toJSON(this: Node<Datum, KeyFuncs, this['depth']>) {
-  //   const node = filterObject<ConditionalExcept<this, undefined | Function>>(
-  //     (v): v is JsonValue => v !== undefined && typeof v !== 'function',
-  //     this
-  //   )
+  toJSON(this: Node<Datum, KeyFuncs, Depth, Height>) {
+    const node = filterObject<ConditionalExcept<this, undefined | Function>>(
+      (v): v is JsonValue => v !== undefined && typeof v !== 'function',
+      this
+    )
 
-  //   // if (node.height === 0)
-  //   //   delete node.children
-  //   return node
-  // }
+    // if (node.height === 0)
+    //   delete node.children
+    return node
+  }
 }
 export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
-  extends Node<Datum, KeyFuncs, KeyFuncs['length'], 0>
-  implements Node<Datum, KeyFuncs, KeyFuncs['length'], 0>
+  extends Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
+  implements Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
 {
   constructor(
     public keyFns: KeyFuncs,
