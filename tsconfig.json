@@ -2,28 +2,24 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "target": "esnext",
-    "module": "commonjs",
     "allowUmdGlobalAccess": true,
     "resolveJsonModule": true,
+    "moduleResolution": "node",
     "allowJs": true,
     "declaration": true,
     "declarationMap": true,
     "importHelpers": true,
+    "noEmit": true,
     "noEmitOnError": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
-    "noStrictGenericChecks": true,
     "noImplicitThis": true,
-    "lib": [
-      "dom",
-      "dom.iterable"
-    ],
     "types": [
       "vitest/globals",
       "vitest/importMeta"
     ]
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*.ts", "./test/**/*.ts", "./*.config.ts", "./.eslintrc.cjs"],
   "exclude": ["./dist"]
 }

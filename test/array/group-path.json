@@ -1,7 +1,37 @@
 [
-  2,
-  1,
-  0,
-  1,
-  2,
+  [
+    "Missouri",
+    "state",
+    998.33,
+    0,
+    3,
+  ],
+  [
+    "M",
+    "state_letter",
+    998.33,
+    1,
+    2,
+  ],
+  [
+    "Bachelor's Degree",
+    "education_level",
+    696.4159999999999,
+    2,
+    1,
+  ],
+  [
+    "A",
+    "state_letter",
+    718.57,
+    1,
+    2,
+  ],
+  [
+    "Arkansas",
+    "state",
+    718.57,
+    0,
+    3,
+  ],
 ]

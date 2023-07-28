@@ -1,11 +1,18 @@
 import {
-  filterObject, uniq, zipObj, anyPass, is, omit, 
+  filterObject,
+  uniq,
+  zipObj,
+  anyPass,
+  is,
+  equals,
+  intersection,
 } from 'rambdax'
 import type {
   ConditionalExcept,
   IsNever,
   IterableElement,
   JsonValue,
+  Simplify,
   LiteralUnion,
   RequireExactlyOne,
 } from 'type-fest'
@@ -19,7 +26,7 @@ import type {
 import type {
   AncestorArray,
   IndexOfElement,
-  DescendantArray,
+  GetDimOptions,
   // DescendantFromDim,
   GetDims,
   KeyFn,
@@ -70,11 +77,11 @@ export class Node<
   >
 > {
   constructor(
-    readonly keyFns: KeyFuncs,
-    readonly records: Datum[],
-    readonly depth: Depth,
-    readonly height: Height,
-    readonly id: Depth extends 0 ? undefined : string
+    public readonly keyFns: KeyFuncs,
+    public readonly records: Datum[],
+    public readonly depth: Depth,
+    public readonly height: Height,
+    public readonly id: Depth extends 0 ? undefined : string
   ) {
     this.name = id
     this.value = records.length
@@ -95,7 +102,7 @@ export class Node<
       },
       []
     ) as unknown as GetDims<KeyFuncs>
-    this.dim = this.dims[depth]
+    this.dim = this.dims[depth] as unknown as GetDimOptions<KeyFuncs, Depth, Depth>
 
     function isKeyofKeyFn(keyFn: unknown | KeyFnKey<Datum>): keyFn is KeyFnKey<Datum> {
       return anyPass([
@@ -126,7 +133,7 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: GetDims<KeyFuncs>[Depth]
+  dim: GetDimOptions<KeyFuncs, Depth, Depth>
   dims: GetDims<KeyFuncs>
   name: this['id']
   #parent = undefined as unknown as ParentType<Datum, KeyFuncs, Depth>
@@ -440,16 +447,21 @@ export class Node<
    * @see {@link path}
    */
   links(this: Node<Datum, KeyFuncs, Depth, Height>) {
-    const links = []
+    const links = [] as Array<
+      {
+        [Key in L.KeySet<Depth, L.Length<KeyFuncs>>]: {
+          source: Key extends 0 ? undefined : Simplify<Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>>['parent']
+          target: Simplify<Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>>
+        }
+      }[L.KeySet<Depth, L.Length<KeyFuncs>>]
+    >
 
     this.each((node) => {
-      if (node !== this) {
-        // Don't include the root's parent, if any.
-        links.push({
-          source: node.parent,
-          target: node,
-        })
-      }
+      // Don't include the root's parent, if any.
+      links.push({
+        source: node.parent,
+        target: node,
+      })
     })
     return links
   }
@@ -459,7 +471,7 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path() {
+  path(this: Node<Datum, KeyFuncs, Depth, Height>, end: Node<Datum, KeyFuncs>) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -548,7 +560,10 @@ export class Node<
    * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
    * @param valueFn a function that receives a node and returns a numeric value
    */
-  setValueFunction(this: Node<Datum, KeyFuncs, Depth, Height>, valueFn: Node<Datum, KeyFuncs, Depth, Height>['valueFunction']) {
+  setValueFunction(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    valueFn: Node<Datum, KeyFuncs, Depth, Height>['valueFunction']
+  ) {
     this.each((node) => (node.valueFunction = valueFn))
     this.setValues()
     return this
@@ -587,7 +602,7 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
     readonly keyFns: KeyFuncs,
     readonly records: Datum[],
     readonly id: string,
-    readonly depth = keyFns.length,
+    readonly depth = keyFns.length as L.Length<KeyFuncs>,
     readonly height = 0 as const
   ) {
     super(
@@ -600,8 +615,6 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
     this.children = undefined
   }
 
-  public children: undefined
-  // #children = undefined
 
   // declare children: never[]
 }
@@ -625,25 +638,26 @@ export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
     )
   }
 
-  #parent: undefined
 
   // #parent = undefined
 
   // declare #parent: never
 }
 
-function leastCommonAncestor(a, b) {
-  if (a === b) return a
+function leastCommonAncestor<ANode extends Node, BNode extends Node>(
+  a: ANode,
+  b: BNode
+) {
+  if (equals(
+    a,
+    b
+  )) return a
   const aNodes = a.ancestors()
   const bNodes = b.ancestors()
-  let c = null
+  const [ c, ] = intersection(
+    aNodes,
+    bNodes
+  )
 
-  a = aNodes.pop()
-  b = bNodes.pop()
-  while (a === b) {
-    c = a
-    a = aNodes.pop()
-    b = bNodes.pop()
-  }
-  return c
+  return c ?? null
 }

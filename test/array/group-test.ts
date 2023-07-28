@@ -2,7 +2,7 @@ import {
   describe, expect, test, 
 } from 'vitest'
 import {
-  map, mean, pipe, prop, 
+  map, mean, pipe, prop, paths,
 } from 'rambdax'
 import { group, } from '../../src/array/group'
 import data from '../data/MOCK_DATA.json'
@@ -33,7 +33,10 @@ describe(
         `)
         expect(groupByAge.height).toBe(3)
         expect(groupByAge.parent).toBeUndefined()
-        expect(groupByAge.descendants().map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
+        expect(groupByAge.descendants().map((d) => d.dim)).toMatchFileSnapshot('./group-children.json')
+        const [ l, ] = groupByAge.links()
+
+        expect(l.source).toBeUndefined()
       }
     )
     // test(
@@ -93,7 +96,26 @@ describe(
           undefined,
           'allNodesAtDimValues'
         )
-        expect(groupByAge.descendants().map(d => [d.id, d.value, d.color])).toMatchFileSnapshot('./group-colors.json')
+        expect(groupByAge.leaves().map((d) => [
+          d.id,
+          d.value,
+          d.color, 
+        ])).toMatchFileSnapshot('./group-colors.json')
+        const [
+          leaf1,
+          leaf2, 
+        ] = groupByAge.leaves()
+
+        expect(leaf1.path(leaf2).map((p) => paths(
+          [
+            'id',
+            'dim',
+            'value',
+            'height',
+            'depth', 
+          ],
+          p
+        ))).toMatchFileSnapshot('./group-path.json')
       }
     )
   }
