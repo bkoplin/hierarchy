@@ -599,11 +599,11 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
   implements Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
 {
   constructor(
-    readonly keyFns: KeyFuncs,
-    readonly records: Datum[],
-    readonly id: string,
-    readonly depth = keyFns.length as L.Length<KeyFuncs>,
-    readonly height = 0 as const
+    public readonly keyFns: KeyFuncs,
+    public readonly records: Datum[],
+    public readonly id: string,
+    public readonly depth = keyFns.length as L.Length<KeyFuncs>,
+    public readonly height = 0 as const
   ) {
     super(
       keyFns,
@@ -623,11 +623,11 @@ export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
   implements Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>
 {
   constructor(
-    readonly keyFns: KeyFuncs,
-    readonly records: Datum[],
-    readonly id = undefined,
-    readonly depth = 0 as const,
-    readonly height = keyFns.length as L.Length<KeyFuncs>
+    public readonly keyFns: KeyFuncs,
+    public readonly records: Datum[],
+    public readonly id = undefined,
+    public readonly depth = 0 as const,
+    public readonly height = keyFns.length as L.Length<KeyFuncs>
   ) {
     super(
       keyFns,
