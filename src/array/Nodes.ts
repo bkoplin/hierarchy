@@ -423,10 +423,8 @@ export class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(this: Node<Datum, KeyFuncs, Depth, Height>): Array<Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>> {
-    const leaves = [] as unknown as Array<
-      Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
-    >
+  leaves(this: Node<Datum, KeyFuncs, Depth, Height>): Array<LeafNode<Datum, KeyFuncs>> {
+    const leaves = [] as unknown as Array<LeafNode<Datum, KeyFuncs>>
 
     this.eachBefore((node) => {
       if (!node.height) {
@@ -488,10 +486,10 @@ export class Node<
 
   setColor(
     this: Node<Datum, KeyFuncs, Depth, Height>,
-    scale?: Node<Datum, KeyFuncs, Depth, Height>['colorScale'],
-    scaleBy?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleBy'],
-    scaleMode?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleMode'],
-    scaleNum?: Node<Datum, KeyFuncs, Depth, Height>['colorScaleNum']
+    scale?: this['colorScale'],
+    scaleBy?: this['colorScaleBy'],
+    scaleMode?: this['colorScaleMode'],
+    scaleNum?: this['colorScaleNum']
   ): Node<Datum, KeyFuncs, Depth, Height> {
     this.each((node) => {
       if (typeof node === 'undefined' || node === null) return
@@ -550,7 +548,7 @@ export class Node<
    * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
    * @param valueFn a function that receives a node and returns a numeric value
    */
-  setValueFunction(valueFn: Node<Datum, KeyFuncs, Depth, Height>['valueFunction']) {
+  setValueFunction(this: Node<Datum, KeyFuncs, Depth, Height>, valueFn: Node<Datum, KeyFuncs, Depth, Height>['valueFunction']) {
     this.each((node) => (node.valueFunction = valueFn))
     this.setValues()
     return this

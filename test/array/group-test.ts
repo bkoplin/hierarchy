@@ -79,23 +79,23 @@ describe(
     //       expect(secondLevelChild.parent.depth).toBe(1)
     //   }
     // )
-    // test(
-    //   'change value function, inline second level first child',
-    //   () => {
-    //     const c = groupByAge.children[0]
+    test(
+      'change value function, inline second level first child',
+      () => {
+        const c = groupByAge.children[0]
 
-    //     c.setValueFunction(pipe(
-    //       prop('records'),
-    //       map(prop('crime_rate')),
-    //       mean
-    //     ))
-    //     c.setColor(
-    //       undefined,
-    //       'allNodesAtDimValues'
-    //     )
-    //     expect(c).toMatchFileSnapshot('./group-children.json')
-    //   }
-    // )
+        groupByAge.setValueFunction(pipe(
+          prop('records'),
+          map(prop('crime_rate')),
+          mean
+        ))
+        groupByAge.setColor(
+          undefined,
+          'allNodesAtDimValues'
+        )
+        expect(groupByAge.descendants().map(d => [d.id, d.value, d.color])).toMatchFileSnapshot('./group-colors.json')
+      }
+    )
   }
 )
 
