@@ -20,6 +20,7 @@ import type {
   ChromaStatic, Color, 
 } from 'chroma-js'
 import chroma from 'chroma-js'
+import {pie,} from 'd3-shape'
 import type {
   L, N, B, 
 } from 'ts-toolbelt'
@@ -42,7 +43,7 @@ type ChildType<
   Height extends L.KeySet<0, KeyFuncs['length']>
 > = B.And<N.Greater<Height, 0>, N.Lower<Depth, L.Length<KeyFuncs>>> extends 1
   ? Height extends 1
-    ? LeafNode<Datum, KeyFuncs>
+    ? Node<Datum, KeyFuncs, 0>
     : Node<Datum, KeyFuncs, N.Add<Depth, 1>, N.Sub<Height, 1>>
   : never
 
@@ -53,7 +54,7 @@ type ParentType<
 > = Depth extends 0
   ? never
   : Depth extends 1
-  ? RootNode<Datum, KeyFuncs>
+  ? Node<Datum, KeyFuncs, L.Length<KeyFuncs>>
   : Node<
       Datum,
       KeyFuncs,
@@ -102,7 +103,11 @@ export class Node<
       },
       []
     ) as unknown as GetDims<KeyFuncs>
-    this.dim = this.dims[depth] as unknown as GetDimOptions<KeyFuncs, Depth, Depth>
+    this.dim = this.dims[depth] as unknown as GetDimOptions<
+      KeyFuncs,
+      Depth,
+      Depth
+    >
 
     function isKeyofKeyFn(keyFn: unknown | KeyFnKey<Datum>): keyFn is KeyFnKey<Datum> {
       return anyPass([
@@ -413,15 +418,19 @@ export class Node<
     }
   }
 
-  hasChildren(): this is Depth extends KeyFuncs['length']
-    ? LeafNode<Datum, KeyFuncs>
-    : Node<Datum, KeyFuncs, Depth, Height> {
+  isRoot(): this is Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>> {
+    return this?.depth === 0
+  }
+
+  isLeaf(): this is Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0> {
+    return this?.height === 0
+  }
+
+  hasChildren() {
     return this?.height > 0
   }
 
-  hasParent(): this is Depth extends 0
-    ? RootNode<Datum, KeyFuncs>
-    : Node<Datum, KeyFuncs, Depth, Height> {
+  hasParent() {
     return this?.depth > 0
   }
 
@@ -430,8 +439,10 @@ export class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(this: Node<Datum, KeyFuncs, Depth, Height>): Array<LeafNode<Datum, KeyFuncs>> {
-    const leaves = [] as unknown as Array<LeafNode<Datum, KeyFuncs>>
+  leaves(this: Node<Datum, KeyFuncs, Depth, Height>): Array<Node<Datum, KeyFuncs, L.Length<KeyFuncs>>> {
+    const leaves = [] as unknown as Array<
+      Node<Datum, KeyFuncs, L.Length<KeyFuncs>>
+    >
 
     this.eachBefore((node) => {
       if (!node.height) {
@@ -450,8 +461,14 @@ export class Node<
     const links = [] as Array<
       {
         [Key in L.KeySet<Depth, L.Length<KeyFuncs>>]: {
-          source: Key extends 0 ? undefined : Simplify<Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>>['parent']
-          target: Simplify<Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>>
+          source: Key extends 0
+            ? undefined
+            : Simplify<
+                Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>
+              >['parent']
+          target: Simplify<
+            Node<Datum, KeyFuncs, Key, N.Sub<L.Length<KeyFuncs>, Key>>
+          >
         }
       }[L.KeySet<Depth, L.Length<KeyFuncs>>]
     >
@@ -594,10 +611,10 @@ export class Node<
     return node
   }
 }
-export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
-  extends Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
-  implements Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0>
-{
+export class LeafNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0> {
   constructor(
     public readonly keyFns: KeyFuncs,
     public readonly records: Datum[],
@@ -615,13 +632,12 @@ export class LeafNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
     this.children = undefined
   }
 
-
   // declare children: never[]
 }
-export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
-  extends Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>
-  implements Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>
-{
+export class RootNode<
+  Datum,
+  KeyFuncs extends ReadonlyArray<KeyFn<Datum>>
+> extends Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>> {
   constructor(
     public readonly keyFns: KeyFuncs,
     public readonly records: Datum[],
@@ -637,7 +653,6 @@ export class RootNode<Datum, KeyFuncs extends ReadonlyArray<KeyFn<Datum>>>
       id
     )
   }
-
 
   // #parent = undefined
 

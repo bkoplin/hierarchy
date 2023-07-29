@@ -4,7 +4,7 @@ import {
 import {
   map, mean, pipe, prop, paths,
 } from 'rambdax'
-import { group, } from '../../src/array/group'
+import { group, } from '../../src/group'
 import data from '../data/MOCK_DATA.json'
 
 const groupByAge = group(

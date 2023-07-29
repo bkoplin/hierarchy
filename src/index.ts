@@ -1,1 +1,1 @@
-export { group, } from './array/group'
+export { group, } from './group'
