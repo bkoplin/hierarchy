@@ -9,8 +9,8 @@ import {
 } from 'rambdax'
 import type {
   ConditionalExcept,
+  Get,
   IsNever,
-  IterableElement,
   JsonValue,
   LiteralUnion,
   RequireExactlyOne,
@@ -22,92 +22,116 @@ import type {
 import chroma from 'chroma-js'
 import { pie, } from 'd3-shape'
 import type {
-  L, N,
+  I, L, N,
 } from 'ts-toolbelt'
 import type {
-  GetDimOptions,
-  GetDims,
+  // GetDims,
   IndexOfElement,
   KeyFn,
   KeyFnKey,
   KeyFnTuple,
 } from './types.d'
 
-type ChildType<
-  ThisNode extends {
-    depth: number
-    height: number
-    records: unknown[]
-    keyFns: L.List<KeyFn<L.UnionOf<ThisNode['records']>>>
-  }
-> = N.Greater<ThisNode['height'], 0> extends 1
-  ? Node<
-      L.UnionOf<ThisNode['records']>,
-      ThisNode['keyFns'],
-      N.Add<ThisNode['depth'], 1>,
-      N.Sub<ThisNode['height'], 1>
-    >
+type GetDims<
+  KeyFunctions extends L.List,
+  StartDepth extends L.KeySet<0, L.Length<KeyFunctions>> = 0,
+  EndDepth extends L.KeySet<0, L.Length<KeyFunctions>> = L.Length<KeyFunctions>,
+  Iter extends I.Iteration = StartDepth extends 0
+    ? I.IterationOf<-1>
+    : I.IterationOf<StartDepth>,
+  Arr extends L.List = readonly []
+> = N.Lower<I.Pos<Iter>, EndDepth> extends 1
+  ? I.Pos<Iter> extends -1
+    ? GetDims<
+        KeyFunctions,
+        StartDepth,
+        EndDepth,
+        I.Next<Iter>,
+        [...Arr, undefined]
+      >
+    : Get<L.ObjectOf<KeyFunctions>, `${I.Pos<Iter>}`> extends readonly unknown[]
+      ? GetDims<
+        KeyFunctions,
+        StartDepth,
+        EndDepth,
+        I.Next<Iter>,
+        [...Arr, Get<L.ObjectOf<KeyFunctions>, [`${I.Pos<Iter>}`, '0']>]
+      >
+      : GetDims<
+        KeyFunctions,
+        StartDepth,
+        EndDepth,
+        I.Next<Iter>,
+        [...Arr, Get<L.ObjectOf<KeyFunctions>, `${I.Pos<Iter>}`>]
+      >
+  : Arr
+
+type ChildType<ThisNode> = ThisNode extends {
+  depth: number
+  height: number
+  records: Array<infer Datum>
+  keyFns: infer KeyFunctions
+}
+  ? KeyFunctions extends ReadonlyArray<KeyFn<Datum>>
+    ? ThisNode['depth'] extends L.Length<KeyFunctions>
+      ? never
+      : ThisNode['height'] extends 0
+        ? never
+        : Node<
+          Datum,
+          KeyFunctions,
+          N.Add<ThisNode['depth'], 1>,
+          N.Sub<ThisNode['height'], 1>
+        >
+    : never
   : never
 
-type ParentType<
-  ThisNode extends {
-    depth: number
-    height: number
-    records: unknown[]
-    keyFns: L.List<KeyFn<L.UnionOf<ThisNode['records']>>>
-  }
-> = N.Greater<ThisNode['depth'], 0> extends 1
-  ? Node<
-      L.UnionOf<ThisNode['records']>,
-      ThisNode['keyFns'],
-      N.Sub<ThisNode['depth'], 1>,
-      N.Add<ThisNode['height'], 1>
-    >
+type ParentType<ThisNode> = ThisNode extends {
+  depth: number
+  height: number
+  records: Array<infer Datum>
+  keyFns: infer KeyFunctions
+}
+  ? KeyFunctions extends ReadonlyArray<KeyFn<Datum>>
+    ? ThisNode['depth'] extends 0
+      ? never
+      : Node<
+          Datum,
+          KeyFunctions,
+          N.Sub<ThisNode['depth'], 1>,
+          N.Add<ThisNode['height'], 1>
+        >
+    : never
   : never
 
-type DescendantIter<
-  ThisNode extends {
-    depth: number
-    height: number
-    keyFns: unknown[]
-    records: unknown[]
-  },
-  Iter = ThisNode
-> = N.Greater<ThisNode['height'], 0> extends 1
-  ? DescendantIter<ChildType<ThisNode>, Iter | ThisNode>
-  : Iter
+type DescendantIter<ThisNode, Iter = ThisNode> = ThisNode extends {
+  depth: number
+  height: number
+  records: Array<infer Datum>
+  keyFns: infer KeyFunctions
+}
+  ? KeyFunctions extends ReadonlyArray<KeyFn<Datum>>
+    ? ThisNode['depth'] extends L.Length<KeyFunctions>
+      ? Iter
+      : ThisNode['height'] extends 0
+        ? Iter
+        : DescendantIter<
+            Node<
+            Datum,
+            KeyFunctions,
+            N.Add<ThisNode['depth'], 1>,
+            N.Sub<ThisNode['height'], 1>
+          >,
+          Iter | ThisNode
+        >
+    : never
+  : never
 
-type AncestorArray<
-  ThisNode extends {
-    depth: number
-    height: number
-    keyFns: unknown[]
-    records: unknown[]
-  },
-  AncestorList extends L.List = []
-> = N.Greater<ThisNode['depth'], 0> extends 1
+type AncestorArray<ThisNode, AncestorList extends L.List = []> = IsNever<
+  ParentType<ThisNode>
+> extends false
   ? AncestorArray<ParentType<ThisNode>, L.Append<AncestorList, ThisNode>>
   : L.Append<AncestorList, ThisNode>
-
-type AncestorsAtParams<
-  ThisNode extends Node
-> = RequireExactlyOne<
-  {
-    depth: L.KeySet<0, ThisNode['depth']>
-    dim: L.UnionOf<L.Extract<ThisNode['dims'], 0, ThisNode['depth']>>
-  },
-  'depth' | 'dim'
->
-
-type DescendantsAtParams<
-  ThisNode extends Node
-> = RequireExactlyOne<
-  {
-    depth: L.KeySet<ThisNode['depth'], N.Add<ThisNode['depth'], ThisNode['height']>>
-    dim: L.UnionOf<L.Extract<ThisNode['dims'], ThisNode['depth'], N.Add<ThisNode['depth'], ThisNode['height']>>>
-  },
-  'depth' | 'dim'
->
 
 export class Node<
   Datum = string,
@@ -154,11 +178,9 @@ export class Node<
       },
       []
     ) as unknown as GetDims<KeyFuncs>
-    this.dim = this.dims[depth] as unknown as GetDimOptions<
-      KeyFuncs,
-      Depth,
-      Depth
-    >
+    const dimDepth = depth as unknown as keyof GetDims<KeyFuncs>
+
+    this.dim = this.dims[dimDepth]
 
     function isKeyofKeyFn(keyFn: unknown | KeyFnKey<Datum>): keyFn is KeyFnKey<Datum> {
       return anyPass([
@@ -189,7 +211,7 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
-  dim: GetDimOptions<KeyFuncs, Depth, Depth>
+  dim: Get<L.ObjectOf<GetDims<KeyFuncs>>, `${Depth}`>
   dims: GetDims<KeyFuncs>
   name: this['id']
   #parent = undefined as unknown as ParentType<
@@ -274,7 +296,13 @@ export class Node<
    * @param depthOrDim.dim The dimension of the ancestor to return.
    */
   ancestorAt<
-    Params extends AncestorsAtParams<this>
+    Params extends RequireExactlyOne<
+      {
+        depth: L.KeySet<0, Depth>
+        dim: this['dims'][L.KeySet<0, Depth>]
+      },
+      'depth' | 'dim'
+    >
   >(this: Node<Datum, KeyFuncs, Depth, Height>, depthOrDim: Params) {
     type DimKey = IndexOfElement<this['dims'], Params['dim']>
 
@@ -310,7 +338,9 @@ export class Node<
       node = node.parent
     }
 
-    return nodes as unknown as AncestorArray<Node<Datum, KeyFuncs, Depth, Height>>
+    return nodes as unknown as AncestorArray<
+      Node<Datum, KeyFuncs, Depth, Height>
+    >
   }
 
   /**
@@ -322,11 +352,20 @@ export class Node<
   }
 
   descendantsAt<
-    Params extends DescendantsAtParams<this>
+    Params extends RequireExactlyOne<
+      {
+        depth: L.KeySet<Depth, L.Length<KeyFuncs>>
+        dim: this['dims'][L.KeySet<Depth, L.Length<KeyFuncs>>]
+      },
+      'depth' | 'dim'
+    >
   >(this: Node<Datum, KeyFuncs, Depth, Height>, depthOrDim: Params) {
     type DimKey = IndexOfElement<this['dims'], Params['dim']>
 
-    type ReturnType = Params['depth'] extends L.KeySet<Depth, L.Length<KeyFuncs>>
+    type ReturnType = Params['depth'] extends L.KeySet<
+      Depth,
+      L.Length<KeyFuncs>
+    >
       ? Node<
           Datum,
           KeyFuncs,
@@ -357,10 +396,13 @@ export class Node<
    * @see {@link eachBefore}
    * @see {@link eachAfter}
    */
-  each(callback: (
-    node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
-    index?: number
-  ) => void): Node<Datum, KeyFuncs, Depth, Height> {
+  each(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    callback: (
+      node: DescendantIter<Node<Datum, KeyFuncs, Depth, Height>>,
+      index?: number
+    ) => void
+  ): this {
     let index = -1
 
     for (const node of this) {
@@ -379,10 +421,13 @@ export class Node<
    * visited. The specified function is passed the current descendant, the zero-based traversal
    * index, and this node. If that is specified, it is the this context of the callback.
    */
-  eachAfter(callback: (
-    node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
-    index?: number
-  ) => void): Node<Datum, KeyFuncs, Depth, Height> {
+  eachAfter(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    callback: (
+      node: DescendantIter<Node<Datum, KeyFuncs, Depth, Height>>,
+      index?: number
+    ) => void
+  ): this {
     const nodes = [ this, ]
     const next = []
     let children
@@ -414,10 +459,13 @@ export class Node<
    * @see {@link each}
    * @see {@link eachAfter}
    */
-  eachBefore(callback: (
-    node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
-    index?: number
-  ) => void): Node<Datum, KeyFuncs, Depth, Height> {
+  eachBefore(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    callback: (
+      node: DescendantIter<Node<Datum, KeyFuncs, Depth, Height>>,
+      index?: number
+    ) => void
+  ): this {
     const nodes = [ this, ]
     let children
     let i
@@ -439,10 +487,13 @@ export class Node<
    * Returns the first node in the hierarchy from this node for which the specified filter returns a truthy value. undefined if no such node is found.
    * @see {@link https://github.com/d3/d3-hierarchy#find}
    */
-  find(callback: (
-    node: IterableElement<Node<Datum, KeyFuncs, Depth, Height>>,
-    index?: number
-  ) => boolean): Node<Datum, KeyFuncs, Depth, Height> | undefined {
+  find(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    callback: (
+      node: DescendantIter<Node<Datum, KeyFuncs, Depth, Height>>,
+      index?: number
+    ) => boolean
+  ): this | undefined {
     for (const node of this) {
       const test = callback(node)
 
@@ -451,11 +502,11 @@ export class Node<
     }
   }
 
-  isRoot(this: this): this is Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>> {
+  isRoot(): this is Node<Datum, KeyFuncs, 0> {
     return this?.depth === 0
   }
 
-  isLeaf(this: this): this is Node<Datum, KeyFuncs, L.Length<KeyFuncs>, 0> {
+  isLeaf(): this is Node<Datum, KeyFuncs, L.Length<KeyFuncs>> {
     return this?.height === 0
   }
 
@@ -514,93 +565,87 @@ export class Node<
     piePadding = 0,
     paddingMaxDepth = 1
   ) {
-    return this.eachBefore((node) => {
-      if (!node.isRoot()) {
-      }
-      else {
-        const children = node.parent.children
-        const minParentArcWidth = children
-          .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
-          .reduce((a, b) => Math.min(
-            a,
-            b
-          ))
-        const nodePadAngle =
-          node.depth === 1 ?
-            piePadding :
-            node.depth <= paddingMaxDepth ?
-              min(
-                node.parent.padAngle,
-                minParentArcWidth
-              ) / children.length :
-              0
-        const nodePieStart =
-          node.depth === 1 ? pieStart : node.parent.startAngle
-        const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
-        const pies = pie()
-          .startAngle(nodePieStart)
-          .endAngle(nodePieEnd)
-          .padAngle(nodePadAngle)
-          .sort((a, b) => {
-            // const sortA = a.leaves()[0]?.data?.[inputs.value.sourceName.value]
-            if ((a.value ?? 0) > (b.value ?? 0))
-              return pieStart > Math.PI ? 1 : -1
-            if ((a.value ?? 0) < (b.value ?? 0))
-              return pieStart > Math.PI ? -1 : 1
-            return 0
-          })
-          .value(d => d.value ?? 1)(children)
-
-        pies.forEach((p, i) => {
-          if (p.data.id === node.id) {
-            const {
-              startAngle: startAngleIn,
-              endAngle: endAngleIn,
-              padAngle,
-            } = p
-            const startAngle = startAngleIn
-            const endAngle = endAngleIn - padAngle
-
-            node.padAngle = padAngle
-            node.startAngle = startAngle
-            node.endAngle = endAngle
-            const arcWidthRadians = endAngleIn - startAngleIn - padAngle
-            const halfAngle = arcWidthRadians / 2
-            const rotationsRaw = (halfAngle + startAngle) / 2 / Math.PI
-            const rotations =
-              halfAngle + startAngle < 0 ?
-                rotationsRaw - Math.ceil(rotationsRaw) :
-                rotationsRaw - Math.floor(rotationsRaw)
-            const paperMidPoint = angleConverter.toPaper(halfAngle + startAngle)
-
-            node.midPointAngle = {
-              radians: halfAngle + startAngle,
-              degrees: ((halfAngle + startAngle) * 180) / Math.PI,
-              paper: paperMidPoint,
-              rotations,
-              side:
-                paperMidPoint < 0 ?
-                  paperMidPoint > -90 ?
-                    'right' :
-                    'left' :
-                  paperMidPoint > 90 ?
-                    'left' :
-                    'right',
-            }
-            node.nodeArcWidth = {
-              radians: arcWidthRadians,
-              degrees: (arcWidthRadians * 180) / Math.PI,
-            }
-            node.paperAngles = {
-              startAngle: angleConverter.toPaper(node.startAngle),
-              endAngle: angleConverter.toPaper(node.endAngle),
-              padAngle: (node.padAngle * 180) / Math.PI,
-              midPointAngle: paperMidPoint,
-            }
-          }
+    for (const node of this) {
+      const parent = node.parent
+      const children = parent.children
+      const minParentArcWidth = children
+        .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
+        .reduce((a, b) => Math.min(
+          a,
+          b
+        ))
+      const nodePadAngle =
+        node.depth === 1 ?
+          piePadding :
+          node.depth <= paddingMaxDepth ?
+            min(
+              node.parent.padAngle,
+              minParentArcWidth
+            ) / children.length :
+            0
+      const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
+      const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
+      const pies = pie()
+        .startAngle(nodePieStart)
+        .endAngle(nodePieEnd)
+        .padAngle(nodePadAngle)
+        .sort((a, b) => {
+          // const sortA = a.leaves()[0]?.data?.[inputs.value.sourceName.value]
+          if ((a.value ?? 0) > (b.value ?? 0))
+            return pieStart > Math.PI ? 1 : -1
+          if ((a.value ?? 0) < (b.value ?? 0))
+            return pieStart > Math.PI ? -1 : 1
+          return 0
         })
-      }
-    })
+        .value(d => d.value ?? 1)(children)
+
+      pies.forEach((p, i) => {
+        if (p.data.id === node.id) {
+          const {
+            startAngle: startAngleIn, endAngle: endAngleIn, padAngle,
+          } = p
+          const startAngle = startAngleIn
+          const endAngle = endAngleIn - padAngle
+
+          node.padAngle = padAngle
+          node.startAngle = startAngle
+          node.endAngle = endAngle
+          const arcWidthRadians = endAngleIn - startAngleIn - padAngle
+          const halfAngle = arcWidthRadians / 2
+          const rotationsRaw = (halfAngle + startAngle) / 2 / Math.PI
+          const rotations =
+            halfAngle + startAngle < 0 ?
+              rotationsRaw - Math.ceil(rotationsRaw) :
+              rotationsRaw - Math.floor(rotationsRaw)
+          const paperMidPoint = angleConverter.toPaper(halfAngle + startAngle)
+
+          node.midPointAngle = {
+            radians: halfAngle + startAngle,
+            degrees: ((halfAngle + startAngle) * 180) / Math.PI,
+            paper: paperMidPoint,
+            rotations,
+            side:
+              paperMidPoint < 0 ?
+                paperMidPoint > -90 ?
+                  'right' :
+                  'left' :
+                paperMidPoint > 90 ?
+                  'left' :
+                  'right',
+          }
+          node.nodeArcWidth = {
+            radians: arcWidthRadians,
+            degrees: (arcWidthRadians * 180) / Math.PI,
+          }
+          node.paperAngles = {
+            startAngle: angleConverter.toPaper(node.startAngle),
+            endAngle: angleConverter.toPaper(node.endAngle),
+            padAngle: (node.padAngle * 180) / Math.PI,
+            midPointAngle: paperMidPoint,
+          }
+        }
+      })
+    }
   }
 
   /**
@@ -608,7 +653,10 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path(this: Node<Datum, KeyFuncs, Depth, Height>, end: Node<Datum, KeyFuncs>) {
+  path(
+    this: Node<Datum, KeyFuncs, Depth, Height>,
+    end: DescendantIter<Node<Datum, KeyFuncs, 0, L.Length<KeyFuncs>>>
+  ) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,

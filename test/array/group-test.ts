@@ -34,6 +34,7 @@ describe(
         expect(groupByAge.descendants().map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
         const [ l, ] = groupByAge.links()
 
+        groupByAge.eachBefore((node) => {})
         expect(l.source).toBeUndefined()
       }
     )
@@ -144,7 +145,7 @@ describe(
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
-        const ansc = secondAncestor.ancestorAt({ dim: 'state_letter', })
+        const ansc = secondAncestor.ancestorAt({ dim: 'state', })
         const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level', })
 
         expect(ansc.depth).toBe(true)
