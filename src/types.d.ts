@@ -1,7 +1,9 @@
-import { A, I, L, N, S } from 'ts-toolbelt'
+import {
+  A, I, L, N, S, 
+} from 'ts-toolbelt'
 import type {
   Get,
-  IsNever, JsonObject, StringKeyOf
+  IsNever, JsonObject, StringKeyOf,
 } from 'type-fest'
 
 export type AncestorArray<Node, AncestorList extends L.List = []> = IsNever<

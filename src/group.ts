@@ -5,38 +5,39 @@ import {
 
 import type { JsonObject, } from 'type-fest'
 
-import type { N, } from 'ts-toolbelt'
+import type {
+  N, L, 
+} from 'ts-toolbelt'
 import type {
   KeyFn, KeyFnTuple, 
 } from './types'
-import {
-  Node, RootNode, LeafNode, 
-} from './Nodes'
+import {Node,} from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
   KeyFunctions extends ReadonlyArray<KeyFn<Input>>
->(values: Input[], ...keys: KeyFunctions): RootNode<Input, KeyFunctions> {
-  const root = new RootNode(
+>(values: Input[], ...keys: KeyFunctions): Node<Input, KeyFunctions, 0> {
+  const rootDepth = 0 as const
+  const rootHeight = keys.length as N.Sub<
+    L.Length<KeyFunctions>,
+    typeof rootDepth
+  >
+  const root = new Node(
     keys,
-    values
+    values,
+    rootDepth,
+    rootHeight,
+    undefined
   )
 
   for (let child of root) {
     child = regroupFn(child)
   }
 
-  // root.eachBefore((node) => {
-  //   if (node.children)
-  //     node.children.forEach((child) => {
-  //       child.parent = node
-  //     })
-  // })
-
   return root
 
   function regroupFn<
-    GroupNode extends Node<Input, KeyFunctions> | RootNode<Input, KeyFunctions>
+    GroupNode extends Node<Input, KeyFunctions>
   >(node: GroupNode) {
     const {
       keyFns, depth, height, 
@@ -68,20 +69,12 @@ export function group<
         records, 
       ] = vals
 
-      if (childHeight >= 1) {
+      if (childHeight >= 0) {
         const child = new Node(
           keyFns,
           records,
           childDepth,
           childHeight,
-          `${key}`
-        )
-
-        node.addChild(child)
-      } else {
-        const child = new LeafNode(
-          keyFns,
-          records,
           `${key}`
         )
 

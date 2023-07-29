@@ -1,15 +1,6 @@
 module.exports = {
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended', 
-  ],
-  parser: '@typescript-eslint/parser',
-  plugins: [ '@typescript-eslint', ],
-  parserOptions: {project: './tsconfig.json',},
-  root: true,
-  ignorePatterns: [
-    './**/*.json',
-    './dist/**/*',
+    '@antfu', 
   ],
   rules: {
     '@typescript-eslint/comma-dangle': [
@@ -57,7 +48,6 @@ module.exports = {
     ],
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/prefer-ts-expect-error': 'off',
-    '@typescript-eslint/prefer-optional-chain': 'error',
     '@typescript-eslint/array-type': [
       'error',
       { default: 'array-simple', },

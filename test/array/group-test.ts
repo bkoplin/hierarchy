@@ -1,8 +1,8 @@
 import {
-  describe, expect, test, 
+  describe, expect, test,
 } from 'vitest'
 import {
-  map, mean, pipe, prop, paths,
+  map, mean, paths, pipe, prop,
 } from 'rambdax'
 import { group, } from '../../src/group'
 import data from '../data/MOCK_DATA.json'
@@ -11,8 +11,8 @@ const groupByAge = group(
   data,
   'education_level',
   [
-    `state_letter` as const,
-    (x) => x.state[0], 
+    'state_letter' as const,
+    x => x.state[0],
   ],
   'state'
 )
@@ -23,17 +23,15 @@ describe(
     test(
       'root tests',
       () => {
-        expect(groupByAge.dims).toMatchInlineSnapshot(`
-          [
-            undefined,
-            "education_level",
-            "state_letter",
-            "state",
-          ]
-        `)
+        expect(groupByAge.dims).toMatchObject([
+          undefined,
+          'education_level',
+          'state_letter',
+          'state',
+        ])
         expect(groupByAge.height).toBe(3)
         expect(groupByAge.parent).toBeUndefined()
-        expect(groupByAge.descendants().map((d) => d.dim)).toMatchFileSnapshot('./group-children.json')
+        expect(groupByAge.descendants().map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
         const [ l, ] = groupByAge.links()
 
         expect(l.source).toBeUndefined()
@@ -85,7 +83,7 @@ describe(
     test(
       'change value function, inline second level first child',
       () => {
-        const c = groupByAge.children[0]
+        const c = groupByAge.children[0].parent
 
         groupByAge.setValueFunction(pipe(
           prop('records'),
@@ -96,78 +94,80 @@ describe(
           undefined,
           'allNodesAtDimValues'
         )
-        expect(groupByAge.leaves().map((d) => [
+        expect(groupByAge.leaves().map(d => [
           d.id,
           d.value,
-          d.color, 
+          d.color,
         ])).toMatchFileSnapshot('./group-colors.json')
         const [
           leaf1,
-          leaf2, 
+          leaf2,
         ] = groupByAge.leaves()
 
-        expect(leaf1.path(leaf2).map((p) => paths(
-          [
-            'id',
-            'dim',
-            'value',
-            'height',
-            'depth', 
-          ],
-          p
-        ))).toMatchFileSnapshot('./group-path.json')
+        expect(leaf1
+          .path(leaf2)
+          .map(p => paths(
+            [
+              'id',
+              'dim',
+              'value',
+              'height',
+              'depth',
+            ],
+            p
+          ))).toMatchFileSnapshot('./group-path.json')
       }
     )
   }
 )
 
-// describe(
-//   'ancestor tests',
-//   () => {
-//     test(
-//       'ancestors tests',
-//       () => {
-//         const [ level1Child, ] = groupByAge.leaves()
-//         const groupAncestor = groupByAge.children[0]
-//         const ancestors = level1Child.ancestors()
-//         const [
-//           firstAncestor,
-//           secondAncestor,
-//           thirdAncestor,
-//           root, 
-//         ] = ancestors
-//         const [
-//           r,
-//           desc, 
-//         ] = groupByAge.descendants()
-//         const dep = r.depth
+describe(
+  'ancestor tests',
+  () => {
+    test(
+      'ancestors tests',
+      () => {
+        const [ level1Child, ] = groupByAge.leaves()
+        const groupAncestor = groupByAge.children[0]
+        const ancestors = level1Child.ancestors()
+        const [
+          firstAncestor,
+          secondAncestor,
+          thirdAncestor,
+          root,
+        ] = ancestors
+        const [
+          r,
+          desc,
+        ] = groupByAge.descendants()
+        const dep = r.depth
 
-//         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
-//         expect(ancestors.length).toBe(3)
-//         const ansc = secondAncestor.ancestorAt({ dim: 'state_letter', })
-//         const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level', })
+        expect(ancestors).toMatchFileSnapshot('./ancestors.json')
+        expect(ancestors.length).toBe(3)
+        const ansc = secondAncestor.ancestorAt({ dim: 'state_letter', })
+        const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level', })
 
-//         expect(ansc.depth).toBe(true)
-//         expect(secondAncestor.dim).toBe(false)
-//         expect(root.depth).toBe(false)
-//       }
-//     )
-//     test(
-//       "ancestorsAt depth of 1 of second level child has dim of 'education_level'",
-//       () => {
-//         const [ leaf, ] = groupByAge.leaves()
-//         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
-//         const depth2 = leaf.ancestorAt({ depth: 2, })
+        expect(ansc.depth).toBe(true)
+        expect(secondAncestor.dim).toBe(false)
+        expect(root.depth).toBe(false)
+      }
+    )
+    test(
+      'ancestorsAt depth of 1 of second level child has dim of \'education_level\'',
+      () => {
+        const [ leaf, ] = groupByAge.leaves()
+        const ancestor = leaf.ancestorAt({ dim: 'education_level', })
+        const depth2 = leaf.ancestorAt({ depth: 2, })
 
-//         expect(ancestor).toBeTruthy()
-//         expect(ancestor.depth).toBeTruthy()
-//         expect(depth2.depth).toBe(2)
-//         expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('node')
-//         expect(leaf.type).toBe('leaf')
-//       }
-//     )
-//   }
-// )
+        expect(ancestor).toBeTruthy()
+        expect(ancestor.depth).toBeTruthy()
+        expect(depth2.depth).toBe(2)
+        expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('node')
+        expect(leaf.type).toBe('leaf')
+      }
+    )
+  }
+)
 // describe(
 //   'leaf node tests',
 //   () => {
@@ -237,7 +237,7 @@ describe(
 //       () => {
 //         const [
 //           first,
-//           last, 
+//           last,
 //         ] = groupByAge.children
 //         const paths = last.leaves()[0].path(first.leaves()[0])
 //         const l = paths.length
@@ -247,7 +247,7 @@ describe(
 //           1,
 //           0,
 //           1,
-//           2, 
+//           2,
 //         ])
 //       }
 //     )
@@ -267,7 +267,7 @@ describe(
 //           n.id,
 //           n.value,
 //           n.color,
-//           n.depth, 
+//           n.depth,
 //         ]))
 //           .toMatchInlineSnapshot(`
 //           [

@@ -1,25 +1,18 @@
 {
   "compilerOptions": {
-    "strictNullChecks": true,
-    "target": "esnext",
-    "allowUmdGlobalAccess": true,
-    "resolveJsonModule": true,
+    "target": "es2018",
+    "module": "esnext",
+    "lib": ["esnext"],
     "moduleResolution": "node",
-    "allowJs": true,
-    "declaration": true,
-    "declarationMap": true,
-    "importHelpers": true,
-    "noEmit": true,
-    "noEmitOnError": true,
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
-    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "types": [
       "vitest/globals",
       "vitest/importMeta"
-    ]
-  },
-  "include": ["./src/**/*.ts", "./test/**/*.ts", "./*.config.ts", "./.eslintrc.cjs"],
-  "exclude": ["./dist"]
+    ]    
+  }
 }
