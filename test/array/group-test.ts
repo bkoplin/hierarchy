@@ -31,7 +31,9 @@ describe(
         ])
         expect(groupByAge.height).toBe(3)
         expect(groupByAge.parent).toBeUndefined()
-        expect(groupByAge.descendants().map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
+        const descendants = groupByAge.descendants()
+
+        expect(descendants.map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
         const [ l, ] = groupByAge.links()
 
         groupByAge.eachBefore((node) => {})

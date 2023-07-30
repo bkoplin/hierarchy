@@ -1,52 +1,49 @@
 import { objectEntries, } from '@antfu/utils'
 import {
-  groupBy, propOr, 
+  groupBy, propOr,
 } from 'rambdax'
 
-import type { JsonObject, } from 'type-fest'
+import type {
+  FixedLengthArray, IterableElement, JsonObject,
+} from 'type-fest'
 
 import type {
-  N, L, 
+  L, N,
 } from 'ts-toolbelt'
 import type {
-  KeyFn, KeyFnTuple, 
+  KeyFn, KeyFnTuple,
 } from './types'
-import {Node,} from './Nodes'
+import { Node, } from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
-  KeyFunctions extends ReadonlyArray<KeyFn<Input>>
->(values: Input[], ...keys: KeyFunctions): Node<Input, KeyFunctions, 0> {
-  const rootDepth = 0 as const
-  const rootHeight = keys.length as N.Sub<
-    L.Length<KeyFunctions>,
-    typeof rootDepth
-  >
+  KeyFunctions extends FixedLengthArray<KeyFn<Input>, L.KeySet<1, 13>>
+>(values: Input[], ...keys: KeyFunctions) {
   const root = new Node(
     keys,
     values,
-    rootDepth,
-    rootHeight,
+    0,
+    keys.length,
     undefined
   )
 
-  for (let child of root) {
+  for (let child of root)
     child = regroupFn(child)
-  }
 
   return root
 
   function regroupFn<
-    GroupNode extends Node<Input, KeyFunctions>
+    GroupNode extends IterableElement<typeof root>
   >(node: GroupNode) {
     const {
-      keyFns, depth, height, 
+      keyFns, depth, height,
     } = node
     const childDepth = (depth + 1) as N.Add<GroupNode['depth'], 1>
     const childHeight = (height - 1) as N.Sub<GroupNode['height'], 1>
     const keyFn = keyFns[depth] as KeyFn<Input>
 
     objectEntries(groupBy(
+      // @ts-expect-error
       (x) => {
         if (
           typeof keyFn === 'string' ||
@@ -56,17 +53,20 @@ export function group<
           return propOr(
             '',
             keyFn,
+            // @ts-expect-error
             x
           )
-        } else if (typeof keyFn?.[1] === 'function') {
+        }
+        else if (typeof keyFn?.[1] === 'function') {
           return (keyFn as KeyFnTuple<Input>)[1](x)
-        } else return undefined
+        }
+        else { return undefined }
       },
       node.records
     )).forEach((vals) => {
       const [
         key,
-        records, 
+        records,
       ] = vals
 
       if (childHeight >= 0) {
@@ -75,9 +75,11 @@ export function group<
           records,
           childDepth,
           childHeight,
+          // @ts-expect-error
           `${key}`
         )
 
+        // @ts-expect-error
         node.addChild(child)
       }
     })
