@@ -32,9 +32,8 @@ export function group<
 
   return root
 
-  function regroupFn<
-    GroupNode extends IterableElement<typeof root>
-  >(node: GroupNode) {
+  function regroupFn(node: IterableElement<typeof root>) {
+    type GroupNode = typeof node
     const {
       keyFns, depth, height,
     } = node
