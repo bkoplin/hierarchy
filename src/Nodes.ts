@@ -64,10 +64,11 @@ type AncestorArray<ThisNode, AncestorList extends L.List = []> = IsNever<
   ? [...AncestorList, ThisNode]
   : AncestorArray<ParentType<ThisNode>, [...AncestorList, ThisNode]>
 
-type GetDimIndex<Dims, DimVal, Iter extends I.Iteration = I.IterationOf<-1>> = Dims extends readonly [
-  infer First,
-  ...infer Rest
-]
+type GetDimIndex<
+  Dims,
+  DimVal,
+  Iter extends I.Iteration = I.IterationOf<-1>
+> = Dims extends readonly [infer First, ...infer Rest]
   ? First extends DimVal
     ? I.Pos<I.Next<Iter>>
     : GetDimIndex<Rest, DimVal, I.Next<Iter>>
@@ -158,9 +159,9 @@ export class Node<
   }
 
   get type() {
-    type ReturnType = this['depth'] extends 0
+    type ReturnType = Depth extends 0
       ? 'root'
-      : this['height'] extends 0
+      : Height extends 0
         ? 'leaf'
         : 'node'
     if (this.depth === 0)
@@ -209,11 +210,7 @@ export class Node<
     type ReturnType = Params['depth'] extends L.KeySet<0, Depth>
       ? Node<Datum, KeysOfDatum, Params['depth']>
       : GetDimIndex<this['dims'], Params['dim']> extends L.KeySet<1, Depth>
-        ? Node<
-          Datum,
-          KeysOfDatum,
-          GetDimIndex<this['dims'], Params['dim']>
-        >
+        ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
         : never
 
     return this.ancestors().find((node) => {
@@ -262,14 +259,16 @@ export class Node<
       'depth' | 'dim'
     >
   >(this: Node<Datum, KeysOfDatum, Depth, Height>, depthOrDim: Params) {
-    type ReturnType = Params['depth'] extends L.KeySet<Depth, KeysOfDatum['length']>
+    type ReturnType = Params['depth'] extends L.KeySet<
+      Depth,
+      KeysOfDatum['length']
+    >
       ? Node<Datum, KeysOfDatum, Params['depth']>
-      : GetDimIndex<this['dims'], Params['dim']> extends L.KeySet<Depth, KeysOfDatum['length']>
-        ? Node<
-          Datum,
-          KeysOfDatum,
-          GetDimIndex<this['dims'], Params['dim']>
+      : GetDimIndex<this['dims'], Params['dim']> extends L.KeySet<
+          Depth,
+          KeysOfDatum['length']
         >
+        ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
         : never
     return this.descendants().filter((node) => {
       const {

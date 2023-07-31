@@ -165,7 +165,7 @@ describe(
         expect(ancestor.depth).toBeTruthy()
         expect(depth2.depth).toBe(2)
         expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('node')
-        expect(leaf.type).toBe('leaf')
+        expect(groupByAge.type).toBe('leaf')
       }
     )
   }
