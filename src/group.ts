@@ -11,13 +11,13 @@ import type {
   L, N,
 } from 'ts-toolbelt'
 import type {
-  KeyFn, KeyFnTuple,
+  KeyFn, KeyFnKey, KeyFnTuple,
 } from './types'
 import { Node, } from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
-  KeyFunctions extends FixedLengthArray<KeyFn<Input>, L.KeySet<1, 13>>
+  KeyFunctions extends FixedLengthArray<KeyFnKey<Input>, L.KeySet<1, 13>>
 >(values: Input[], ...keys: KeyFunctions) {
   const root = new Node(
     keys,

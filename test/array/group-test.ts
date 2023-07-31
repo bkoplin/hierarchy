@@ -10,10 +10,10 @@ import data from '../data/MOCK_DATA.json'
 const groupByAge = group(
   data,
   'education_level',
-  [
-    'state_letter' as const,
-    x => x.state[0],
-  ],
+  // [
+  //   'state_letter' as const,
+  //   x => x.state[0],
+  // ],
   'state'
 )
 
@@ -23,10 +23,9 @@ describe(
     test(
       'root tests',
       () => {
-        expect(groupByAge.dims).toMatchObject([
+        expect(groupByAge.dimDepths).toMatchObject([
           undefined,
           'education_level',
-          'state_letter',
           'state',
         ])
         expect(groupByAge.height).toBe(3)
@@ -136,19 +135,18 @@ describe(
         const [
           firstAncestor,
           secondAncestor,
-          thirdAncestor,
           root,
         ] = ancestors
         const [
           r,
           desc,
         ] = groupByAge.descendants()
-        const dep = r.depth
+        const dep = desc.depth
 
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         const ansc = secondAncestor.ancestorAt({ dim: 'state', })
-        const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level', })
+        const ansc2 = firstAncestor.ancestorAt({ dim: 'state', })
 
         expect(ansc.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
@@ -161,6 +159,7 @@ describe(
         const [ leaf, ] = groupByAge.leaves()
         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
         const depth2 = leaf.ancestorAt({ depth: 2, })
+        const found = groupByAge.descendantsAt({ depth: 1 })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()
