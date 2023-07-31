@@ -148,7 +148,7 @@ describe(
         const ansc = secondAncestor.ancestorAt({ dim: 'state', })
         const ansc2 = firstAncestor.ancestorAt({ dim: 'state', })
 
-        expect(ansc.depth).toBe(true)
+        expect(ansc2.depth).toBe(true)
         expect(secondAncestor.dim).toBe(false)
         expect(root.depth).toBe(false)
       }
