@@ -23,7 +23,7 @@ describe(
     test(
       'root tests',
       () => {
-        expect(groupByAge.dimDepths).toMatchObject([
+        expect(groupByAge?.ancestorDims).toMatchObject([
           undefined,
           'education_level',
           'state',
@@ -146,11 +146,12 @@ describe(
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         const ansc = secondAncestor.ancestorAt({ dim: 'state', })
-        const ansc2 = firstAncestor.ancestorAt({ dim: 'state', })
+        const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level' })
+        const ansc2dims = firstAncestor.ancestorDims
 
-        expect(ansc2.depth).toBe(true)
-        expect(secondAncestor.dim).toBe(false)
-        expect(root.depth).toBe(false)
+        expect(ansc2.depth).toBe(1)
+        expect(secondAncestor.dim).toBe('education_level')
+        expect(root.depth).toBe(0)
       }
     )
     test(
@@ -159,12 +160,12 @@ describe(
         const [ leaf, ] = groupByAge.leaves()
         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
         const depth2 = leaf.ancestorAt({ depth: 2, })
-        const found = groupByAge.descendantsAt({ depth: 1 })
+        const found = groupByAge.descendantsAt({ dim: 'state' })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()
         expect(depth2.depth).toBe(2)
-        expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('node')
+        expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('education_level')
         expect(groupByAge.type).toBe('leaf')
       }
     )
