@@ -120,10 +120,7 @@ export class Node<
   readonly id: Depth extends 0 ? undefined : ValueOf<Datum>
   declare ancestorDimPath: L.Take<KeysOfDatum, Depth>
 
-  declare descendantDimPath: L.Drop<
-    L.Prepend<KeysOfDatum, undefined>,
-    Depth
-  >
+  declare descendantDimPath: L.Drop<L.Prepend<KeysOfDatum, undefined>, Depth>
 
   #parent = undefined as unknown as Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
 
@@ -213,11 +210,7 @@ export class Node<
     type ReturnType = Params['depth'] extends ThisNode['depth']
       ? ThisNode
       : Params['depth'] extends L.KeySet<0, Depth>
-        ? Node<
-          Datum,
-          KeysOfDatum,
-          Params['depth']
-        >
+        ? Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
           : Params['dim'] extends ThisNode['ancestorDimPath'][number]
@@ -276,11 +269,7 @@ export class Node<
     type ReturnType = Params['depth'] extends ThisNode['depth']
       ? ThisNode
       : Params['depth'] extends L.KeySet<Depth, KeysOfDatum['length']>
-        ? Node<
-          Datum,
-          KeysOfDatum,
-          Params['depth']
-        >
+        ? Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
           : Params['dim'] extends ThisNode['descendantDimPath'][number]
@@ -455,10 +444,10 @@ export class Node<
           source: Key extends 0
             ? undefined
             : Simplify<
-                Node<Datum, KeysOfDatum, Key, N.Sub<L.Length<KeysOfDatum>, Key>>
+                Node<Datum, KeysOfDatum, Key>
               >['parent']
           target: Simplify<
-            Node<Datum, KeysOfDatum, Key, N.Sub<L.Length<KeysOfDatum>, Key>>
+            Node<Datum, KeysOfDatum, Key>
           >
         }
       }[L.KeySet<Depth, L.Length<KeysOfDatum>>]
@@ -569,7 +558,7 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path(this: this, end: DescendantIter<Node<Datum, KeysOfDatum, 0>>) {
+  path(this: Node<Datum, KeysOfDatum, Depth>, end: DescendantIter<Node<Datum, KeysOfDatum, 0>>) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -595,11 +584,11 @@ export class Node<
   }
 
   setColor(
-    this: this,
-    scale?: this['colorScale'],
-    scaleBy?: this['colorScaleBy'],
-    scaleMode?: this['colorScaleMode'],
-    scaleNum?: this['colorScaleNum']
+    this: Node<Datum, KeysOfDatum, Depth>,
+    scale?: Node<Datum, KeysOfDatum, Depth>['colorScale'],
+    scaleBy?: Node<Datum, KeysOfDatum, Depth>['colorScaleBy'],
+    scaleMode?: Node<Datum, KeysOfDatum, Depth>['colorScaleMode'],
+    scaleNum?: Node<Datum, KeysOfDatum, Depth>['colorScaleNum']
   ): Node<Datum, KeysOfDatum, Depth> {
     this.each((node) => {
       if (typeof node === 'undefined' || node === null) {
@@ -616,7 +605,7 @@ export class Node<
         if (
           (node.colorScaleBy === 'allNodesAtDimIds' ||
             node.colorScaleBy === 'parentListIds') &&
-          node.hasParent()
+          !node.isRoot()
         ) {
           let values: string[] = node.parent!.children!.map(n => n.id)
 
@@ -664,11 +653,16 @@ export class Node<
    * Sets the value function for this node and its descendants, sets the values based on the value function, and returns this node.
    * @param valueFn a function that receives a node and returns a numeric value
    */
-  setValueFunction(this: this, valueFn: this['valueFunction']) {
+  setValueFunction(
+    this: Node<Datum, KeysOfDatum, Depth>,
+    valueFn: (node: Node<Datum, KeysOfDatum, Depth>) => number
+  ) {
     const index = -1
 
     for (const node of this) {
-      node.value = valueFn
+      if (typeof node === 'undefined' || node === null)
+        return
+      node.valueFunction = valueFn
       node.setValues()
     }
     return this
@@ -680,13 +674,12 @@ export class Node<
   setValues(this: Node<Datum, KeysOfDatum, Depth>) {
     const index = -1
 
-    for (const node of this)
-      node.value = node.valueFunction(node)
+    for (const node of this) node.value = node.valueFunction(node)
 
     return this
   }
 
-  toJSON(this: this) {
+  toJSON(this: Node<Datum, KeysOfDatum, Depth>) {
     const node = filterObject<ConditionalExcept<this, undefined>>(
       (v): v is JsonValue => {
         // if (Array.isArray(v)) return v.length > 0
