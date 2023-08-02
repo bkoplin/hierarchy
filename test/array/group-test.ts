@@ -23,7 +23,7 @@ describe(
     test(
       'root tests',
       () => {
-        expect(groupByAge?.ancestorDims).toMatchObject([
+        expect(groupByAge?.descendantDimPath).toMatchObject([
           undefined,
           'education_level',
           'state',
@@ -146,11 +146,15 @@ describe(
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         const ansc = secondAncestor.ancestorAt({ dim: 'state', })
-        const ansc2 = firstAncestor.ancestorAt({ dim: 'education_level' })
-        const ansc2dims = firstAncestor.ancestorDims
+        const ansc2 = firstAncestor.ancestorAt({ dim: 'state' })
+        const ansc2dims = firstAncestor.descendantDimPath
 
-        expect(ansc2.depth).toBe(1)
-        expect(secondAncestor.dim).toBe('education_level')
+        expect(ansc2.depth).toBe(2)
+        expect(secondAncestor.ancestorDimPath).toMatchInlineSnapshot(`
+          [
+            "education_level",
+          ]
+        `)
         expect(root.depth).toBe(0)
       }
     )
@@ -165,7 +169,7 @@ describe(
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()
         expect(depth2.depth).toBe(2)
-        expect(leaf.ancestorAt({ depth: 1, }).dim).toBe('education_level')
+        expect(leaf.ancestorAt({ depth: 1, }).dim).toMatchInlineSnapshot('"education_level"')
         expect(groupByAge.type).toBe('leaf')
       }
     )

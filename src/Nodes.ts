@@ -1,11 +1,18 @@
 import {
-  equals, filterObject, intersection, omit, prop, uniq, zipObj,
+  drop,
+  equals,
+  filterObject,
+  intersection,
+  omit,
+  prop,
+  take,
+  uniq,
+  zipObj,
 } from 'rambdax'
 import type {
   ConditionalExcept,
   FixedLengthArray,
   Get,
-  IfNever,
   JsonObject,
   JsonValue,
   LiteralUnion,
@@ -19,28 +26,24 @@ import type {
 import chroma from 'chroma-js'
 import { pie, } from 'd3-shape'
 import type {
-  A, I, L, N,
+  I, L, N,
 } from 'ts-toolbelt'
 import type { KeyFnKey, } from './types.d'
 
 export type DescendantIter<
   ThisNode,
-  MaxDepth extends number,
   DescendantList extends L.List = []
-> = {
-  1: L.UnionOf<L.Append<DescendantList, ThisNode>>
-  0: DescendantIter<
-    Get<ThisNode, 'children'>[0],
-    MaxDepth,
-    L.Append<DescendantList, ThisNode>
-  >
-}[A.Contains<ThisNode, { depth: MaxDepth }>]
+> = ThisNode extends { children: Array<infer Child> }
+  ? Get<Child, 'height'> extends -1
+    ? L.UnionOf<[...DescendantList, ThisNode]>
+    : DescendantIter<Child, [...DescendantList, ThisNode]>
+  : never
 
 type AncestorArray<
   ThisNode,
   AncestorList extends L.List = []
 > = ThisNode extends { parent: infer Parent }
-  ? IfNever<Parent> extends true
+  ? Get<Parent, 'depth'> extends -1
     ? [...AncestorList, ThisNode]
     : AncestorArray<Parent, [...AncestorList, ThisNode]>
   : never
@@ -58,8 +61,11 @@ type GetDimIndex<
 export class Node<
   Datum extends JsonObject | string,
   KeysOfDatum extends FixedLengthArray<KeyFnKey<Datum>, L.KeySet<1, 13>>,
-  Depth extends number = 0,
-  Height extends number = N.Sub<KeysOfDatum['length'], Depth>
+  Depth extends L.KeySet<0, KeysOfDatum['length']> = 0,
+  Height extends N.Sub<KeysOfDatum['length'], Depth> = N.Sub<
+    KeysOfDatum['length'],
+    Depth
+  >
 > {
   constructor(
     public readonly keyFns: KeysOfDatum,
@@ -69,14 +75,20 @@ export class Node<
     this.value = records.length
     this.colorScaleNum = records.length
     this.height = (keyFns.length - depth) as Height
-    this.dims = [
-      undefined,
-      ...keyFns,
-    ]
     const localDims: [undefined, ...KeysOfDatum] = [
       undefined,
       ...keyFns,
     ]
+
+    this.dims = localDims
+    this.ancestorDimPath = take(
+      depth,
+      keyFns
+    )
+    this.descendantDimPath = drop(
+      depth,
+      localDims
+    )
 
     this.dim = localDims[depth]
     this.id = depth === 0 ?
@@ -106,32 +118,29 @@ export class Node<
   readonly height: Height
   readonly name: Depth extends 0 ? undefined : ValueOf<Datum>
   readonly id: Depth extends 0 ? undefined : ValueOf<Datum>
-  declare ancestorDims: Depth extends 0
-    ? undefined
-    : L.Extract<L.Prepend<KeysOfDatum, undefined>, 1, Depth>[number]
+  declare ancestorDimPath: L.Take<KeysOfDatum, Depth>
 
-  declare descendantDims: L.Drop<
+  declare descendantDimPath: L.Drop<
     L.Prepend<KeysOfDatum, undefined>,
     Depth
-  >[number]
+  >
 
-  #parent = undefined as unknown as Depth extends 0
-    ? never
-    : Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
+  #parent = undefined as unknown as Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
 
   value: number
 
-  children: Array<
-    Height extends 0 ? never : Node<Datum, KeysOfDatum, N.Add<Depth, 1>>
-  > = []
+  children: Array<Node<Datum, KeysOfDatum, N.Add<Depth, 1>>> = []
 
-  addChild(this: this, child: Node<Datum, KeysOfDatum, N.Add<Depth, 1>>) {
+  addChild(
+    this: Node<Datum, KeysOfDatum, 1>,
+    child: Node<Datum, KeysOfDatum, N.Add<Depth, 1>>
+  ) {
     if (this.height > 0 && !!child) {
       this.children = [
         ...this.children,
         child,
       ]
-      child.parent = this as unknown as (typeof child)['parent']
+      child.parent = this
     }
   }
 
@@ -164,7 +173,7 @@ export class Node<
   }
 
   *[Symbol.iterator](): Generator<
-    DescendantIter<Node<Datum, KeysOfDatum, Depth>, KeysOfDatum['length']>,
+    DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
     void,
     unknown
     > {
@@ -198,21 +207,24 @@ export class Node<
     ThisNode extends Node<Datum, KeysOfDatum, Depth>,
     Params extends RequireExactlyOne<{
       depth: L.KeySet<0, Depth>
-      dim: ThisNode['ancestorDims']
+      dim: ThisNode['ancestorDimPath'][number]
     }>
   >(this: ThisNode, depthOrDim: Params) {
-    type ReturnType = Params['depth'] extends L.KeySet<0, Depth>
-      ? Node<
+    type ReturnType = Params['depth'] extends ThisNode['depth']
+      ? ThisNode
+      : Params['depth'] extends L.KeySet<0, Depth>
+        ? Node<
           Datum,
           KeysOfDatum,
-          Params['depth'],
-          N.Sub<KeysOfDatum['length'], Params['depth']>
+          Params['depth']
         >
-      : Params['dim'] extends ThisNode['ancestorDims']
-        ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<0, Depth>
-          ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
-          : never
-        : never
+        : Params['dim'] extends ThisNode['dim']
+          ? ThisNode
+          : Params['dim'] extends ThisNode['ancestorDimPath'][number]
+            ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<0, Depth>
+              ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
+              : never
+            : never
     let node: ReturnType
 
     this.ancestors().forEach((ancestor) => {
@@ -258,27 +270,27 @@ export class Node<
     ThisNode extends Node<Datum, KeysOfDatum, Depth>,
     Params extends RequireExactlyOne<{
       depth: L.KeySet<Depth, KeysOfDatum['length']>
-      dim: ThisNode['descendantDims']
+      dim: ThisNode['descendantDimPath'][number]
     }>
   >(this: ThisNode, depthOrDim: Params) {
-    type ReturnType = Params['depth'] extends L.KeySet<
-      Depth,
-      KeysOfDatum['length']
-    >
-      ? Node<
+    type ReturnType = Params['depth'] extends ThisNode['depth']
+      ? ThisNode
+      : Params['depth'] extends L.KeySet<Depth, KeysOfDatum['length']>
+        ? Node<
           Datum,
           KeysOfDatum,
-          Params['depth'],
-          N.Sub<KeysOfDatum['length'], Params['depth']>
+          Params['depth']
         >
-      : Params['dim'] extends ThisNode['descendantDims']
-        ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<
+        : Params['dim'] extends ThisNode['dim']
+          ? ThisNode
+          : Params['dim'] extends ThisNode['descendantDimPath'][number]
+            ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<
           Depth,
           KeysOfDatum['length']
         >
-          ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
-          : never
-        : never
+              ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
+              : never
+            : never
     return this.descendants().filter((node) => {
       const {
         depth: paramDepth, dim: paramDim,
@@ -303,10 +315,7 @@ export class Node<
   each(
     this: this,
     callback: (
-      node: DescendantIter<
-        Node<Datum, KeysOfDatum, Depth>,
-        KeysOfDatum['length']
-      >,
+      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -331,10 +340,7 @@ export class Node<
   eachAfter(
     this: this,
     callback: (
-      node: DescendantIter<
-        Node<Datum, KeysOfDatum, Depth>,
-        KeysOfDatum['length']
-      >,
+      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -372,10 +378,7 @@ export class Node<
   eachBefore(
     this: this,
     callback: (
-      node: DescendantIter<
-        Node<Datum, KeysOfDatum, Depth>,
-        KeysOfDatum['length']
-      >,
+      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -403,10 +406,7 @@ export class Node<
   find(
     this: this,
     callback: (
-      node: DescendantIter<
-        Node<Datum, KeysOfDatum, Depth>,
-        KeysOfDatum['length']
-      >,
+      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => boolean
   ): this | undefined {
@@ -589,7 +589,7 @@ export class Node<
         0,
         end
       )
-      end = end.parent
+      end = end?.parent
     }
     return nodes
   }
@@ -633,7 +633,7 @@ export class Node<
             chroma.scale(node.colorScale).colors(values.length)
           )[node.id]
         }
-        else if (node.hasParent()) {
+        else if (!node.isRoot()) {
           let values: number[] = node.parent!.children!.map(n => n.value)
 
           if (node.colorScaleBy === 'allNodesAtDimValues') {
@@ -665,8 +665,12 @@ export class Node<
    * @param valueFn a function that receives a node and returns a numeric value
    */
   setValueFunction(this: this, valueFn: this['valueFunction']) {
-    this.each(node => (node.valueFunction = valueFn))
-    this.setValues()
+    const index = -1
+
+    for (const node of this) {
+      node.value = valueFn
+      node.setValues()
+    }
     return this
   }
 
@@ -674,9 +678,11 @@ export class Node<
    * Sets the value of this node and its descendants, and returns this node.
    */
   setValues(this: Node<Datum, KeysOfDatum, Depth>) {
-    this.each((node) => {
+    const index = -1
+
+    for (const node of this)
       node.value = node.valueFunction(node)
-    })
+
     return this
   }
 

@@ -1,11 +1,18 @@
 [
   {
-    "color": "#cccccc",
+    "ancestorDimPath": [
+      "education_level",
+      "state",
+    ],
+    "color": "#5e4fa2",
     "colorScale": "Spectral",
-    "colorScaleBy": "allNodesAtDimIds",
+    "colorScaleBy": "allNodesAtDimValues",
     "colorScaleMode": "e",
     "colorScaleNum": 0,
     "depth": 2,
+    "descendantDimPath": [
+      "state",
+    ],
     "dim": "state",
     "dims": [
       undefined,
@@ -21,14 +28,24 @@
     "value": 0,
   },
   {
+    "ancestorDimPath": [
+      "education_level",
+    ],
     "children": [
       {
-        "color": "#cccccc",
+        "ancestorDimPath": [
+          "education_level",
+          "state",
+        ],
+        "color": "#5e4fa2",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 0,
         "depth": 2,
+        "descendantDimPath": [
+          "state",
+        ],
         "dim": "state",
         "dims": [
           undefined,
@@ -44,12 +61,16 @@
         "value": 0,
       },
     ],
-    "color": "#cccccc",
+    "color": "#48a1b3",
     "colorScale": "Spectral",
-    "colorScaleBy": "allNodesAtDimIds",
+    "colorScaleBy": "allNodesAtDimValues",
     "colorScaleMode": "e",
     "colorScaleNum": 17,
     "depth": 1,
+    "descendantDimPath": [
+      "education_level",
+      "state",
+    ],
     "dim": "education_level",
     "dims": [
       undefined,
@@ -65,16 +86,27 @@
     "value": 17,
   },
   {
+    "ancestorDimPath": [],
     "children": [
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -90,12 +122,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#48a1b3",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 17,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -111,14 +147,24 @@
         "value": 17,
       },
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -134,12 +180,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#9e0142",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 11,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -155,14 +205,24 @@
         "value": 11,
       },
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -178,12 +238,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#e2524a",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 12,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -199,14 +263,24 @@
         "value": 12,
       },
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -222,12 +296,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#a1d9a4",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 16,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -243,14 +321,24 @@
         "value": 16,
       },
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -266,12 +354,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#edf8a3",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 15,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -287,14 +379,24 @@
         "value": 15,
       },
       {
+        "ancestorDimPath": [
+          "education_level",
+        ],
         "children": [
           {
-            "color": "#cccccc",
+            "ancestorDimPath": [
+              "education_level",
+              "state",
+            ],
+            "color": "#5e4fa2",
             "colorScale": "Spectral",
-            "colorScaleBy": "allNodesAtDimIds",
+            "colorScaleBy": "allNodesAtDimValues",
             "colorScaleMode": "e",
             "colorScaleNum": 0,
             "depth": 2,
+            "descendantDimPath": [
+              "state",
+            ],
             "dim": "state",
             "dims": [
               undefined,
@@ -310,12 +412,16 @@
             "value": 0,
           },
         ],
-        "color": "#cccccc",
+        "color": "#5e4fa2",
         "colorScale": "Spectral",
-        "colorScaleBy": "allNodesAtDimIds",
+        "colorScaleBy": "allNodesAtDimValues",
         "colorScaleMode": "e",
         "colorScaleNum": 18,
         "depth": 1,
+        "descendantDimPath": [
+          "education_level",
+          "state",
+        ],
         "dim": "education_level",
         "dims": [
           undefined,
@@ -333,10 +439,15 @@
     ],
     "color": "#cccccc",
     "colorScale": "Spectral",
-    "colorScaleBy": "allNodesAtDimIds",
+    "colorScaleBy": "allNodesAtDimValues",
     "colorScaleMode": "e",
     "colorScaleNum": 27,
     "depth": 0,
+    "descendantDimPath": [
+      undefined,
+      "education_level",
+      "state",
+    ],
     "dims": [
       undefined,
       "education_level",
@@ -673,6 +784,6 @@
         "unemployment_rate": 75.17,
       },
     ],
-    "value": 652.011111111111,
+    "value": 27,
   },
 ]
