@@ -5,7 +5,6 @@ import {
   intersection,
   min,
   omit,
-  prop,
   take,
   uniq,
   zipObj,
@@ -33,7 +32,10 @@ import type {
 import { objectEntries, } from '@antfu/utils'
 import type { KeyFnKey, } from './types.d'
 
-export type DescendantIter<ThisNode, DescendantList extends L.List = []> = ThisNode extends { height: number; depth: number }
+export type DescendantIter<
+  ThisNode,
+  DescendantList extends L.List = []
+> = ThisNode extends { height: number; depth: number }
   ? ThisNode['height'] extends 0
     ? L.UnionOf<L.Append<DescendantList, ThisNode>>
     : ThisNode extends { children: Array<infer Child> }
@@ -60,7 +62,12 @@ type GetDimIndex<
     : GetDimIndex<Rest, DimVal, I.Next<Iter>>
   : never
 
-type ArrayMap<Arr extends FixedLengthArray<unknown, number>, Length extends number, Final extends L.List = [], Iter extends I.Iteration = I.IterationOf<0>> = {
+type ArrayMap<
+  Arr extends FixedLengthArray<unknown, number>,
+  Length extends number,
+  Final extends L.List = [],
+  Iter extends I.Iteration = I.IterationOf<0>
+> = {
   0: Final
   1: ArrayMap<Arr, Length, [...Final, Arr[I.Pos<Iter>]], I.Next<Iter>>
 }[N.Lower<I.Pos<Iter>, Length>]
@@ -88,16 +95,24 @@ export class Node<
     this.ancestorDimPath = take(
       depth,
       keyFns
-    )
+    ) as ArrayMap<
+      KeysOfDatum,
+      Depth,
+      [],
+      I.IterationOf<0>
+    >
     this.descendantDimPath = drop(
       depth,
       localDims
-    )
+    ) as ArrayMap<
+      KeysOfDatum,
+      KeysOfDatum['length'],
+      [],
+      I.IterationOf<N.Sub<Depth, 1>>
+    >
 
     this.dim = localDims[depth]
-    this.id = depth === 0 ?
-      undefined :
-      records[0][this.dim]
+    this.id = depth === 0 ? undefined : records[0][this.dim]
     this.name = this.id
   }
 
@@ -124,7 +139,12 @@ export class Node<
   readonly id: Depth extends 0 ? undefined : ValueOf<Datum>
   readonly ancestorDimPath!: ArrayMap<KeysOfDatum, Depth, [], I.IterationOf<0>>
 
-  readonly descendantDimPath!: ArrayMap<KeysOfDatum, KeysOfDatum['length'], [], I.IterationOf<N.Sub<Depth, 1>>>
+  readonly descendantDimPath!: ArrayMap<
+    KeysOfDatum,
+    KeysOfDatum['length'],
+    [],
+    I.IterationOf<N.Sub<Depth, 1>>
+  >
 
   #parent!: N.Sub<Depth, 1> extends L.KeySet<0, KeysOfDatum['length']>
     ? Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
@@ -480,14 +500,14 @@ export class Node<
           b
         ))
       const nodePadAngle =
-          node.depth === 1 ?
-            piePadding :
-            node.depth <= paddingMaxDepth ?
-              min(
-                node.parent.padAngle,
-                minParentArcWidth
-              ) / children.length :
-              0
+        node.depth === 1 ?
+          piePadding :
+          node.depth <= paddingMaxDepth ?
+            min(
+              node.parent.padAngle,
+              minParentArcWidth
+            ) / children.length :
+            0
       const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
       const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
       const pies = pie<(typeof children)[number]>()
@@ -556,10 +576,12 @@ export class Node<
 
   setColor(
     this: Node<Datum, KeysOfDatum, Depth>,
-    args: Partial<Pick<
-      Node<Datum, KeysOfDatum, Depth>,
-      'colorScale' | 'colorScaleBy' | 'colorScaleMode' | 'colorScaleNum'
-    >>
+    args: Partial<
+      Pick<
+        Node<Datum, KeysOfDatum, Depth>,
+        'colorScale' | 'colorScaleBy' | 'colorScaleMode' | 'colorScaleNum'
+      >
+    >
   ): Node<Datum, KeysOfDatum, Depth> {
     this.each((node) => {
       if (!(typeof node === 'undefined' || node === null)) {
@@ -641,7 +663,7 @@ export class Node<
    * Sets the value of this node and its descendants, and returns this node.
    */
   setValues(this: Node<Datum, KeysOfDatum, Depth>) {
-    this.each(node => node.value = node.valueFunction(node))
+    this.each(node => (node.value = node.valueFunction(node)))
 
     return this
   }

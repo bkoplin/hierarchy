@@ -1,13 +1,13 @@
 import { objectEntries, } from '@antfu/utils'
-import {
-  groupBy, propOr,
-} from 'rambdax'
+import { groupBy, } from 'rambdax'
 
 import type {
   FixedLengthArray, JsonObject,
 } from 'type-fest'
 
-import type { L, } from 'ts-toolbelt'
+import type {
+  L, N,
+} from 'ts-toolbelt'
 import type { KeyFnKey, } from './types'
 import { Node, } from './Nodes'
 
@@ -21,22 +21,28 @@ export function group<
     0
   )
 
-  for (const nodeIter of root)
-    regroupFn(nodeIter)
+  // @ts-ignore
+  for (const nodeIter of root) regroupFn(nodeIter)
 
   return root
 
-  function regroupFn(node: Node<Input, KeyFunctions, L.KeySet<0, KeyFunctions['length']>>) {
+  function regroupFn(node: N.Sub<KeyFunctions['length'], 0> extends 0
+    ? Node<Input, KeyFunctions, 0, N.Sub<KeyFunctions['length'], 0>>
+    : never) {
     const keyFns = node.keyFns
     const depth = node.depth
-    const childDepth = (depth + 1)
+    const childDepth = depth + 1
     const keyFn = keyFns[depth]
 
     objectEntries(groupBy(
+      // @ts-ignore
       rec => rec[keyFn],
       node.records
     )).forEach((vals) => {
-      const [ _key, records ] = vals
+      const [
+        _key,
+        records,
+      ] = vals
 
       if (childDepth <= keyFns.length) {
         const child = new Node(
@@ -45,7 +51,7 @@ export function group<
           childDepth
         )
 
-        node.addChild(child)
+        node.addChild(child as Parameters<typeof node.addChild>[0])
       }
     })
   }
