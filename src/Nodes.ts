@@ -3,6 +3,7 @@ import {
   equals,
   filterObject,
   intersection,
+  min,
   omit,
   prop,
   take,
@@ -29,17 +30,15 @@ import { pie, } from 'd3-shape'
 import type {
   I, L, N,
 } from 'ts-toolbelt'
+import { objectEntries, } from '@antfu/utils'
 import type { KeyFnKey, } from './types.d'
 
-export type DescendantIter<ThisNode, DescendantList extends L.List = []> = Pick<
-  ThisNode,
-  'height' | 'depth'
-> extends { height: number; depth: number }
+export type DescendantIter<ThisNode, DescendantList extends L.List = []> = ThisNode extends { height: number; depth: number }
   ? ThisNode['height'] extends 0
     ? L.UnionOf<L.Append<DescendantList, ThisNode>>
-    : Pick<ThisNode, 'children'> extends { children: Array<infer Child> }
+    : ThisNode extends { children: Array<infer Child> }
       ? DescendantIter<Child, L.Append<DescendantList, ThisNode>>
-      : never
+      : L.UnionOf<L.Append<DescendantList, ThisNode>>
   : never
 
 type AncestorArray<
@@ -118,6 +117,9 @@ export class Node<
 
   colorScaleMode: 'e' | 'q' | 'l' | 'k' = 'e'
   colorScaleNum: number
+  startAngle!: number = 0
+  endAngle!: number = 2 * Math.PI
+  padAngle!: number = 0
   readonly dim: L.Prepend<KeysOfDatum, undefined>[Depth]
   readonly dims: L.Prepend<KeysOfDatum, undefined>
   readonly height: Height
@@ -464,13 +466,13 @@ export class Node<
 
   makePies(
     this: this,
-    pieStart: number,
-    pieEnd: number,
+    pieStart: number = 0,
+    pieEnd: number = 2 * Math.PI,
     piePadding = 0,
     paddingMaxDepth = 1
   ) {
-    for (const node of this) {
-      const parent = node.parent
+    this.eachBefore((node) => {
+      const parent = node.parent ?? node
       const children = parent.children
       const minParentArcWidth = children
         .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
@@ -479,17 +481,17 @@ export class Node<
           b
         ))
       const nodePadAngle =
-        node.depth === 1 ?
-          piePadding :
-          node.depth <= paddingMaxDepth ?
-            min(
-              node.parent.padAngle,
-              minParentArcWidth
-            ) / children.length :
-            0
+          node.depth === 1 ?
+            piePadding :
+            node.depth <= paddingMaxDepth ?
+              min(
+                node.parent.padAngle,
+                minParentArcWidth
+              ) / children.length :
+              0
       const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
       const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
-      const pies = pie()
+      const pies = pie<(typeof children)[number]>()
         .startAngle(nodePieStart)
         .endAngle(nodePieEnd)
         .padAngle(nodePadAngle)
@@ -514,42 +516,10 @@ export class Node<
           node.padAngle = padAngle
           node.startAngle = startAngle
           node.endAngle = endAngle
-          const arcWidthRadians = endAngleIn - startAngleIn - padAngle
-          const halfAngle = arcWidthRadians / 2
-          const rotationsRaw = (halfAngle + startAngle) / 2 / Math.PI
-          const rotations =
-            halfAngle + startAngle < 0 ?
-              rotationsRaw - Math.ceil(rotationsRaw) :
-              rotationsRaw - Math.floor(rotationsRaw)
-          const paperMidPoint = angleConverter.toPaper(halfAngle + startAngle)
-
-          node.midPointAngle = {
-            radians: halfAngle + startAngle,
-            degrees: ((halfAngle + startAngle) * 180) / Math.PI,
-            paper: paperMidPoint,
-            rotations,
-            side:
-              paperMidPoint < 0 ?
-                paperMidPoint > -90 ?
-                  'right' :
-                  'left' :
-                paperMidPoint > 90 ?
-                  'left' :
-                  'right',
-          }
-          node.nodeArcWidth = {
-            radians: arcWidthRadians,
-            degrees: (arcWidthRadians * 180) / Math.PI,
-          }
-          node.paperAngles = {
-            startAngle: angleConverter.toPaper(node.startAngle),
-            endAngle: angleConverter.toPaper(node.endAngle),
-            padAngle: (node.padAngle * 180) / Math.PI,
-            midPointAngle: paperMidPoint,
-          }
         }
       })
-    }
+    })
+    return this
   }
 
   /**
@@ -587,21 +557,21 @@ export class Node<
 
   setColor(
     this: Node<Datum, KeysOfDatum, Depth>,
-    args: Pick<
+    args: Partial<Pick<
       Node<Datum, KeysOfDatum, Depth>,
       'colorScale' | 'colorScaleBy' | 'colorScaleMode' | 'colorScaleNum'
-    >
+    >>
   ): Node<Datum, KeysOfDatum, Depth> {
     this.each((node) => {
       if (!(typeof node === 'undefined' || node === null)) {
-        if (typeof scaleBy !== 'undefined')
-          node.colorScaleBy = scaleBy
-        if (typeof scale !== 'undefined')
-          node.colorScale = scale
-        if (typeof scaleMode !== 'undefined')
-          node.colorScaleMode = scaleMode
-        if (typeof scaleNum !== 'undefined')
-          node.colorScaleNum = scaleNum
+        objectEntries(args).forEach(([
+          colorKey,
+          value,
+        ]) => {
+          if (node[colorKey] !== value && typeof value !== 'undefined')
+            node[colorKey] = value
+        })
+
         if (
           (node.colorScaleBy === 'allNodesAtDimIds' ||
             node.colorScaleBy === 'parentListIds') &&
@@ -672,9 +642,7 @@ export class Node<
    * Sets the value of this node and its descendants, and returns this node.
    */
   setValues(this: Node<Datum, KeysOfDatum, Depth>) {
-    const index = -1
-
-    for (const node of this) node.value = node.valueFunction(node)
+    this.each(node => node.value = node.valueFunction(node))
 
     return this
   }

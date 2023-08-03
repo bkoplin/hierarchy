@@ -1,0 +1,61 @@
+{
+  "ancestorDimPath": [
+    "education_level",
+  ],
+  "children": [
+    {
+      "ancestorDimPath": [
+        "education_level",
+        "state",
+      ],
+      "color": "#cccccc",
+      "colorScale": "Spectral",
+      "colorScaleBy": "allNodesAtDimIds",
+      "colorScaleMode": "e",
+      "colorScaleNum": 0,
+      "depth": 2,
+      "descendantDimPath": [
+        "state",
+      ],
+      "dim": "state",
+      "dims": [
+        undefined,
+        "education_level",
+        "state",
+      ],
+      "height": 0,
+      "keyFns": [
+        "education_level",
+        "state",
+      ],
+      "records": "",
+      "value": 0,
+    },
+  ],
+  "color": "#cccccc",
+  "colorScale": "Spectral",
+  "colorScaleBy": "allNodesAtDimIds",
+  "colorScaleMode": "e",
+  "colorScaleNum": 17,
+  "depth": 1,
+  "descendantDimPath": [
+    "education_level",
+    "state",
+  ],
+  "dim": "education_level",
+  "dims": [
+    undefined,
+    "education_level",
+    "state",
+  ],
+  "endAngle": 1.270756578980141,
+  "height": 1,
+  "keyFns": [
+    "education_level",
+    "state",
+  ],
+  "padAngle": 0,
+  "records": "Bachelor's Degree",
+  "startAngle": 0,
+  "value": 17,
+}

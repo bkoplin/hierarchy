@@ -2,6 +2,7 @@ import {
   describe, expect, test,
 } from 'vitest'
 import {
+  length,
   map, mean, paths, pipe, prop,
 } from 'rambdax'
 import { group, } from '../../src/group'
@@ -28,7 +29,7 @@ describe(
           'education_level',
           'state',
         ])
-        expect(groupByAge.height).toBe(3)
+        expect(groupByAge.height).toBe(2)
         expect(groupByAge.parent).toBeUndefined()
         const descendants = groupByAge.descendants()
 
@@ -48,13 +49,9 @@ describe(
 
         groupByAge.setValueFunction(pipe(
           prop('records'),
-          map(prop('crime_rate')),
-          mean
+          length
         ))
-        groupByAge.setColor(
-          undefined,
-          'allNodesAtDimValues'
-        )
+        groupByAge.setColor({ colorScaleBy: 'allNodesAtDimValues', })
         expect(groupByAge.leaves().map(d => [
           d.id,
           d.value,
@@ -115,6 +112,8 @@ describe(
           ]
         `)
         expect(root.depth).toBe(0)
+        root.makePies()
+        expect(root).toMatchFileSnapshot('./pies.json')
       }
     )
     test(
