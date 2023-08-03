@@ -35,53 +35,12 @@ describe(
         expect(descendants.map(d => d.dim)).toMatchFileSnapshot('./group-children.json')
         const [ l, ] = groupByAge.links()
 
-        groupByAge.eachBefore((node) => {})
+        groupByAge.eachBefore((node) => {
+          const d = node.depth
+        })
         expect(l.source).toBeUndefined()
       }
     )
-    // test(
-    //   'first level child tests',
-    //   () => {
-    //     const [ child, ] = groupByAge.children
-
-    //     expect(child.dim).toEqual('education_level')
-    //     expect(child.depth).toEqual(1)
-    //     if (child.hasChildren()) expect(child.children).toBeTruthy()
-
-    //     expect(child.parent.depth).toEqual(0)
-    //     child.eachBefore((node) => {
-    //       expect(node.dim).toBeGreaterThan(0)
-    //     })
-    //   }
-    // )
-    // test(
-    //   'second level child dim is state',
-    //   () => {
-    //     expect(groupByAge.children[0].children[0].dim).toBe('state')
-    //   }
-    // )
-    // test(
-    //   'second level child has no children',
-    //   () => {
-    //     const [ child, ] = groupByAge.leaves()
-
-    //     expect(child.hasChildren()).toBe(false)
-    //     expect(child.hasParent()).toBeTruthy()
-    //     if (child.hasParent()) expect(child.parent.depth).toBe(1)
-    //   }
-    // )
-    // test(
-    //   'second level child depth is 2',
-    //   () => {
-    //     expect(groupByAge.children?.[0].depth).toBe(1)
-    //     const secondLevelChild = groupByAge.children?.[0]?.children?.[0]
-
-    //     expect(secondLevelChild.depth).toBe(2)
-    //     expect(secondLevelChild.type).toBe('leaf')
-    //     if (secondLevelChild.hasParent())
-    //       expect(secondLevelChild.parent.depth).toBe(1)
-    //   }
-    // )
     test(
       'change value function, inline second level first child',
       () => {
@@ -146,8 +105,8 @@ describe(
         expect(ancestors).toMatchFileSnapshot('./ancestors.json')
         expect(ancestors.length).toBe(3)
         const ansc = secondAncestor.ancestorAt({ dim: 'state', })
-        const ansc2 = firstAncestor.ancestorAt({ dim: 'state' })
-        const ansc2dims = firstAncestor.descendantDimPath
+        const ansc2 = firstAncestor.ancestorAt({ dim: 'state', })
+        const ansc2dims = secondAncestor.descendantDimPath
 
         expect(ansc2.depth).toBe(2)
         expect(secondAncestor.ancestorDimPath).toMatchInlineSnapshot(`
@@ -164,7 +123,7 @@ describe(
         const [ leaf, ] = groupByAge.leaves()
         const ancestor = leaf.ancestorAt({ dim: 'education_level', })
         const depth2 = leaf.ancestorAt({ depth: 2, })
-        const found = groupByAge.descendantsAt({ dim: 'state' })
+        const found = groupByAge.descendantsAt({ dim: 'state', })
 
         expect(ancestor).toBeTruthy()
         expect(ancestor.depth).toBeTruthy()

@@ -13,6 +13,7 @@ import type {
   ConditionalExcept,
   FixedLengthArray,
   Get,
+  IterableElement,
   JsonObject,
   JsonValue,
   LiteralUnion,
@@ -30,13 +31,15 @@ import type {
 } from 'ts-toolbelt'
 import type { KeyFnKey, } from './types.d'
 
-export type DescendantIter<
+export type DescendantIter<ThisNode, DescendantList extends L.List = []> = Pick<
   ThisNode,
-  DescendantList extends L.List = []
-> = ThisNode extends { children: Array<infer Child> }
-  ? Get<Child, 'height'> extends -1
-    ? L.UnionOf<[...DescendantList, ThisNode]>
-    : DescendantIter<Child, [...DescendantList, ThisNode]>
+  'height' | 'depth'
+> extends { height: number; depth: number }
+  ? ThisNode['height'] extends 0
+    ? L.UnionOf<L.Append<DescendantList, ThisNode>>
+    : Pick<ThisNode, 'children'> extends { children: Array<infer Child> }
+      ? DescendantIter<Child, L.Append<DescendantList, ThisNode>>
+      : never
   : never
 
 type AncestorArray<
@@ -58,14 +61,16 @@ type GetDimIndex<
     : GetDimIndex<Rest, DimVal, I.Next<Iter>>
   : never
 
+type ArrayMap<Arr extends FixedLengthArray<unknown, number>, Length extends number, Final extends L.List = [], Iter extends I.Iteration = I.IterationOf<0>> = {
+  0: Final
+  1: ArrayMap<Arr, Length, [...Final, Arr[I.Pos<Iter>]], I.Next<Iter>>
+}[N.Lower<I.Pos<Iter>, Length>]
+
 export class Node<
   Datum extends JsonObject | string,
   KeysOfDatum extends FixedLengthArray<KeyFnKey<Datum>, L.KeySet<1, 13>>,
-  Depth extends L.KeySet<0, KeysOfDatum['length']> = 0,
-  Height extends N.Sub<KeysOfDatum['length'], Depth> = N.Sub<
-    KeysOfDatum['length'],
-    Depth
-  >
+  Depth extends number = L.KeySet<0, KeysOfDatum['length']>,
+  Height extends number = N.Sub<KeysOfDatum['length'], Depth>
 > {
   constructor(
     public readonly keyFns: KeysOfDatum,
@@ -118,25 +123,28 @@ export class Node<
   readonly height: Height
   readonly name: Depth extends 0 ? undefined : ValueOf<Datum>
   readonly id: Depth extends 0 ? undefined : ValueOf<Datum>
-  declare ancestorDimPath: L.Take<KeysOfDatum, Depth>
+  readonly ancestorDimPath!: ArrayMap<KeysOfDatum, Depth, [], I.IterationOf<0>>
 
-  declare descendantDimPath: L.Drop<L.Prepend<KeysOfDatum, undefined>, Depth>
+  readonly descendantDimPath!: ArrayMap<KeysOfDatum, KeysOfDatum['length'], [], I.IterationOf<N.Sub<Depth, 1>>>
 
-  #parent = undefined as unknown as Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
+  #parent!: N.Sub<Depth, 1> extends L.KeySet<0, KeysOfDatum['length']>
+    ? Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
+    : never
 
   value: number
 
-  children: Array<Node<Datum, KeysOfDatum, N.Add<Depth, 1>>> = []
+  children!: N.Add<Depth, 1> extends L.KeySet<0, KeysOfDatum['length']>
+    ? Array<Node<Datum, KeysOfDatum, N.Add<Depth, 1>>>
+    : never
 
   addChild(
-    this: Node<Datum, KeysOfDatum, 1>,
-    child: Node<Datum, KeysOfDatum, N.Add<Depth, 1>>
+    this: Node<Datum, KeysOfDatum, Depth>,
+    child: this['children'][number]
   ) {
     if (this.height > 0 && !!child) {
-      this.children = [
-        ...this.children,
-        child,
-      ]
+      if (typeof this.children === 'undefined')
+        this.children = []
+      this.children.push(child)
       child.parent = this
     }
   }
@@ -204,7 +212,7 @@ export class Node<
     ThisNode extends Node<Datum, KeysOfDatum, Depth>,
     Params extends RequireExactlyOne<{
       depth: L.KeySet<0, Depth>
-      dim: ThisNode['ancestorDimPath'][number]
+      dim: L.UnionOf<ThisNode['ancestorDimPath']>
     }>
   >(this: ThisNode, depthOrDim: Params) {
     type ReturnType = Params['depth'] extends ThisNode['depth']
@@ -213,7 +221,7 @@ export class Node<
         ? Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
-          : Params['dim'] extends ThisNode['ancestorDimPath'][number]
+          : Params['dim'] extends L.UnionOf<ThisNode['ancestorDimPath']>
             ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<0, Depth>
               ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
               : never
@@ -263,7 +271,7 @@ export class Node<
     ThisNode extends Node<Datum, KeysOfDatum, Depth>,
     Params extends RequireExactlyOne<{
       depth: L.KeySet<Depth, KeysOfDatum['length']>
-      dim: ThisNode['descendantDimPath'][number]
+      dim: L.UnionOf<ThisNode['descendantDimPath']>
     }>
   >(this: ThisNode, depthOrDim: Params) {
     type ReturnType = Params['depth'] extends ThisNode['depth']
@@ -272,7 +280,7 @@ export class Node<
         ? Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
-          : Params['dim'] extends ThisNode['descendantDimPath'][number]
+          : Params['dim'] extends L.UnionOf<ThisNode['descendantDimPath']>
             ? GetDimIndex<ThisNode['dims'], Params['dim']> extends L.KeySet<
           Depth,
           KeysOfDatum['length']
@@ -304,7 +312,7 @@ export class Node<
   each(
     this: this,
     callback: (
-      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
+      node: IterableElement<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -329,7 +337,7 @@ export class Node<
   eachAfter(
     this: this,
     callback: (
-      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
+      node: IterableElement<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -367,7 +375,7 @@ export class Node<
   eachBefore(
     this: this,
     callback: (
-      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
+      node: IterableElement<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => void
   ): this {
@@ -395,16 +403,11 @@ export class Node<
   find(
     this: this,
     callback: (
-      node: DescendantIter<Node<Datum, KeysOfDatum, Depth>>,
+      node: IterableElement<Node<Datum, KeysOfDatum, Depth>>,
       index?: number
     ) => boolean
   ): this | undefined {
-    for (const node of this) {
-      const test = callback(node)
-
-      if (test)
-        return node
-    }
+    return this.descendants().find(callback)
   }
 
   isRoot(): this is Node<Datum, KeysOfDatum, 0> {
@@ -443,12 +446,8 @@ export class Node<
         [Key in L.KeySet<Depth, L.Length<KeysOfDatum>>]: {
           source: Key extends 0
             ? undefined
-            : Simplify<
-                Node<Datum, KeysOfDatum, Key>
-              >['parent']
-          target: Simplify<
-            Node<Datum, KeysOfDatum, Key>
-          >
+            : Simplify<Node<Datum, KeysOfDatum, Key>>['parent']
+          target: Simplify<Node<Datum, KeysOfDatum, Key>>
         }
       }[L.KeySet<Depth, L.Length<KeysOfDatum>>]
     >
@@ -558,7 +557,10 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#node_path}
    * @see {@link links}
    */
-  path(this: Node<Datum, KeysOfDatum, Depth>, end: DescendantIter<Node<Datum, KeysOfDatum, 0>>) {
+  path(
+    this: Node<Datum, KeysOfDatum, Depth>,
+    end: DescendantIter<Node<Datum, KeysOfDatum, 0>>
+  ) {
     let start = this
     const ancestor = leastCommonAncestor(
       start,
@@ -585,15 +587,13 @@ export class Node<
 
   setColor(
     this: Node<Datum, KeysOfDatum, Depth>,
-    scale?: Node<Datum, KeysOfDatum, Depth>['colorScale'],
-    scaleBy?: Node<Datum, KeysOfDatum, Depth>['colorScaleBy'],
-    scaleMode?: Node<Datum, KeysOfDatum, Depth>['colorScaleMode'],
-    scaleNum?: Node<Datum, KeysOfDatum, Depth>['colorScaleNum']
+    args: Pick<
+      Node<Datum, KeysOfDatum, Depth>,
+      'colorScale' | 'colorScaleBy' | 'colorScaleMode' | 'colorScaleNum'
+    >
   ): Node<Datum, KeysOfDatum, Depth> {
     this.each((node) => {
-      if (typeof node === 'undefined' || node === null) {
-      }
-      else {
+      if (!(typeof node === 'undefined' || node === null)) {
         if (typeof scaleBy !== 'undefined')
           node.colorScaleBy = scaleBy
         if (typeof scale !== 'undefined')
