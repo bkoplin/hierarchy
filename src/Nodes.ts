@@ -97,10 +97,7 @@ export class Node<
     this.dim = localDims[depth]
     this.id = depth === 0 ?
       undefined :
-      prop(
-        this.dim,
-        this.records[0]
-      )
+      records[0][this.dim]
     this.name = this.id
   }
 
@@ -472,7 +469,9 @@ export class Node<
     paddingMaxDepth = 1
   ) {
     this.eachBefore((node) => {
-      const parent = node.parent ?? node
+      if (node.isRoot())
+        return
+      const parent = node.parent
       const children = parent.children
       const minParentArcWidth = children
         .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)

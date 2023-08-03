@@ -33,13 +33,10 @@ export function group<
     const keyFn = keyFns[depth]
 
     objectEntries(groupBy(
-      propOr(
-        '',
-        keyFn
-      ),
+      rec => rec[keyFn],
       node.records
     )).forEach((vals) => {
-      const [ records, ] = vals
+      const [ _key, records ] = vals
 
       if (childDepth <= keyFns.length) {
         const child = new Node(
