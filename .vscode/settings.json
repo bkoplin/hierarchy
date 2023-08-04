@@ -1,4 +1,9 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "testing.automaticallyOpenPeekView": "never"
+  "testing.automaticallyOpenPeekView": "never",
+  "vitest.enable": true,
+  "vitest.include": [
+    "test/array/*.{js,ts}",
+    "src/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+  ]
 }

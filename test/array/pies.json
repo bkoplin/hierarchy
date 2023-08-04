@@ -1,15 +1,19 @@
 {
-  "ancestorDimPath": [],
+  "ancestorDimPath": [
+    undefined,
+  ],
   "children": [
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -54,8 +58,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -100,8 +105,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -146,8 +152,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -192,8 +199,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -330,12 +338,14 @@
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -380,8 +390,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -426,8 +437,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -472,8 +484,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -518,8 +531,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -656,12 +670,14 @@
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -706,8 +722,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -752,8 +769,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -798,8 +816,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -844,8 +863,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -982,12 +1002,14 @@
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1032,8 +1054,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1078,8 +1101,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1124,8 +1148,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1250,12 +1275,14 @@
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1300,8 +1327,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1346,8 +1374,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1460,12 +1489,14 @@
     {
       "ancestorDimPath": [
         "education_level",
+        undefined,
       ],
       "children": [
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1510,8 +1541,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1556,8 +1588,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1602,8 +1635,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",
@@ -1648,8 +1682,9 @@
         },
         {
           "ancestorDimPath": [
-            "education_level",
             "state",
+            "education_level",
+            undefined,
           ],
           "color": "#cccccc",
           "colorScale": "Spectral",

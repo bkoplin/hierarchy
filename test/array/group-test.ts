@@ -1,9 +1,7 @@
 import {
   describe, expect, test,
 } from 'vitest'
-import {
-  length, paths, pipe, prop,
-} from 'rambdax'
+
 import { group, } from '../../src/group'
 import data from '../data/MOCK_DATA.json'
 
@@ -17,7 +15,6 @@ const groupByAge = group(
   'state'
 )
 
-
 describe(
   'ancestor tests',
   () => {
@@ -30,13 +27,51 @@ describe(
           root,
         ] = groupByAge.leaves()[0].ancestors()
 
+        expect(root.parent).toBe(undefined)
+        expect(secondAncestor.ancestorAt({ depth: 1, })?.depth).toBe(1)
+        expect(secondAncestor.ancestorDimPath).toMatchInlineSnapshot(`
+          [
+            "state",
+            "education_level",
+            undefined,
+          ]
+        `)
+        expect(root.idObject).toMatchInlineSnapshot(`
+          {
+            "undefined": undefined,
+          }
+        `)
+        expect(firstAncestor.idPath({ noRoot: true, })).toMatchInlineSnapshot(`
+          [
+            "Missouri",
+            "Bachelor's Degree",
+          ]
+        `)
+        expect(firstAncestor.descendantDimPath).toMatchInlineSnapshot(`
+          [
+            "state",
+          ]
+        `)
+        expect(root.ancestorDimPath).toMatchInlineSnapshot(`
+          [
+            undefined,
+          ]
+        `)
+        expect(root.descendantDimPath).toMatchInlineSnapshot(`
+          [
+            undefined,
+            "education_level",
+            "state",
+          ]
+        `)
         root.makePies()
         expect(root).toMatchFileSnapshot('./pies.json')
         expect(root.find(node => node.dim === 'state' && node.id === 'Missouri')).toMatchInlineSnapshot(`
           {
             "ancestorDimPath": [
-              "education_level",
               "state",
+              "education_level",
+              undefined,
             ],
             "color": "#cccccc",
             "colorScale": "Spectral",
