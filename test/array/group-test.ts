@@ -28,7 +28,7 @@ describe(
         ] = groupByAge.leaves()[0].ancestors()
 
         expect(root.parent).toBe(undefined)
-        expect(secondAncestor.ancestorAt({ depth: 1, })?.depth).toBe(1)
+        expect(firstAncestor.ancestorAt({ dim: 'education_level' })?.depth).toBe(1)
         expect(secondAncestor.ancestorDimPath).toMatchInlineSnapshot(`
           [
             "state",
@@ -65,6 +65,8 @@ describe(
           ]
         `)
         root.makePies()
+        const d = root.descendants()
+
         expect(root).toMatchFileSnapshot('./pies.json')
         expect(root.find(node => node.dim === 'state' && node.id === 'Missouri')).toMatchInlineSnapshot(`
           {

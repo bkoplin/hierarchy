@@ -12,10 +12,13 @@ export default defineConfig({
     'cjs',
     'esm',
   ],
-  dts: { entry: [ 'src/index.ts', ], },
+  dts: {
+    entry: [ 'src/index.ts', ],
+    only: true,
+  },
   // footer: { js: '\n\nObject.keys(func).forEach((key) => globalThis[key] = func[key])', },
-  shims: true,
+  // shims: true,
   define: { 'import.meta.vitest': 'false', },
-  esbuildPlugins: [ nodeModulesPolyfillPlugin(), ],
-  external: [ 'jsdom/lib/jsdom/living/generated/utils', ],
+  // esbuildPlugins: [ nodeModulesPolyfillPlugin(), ],
+  // external: [ 'jsdom/lib/jsdom/living/generated/utils', ],
 })
