@@ -14,11 +14,11 @@ import type {
   ConditionalExcept,
   FixedLengthArray,
   Get,
+  IsNever,
   IterableElement,
   JsonObject,
   LiteralUnion,
   RequireExactlyOne,
-  Simplify,
   ValueOf,
 } from 'type-fest'
 import type {
@@ -35,13 +35,15 @@ import type { KeyFnKey, } from './types.d'
 export type DescendantIter<
   ThisNode,
   DescendantList extends L.List = []
-> = ThisNode extends { height: number; depth: number }
-  ? ThisNode['height'] extends 0
-    ? L.UnionOf<L.Append<DescendantList, ThisNode>>
-    : ThisNode extends { children: Array<infer Child> }
-      ? DescendantIter<Child, L.Append<DescendantList, ThisNode>>
-      : L.UnionOf<L.Append<DescendantList, ThisNode>>
-  : never
+> = IsNever<ThisNode> extends true
+  ? L.UnionOf<DescendantList>
+  : ThisNode extends { height: number; depth: number }
+    ? ThisNode['height'] extends 0
+      ? L.UnionOf<L.Append<DescendantList, ThisNode>>
+      : ThisNode extends { children: Array<infer Child> }
+        ? DescendantIter<Child, L.Append<DescendantList, ThisNode>>
+        : L.UnionOf<L.Append<DescendantList, ThisNode>>
+    : never
 
 type AncestorBy<ThisNode, Prop extends string, Value> = ThisNode extends object
   ? Get<ThisNode, `${Prop}`> extends Value
@@ -58,7 +60,7 @@ type AncestorArray<
   ? ThisNode['depth'] extends 0
     ? [...AncestorList, ThisNode]
     : AncestorArray<Parent, [...AncestorList, ThisNode]>
-  : never
+  : AncestorList
 
 type GetDimIndex<
   Dims,
@@ -98,6 +100,7 @@ export class Node<
     let [ record, ] = records
 
     if (typeof record === 'string')
+    // @ts-ignore
       record = String(record)
     this.value = records.length
     this.colorScaleNum = records.length
@@ -256,8 +259,7 @@ export class Node<
       : Height extends 0
         ? 'leaf'
         : 'node'
-    if (this.depth === 0)
-      return 'leaf' as ReturnType
+    if (this.depth === 0) return 'leaf' as ReturnType
     else if (this.height === 0)
       return 'root' as ReturnType
     else return 'node' as ReturnType
@@ -321,9 +323,12 @@ export class Node<
       : Params['dim'] extends L.Take<KeysOfDatum, Depth>[number]
         ? AncestorBy<ThisNode, 'dim', Params['dim']>
         : never
-    const node: Simplify<ReturnType> = this.ancestors()!.find((ancestor) => {
-      return ('depth' in depthOrDim && depthOrDim.depth === ancestor.depth) || ('dim' in depthOrDim && depthOrDim.dim === ancestor.dim)
-    })
+    const node: ReturnType = this.ancestors()
+    // @ts-ignore
+      .find((ancestor) => {
+        // @ts-ignore
+        return ('depth' in depthOrDim && depthOrDim.depth === ancestor.depth) || ('dim' in depthOrDim && depthOrDim.dim === ancestor.dim)
+      })
 
     return node
   }
@@ -369,6 +374,7 @@ export class Node<
     type ReturnType = Params['depth'] extends ThisNode['depth']
       ? ThisNode
       : Params['depth'] extends L.KeySet<Depth, KeysOfDatum['length']>
+        // @ts-ignore
         ? Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
@@ -377,6 +383,7 @@ export class Node<
           Depth,
           KeysOfDatum['length']
         >
+            // @ts-ignore
               ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
               : never
             : never
@@ -386,8 +393,8 @@ export class Node<
       } = depthOrDim
 
       if (typeof paramDepth === 'number')
-        return node.depth === paramDepth
-      else return node.dim === paramDim
+        return node?.depth === paramDepth
+      else return node?.dim === paramDim
     }) as unknown as ReturnType[]
   }
 
@@ -447,6 +454,7 @@ export class Node<
     }
     while ((node = next.pop()) !== undefined) {
       callback(
+        // @ts-ignore
         node,
         ++index
       )
@@ -502,11 +510,15 @@ export class Node<
     return this.descendants().find(callback)
   }
 
-  isRoot(): this is Node<Datum, KeysOfDatum, 0> {
+  hasParent(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.KeySet<1, KeysOfDatum['length']>> {
+    return this?.depth > 0
+  }
+
+  isRoot(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, 0> {
     return this?.depth === 0
   }
 
-  isLeaf(): this is Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>> {
+  isLeaf(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>> {
     return this?.height === 0
   }
 
@@ -521,7 +533,7 @@ export class Node<
     >
 
     this.eachBefore((node) => {
-      if (!node.height)
+      if (!node?.height)
         leaves.push(node)
     })
     return leaves
@@ -532,7 +544,7 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#links}
    * @see {@link path}
    */
-  links(this: this): Array<
+  links(this: Node<Datum, KeysOfDatum, Depth>): Array<
     {
       [Key in L.KeySet<Depth, L.Length<KeysOfDatum>>]: {
         source: Key extends 0
@@ -542,7 +554,7 @@ export class Node<
       }
     }[L.KeySet<Depth, L.Length<KeysOfDatum>>]
   > {
-    const links = []
+    const links = [] as unknown[]
 
     this.each((node) => {
       // Don't include the root's parent, if any.
@@ -555,61 +567,61 @@ export class Node<
   }
 
   makePies(
-    this: this,
+    this: Node<Datum, KeysOfDatum, Depth>,
     pieStart: number = 0,
     pieEnd: number = 2 * Math.PI,
     piePadding = 0,
     paddingMaxDepth = 1
-  ): this {
+  ): Node<Datum, KeysOfDatum, Depth> {
     this.eachBefore((node) => {
-      if (node.isRoot())
-        return
-      const parent = node.parent
-      const children = parent.children
-      const minParentArcWidth = children
-        .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
-        .reduce((a, b) => Math.min(
-          a,
-          b
-        ))
-      const nodePadAngle =
-        node.depth === 1 ?
-          piePadding :
-          node.depth <= paddingMaxDepth ?
-            min(
-              node.parent.padAngle,
-              minParentArcWidth
-            ) / children.length :
-            0
-      const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
-      const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
-      const pies = pie<(typeof children)[number]>()
-        .startAngle(nodePieStart)
-        .endAngle(nodePieEnd)
-        .padAngle(nodePadAngle)
-        .sort((a, b) => {
-          // const sortA = a.leaves()[0]?.data?.[inputs.value.sourceName.value]
-          if ((a.value ?? 0) > (b.value ?? 0))
-            return pieStart > Math.PI ? 1 : -1
-          if ((a.value ?? 0) < (b.value ?? 0))
-            return pieStart > Math.PI ? -1 : 1
-          return 0
+      if (node.hasParent()) {
+        const parent = node.parent
+        const children = parent.children
+        const minParentArcWidth = children
+          .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
+          .reduce((a, b) => Math.min(
+            a,
+            b
+          ))
+        const nodePadAngle =
+          node.depth === 1 ?
+            piePadding :
+            node.depth <= paddingMaxDepth ?
+              min(
+                node.parent.padAngle,
+                minParentArcWidth
+              ) / children.length :
+              0
+        const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
+        const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
+        const pies = pie<(typeof children)[number]>()
+          .startAngle(nodePieStart)
+          .endAngle(nodePieEnd)
+          .padAngle(nodePadAngle)
+          .sort((a, b) => {
+            // const sortA = a.leaves()[0]?.data?.[inputs.value.sourceName.value]
+            if ((a.value ?? 0) > (b.value ?? 0))
+              return pieStart > Math.PI ? 1 : -1
+            if ((a.value ?? 0) < (b.value ?? 0))
+              return pieStart > Math.PI ? -1 : 1
+            return 0
+          })
+          .value(d => d.value ?? 1)(children)
+
+        pies.forEach((p, i) => {
+          if (p.data.id === node.id) {
+            const {
+              startAngle: startAngleIn, endAngle: endAngleIn, padAngle,
+            } = p
+            const startAngle = startAngleIn
+            const endAngle = endAngleIn - padAngle
+
+            node.padAngle = padAngle
+            node.startAngle = startAngle
+            node.endAngle = endAngle
+          }
         })
-        .value(d => d.value ?? 1)(children)
-
-      pies.forEach((p, i) => {
-        if (p.data.id === node.id) {
-          const {
-            startAngle: startAngleIn, endAngle: endAngleIn, padAngle,
-          } = p
-          const startAngle = startAngleIn
-          const endAngle = endAngleIn - padAngle
-
-          node.padAngle = padAngle
-          node.startAngle = startAngle
-          node.endAngle = endAngle
-        }
-      })
+      }
     })
     return this
   }
@@ -686,7 +698,7 @@ export class Node<
             chroma.scale(node.colorScale).colors(values.length)
           )[node.id]
         }
-        else if (!node.isRoot()) {
+        else if (node.hasParent()) {
           let values: number[] = node.parent!.children!.map(n => n.value)
 
           if (node.colorScaleBy === 'allNodesAtDimValues') {
