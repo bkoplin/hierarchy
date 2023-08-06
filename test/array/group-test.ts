@@ -22,7 +22,7 @@ describe(
       'ancestors tests',
       () => {
         const leaves = groupByAge.leaves()
-        const [ leaf, ] = groupByAge.children
+        const [ leaf, ] = leaves
         const [
           firstAncestor,
           secondAncestor,
@@ -68,7 +68,7 @@ describe(
           ]
         `)
         root.makePies()
-        const d = root.descendants().map(desc => desc.depth)
+        const d = groupByAge.descendants().map(desc => desc.depth)
 
         expect(root).toMatchFileSnapshot('./pies.json')
         expect(root.find(node => node.dim === 'state' && node.id === 'Missouri')).toMatchInlineSnapshot(`

@@ -8,17 +8,17 @@ import type {
 import type {
   L, N,
 } from 'ts-toolbelt'
-import type { KeyFnKey, } from './types'
+import type { KeyFn, KeyFnKey, } from './types'
 import { Node, } from './Nodes'
 
 export function group<
   Input extends JsonObject | string,
-  KeyFunctions extends FixedLengthArray<KeyFnKey<Input>, L.KeySet<1, 13>>
+  KeyFunctions extends ReadonlyArray<KeyFn<Input>>
 >(values: Input[], ...keys: KeyFunctions) {
   const root = new Node(
     keys,
     values,
-    0
+    0 as const
   )
 
   // @ts-ignore
@@ -48,7 +48,9 @@ export function group<
         const child = new Node(
           keyFns,
           records,
-          childDepth
+          childDepth,
+          node.height - 1,
+          _key
         )
 
         node.addChild(child as Parameters<typeof node.addChild>[0])

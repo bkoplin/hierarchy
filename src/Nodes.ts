@@ -4,7 +4,6 @@ import {
   intersection,
   min,
   omit,
-  propOr,
   uniq,
   zipObj,
 } from 'rambdax'
@@ -15,31 +14,39 @@ import type {
 import chroma from 'chroma-js'
 import { pie, } from 'd3-shape'
 import { objectEntries, } from '@antfu/utils'
+import type {
+  L, N,
+} from 'ts-toolbelt'
+import type { KeyFn, } from './types'
 
-export class Node {
-  constructor(public keyFns, public records, public depth) {
-    let [ record, ] = records
+type Ancestors<ThisNode, AncestorList extends L.List = []> = ThisNode extends { parent: unknown; depth: number }
+  ? N.Greater<ThisNode['depth'], 0> extends 1
+    ? Ancestors<ThisNode['parent'], L.Append<AncestorList, ThisNode>>
+    : L.Append<AncestorList, ThisNode>
+  : never
 
-    if (typeof record === 'string')
-      record = String(record)
-    this.value = records.length
-    this.colorScaleNum = records.length
-    this.height = keyFns.length - depth
-    const localDims = [
-      undefined,
-      ...keyFns,
-    ]
-
-    this.dims = localDims
-
-    this.dim = localDims[depth]
-    this.id = propOr(
-      undefined,
-      `${this.dim}`,
-      // @ts-ignore
-      record
-    )
+export class Node<
+  Datum = any,
+  KeyFunctions extends ReadonlyArray<KeyFn<Datum>> = readonly [KeyFn<Datum>],
+  Depth extends L.KeySet<0, L.Length<KeyFunctions>> = 0,
+  Height extends N.Sub<
+    L.Length<KeyFunctions>,
+    Depth
+  > = N.Sub<
+    L.Length<KeyFunctions>,
+    Depth
+  >
+> {
+  constructor(
+    public readonly keyFns: KeyFunctions,
+    public records: Datum[],
+    public depth: Depth,
+    public height: Height = keyFns.length - depth,
+    public readonly id?: any = undefined
+  ) {
     this.name = this.id
+    this.colorScaleNum = this.records.length
+    this.value = this.records.length
   }
 
   color = '#cccccc'
@@ -57,14 +64,15 @@ export class Node {
   colorScaleNum: number
   startAngle: number = 0
   endAngle: number = 2 * Math.PI
+  name: this['id']
   padAngle: number = 0
-  #parent = undefined
+  #parent?: Node<Datum, KeyFunctions, N.Sub<Depth, 1>> = undefined
 
   value: number
 
-  children = []
+  children: Array<Node<Datum, KeyFunctions, N.Add<Depth, 1>>> = []
 
-  addChild(child) {
+  addChild(child: this['children'][number]) {
     if (this.height > 0 && !!child) {
       if (typeof this.children === 'undefined')
         this.children = []
@@ -75,6 +83,18 @@ export class Node {
   }
 
   valueFunction = rec => rec.records.length
+
+  get keyFn() {
+    return this.keyFns[this.depth]
+  }
+
+  get dim() {
+    if (typeof this.keyFn === 'undefined')
+      return ''
+    else if (typeof this.keyFn === 'string' || typeof this.keyFn === 'number' || typeof this.keyFn === 'symbol')
+      return `${this.keyFn}`
+    else return this.keyFn[0]
+  }
 
   get idObject() {
     return { [this.dim]: this.id, }
@@ -124,7 +144,14 @@ export class Node {
     else return 'node'
   }
 
-  *[Symbol.iterator]() {
+  *[Symbol.iterator](): Generator<
+    {
+      1: Node<Datum, KeyFunctions, L.KeySet<Depth, KeyFunctions['length']>>
+      0: never
+    }[N.Greater<Height, 0>],
+    void,
+    unknown
+    > {
     let node = this
     let current
     let next = [ node, ]
@@ -154,8 +181,8 @@ export class Node {
     return node
   }
 
-  ancestors() {
-    const nodes = [ this, ]
+  ancestors(): Ancestors<this> {
+    const nodes = [ this, ] as Ancestors<this>
     let node = this
 
     while (
@@ -163,18 +190,12 @@ export class Node {
       'parent' in node &&
       typeof node.parent !== 'undefined'
     ) {
-      // @ts-ignore
       nodes.push(node.parent)
       node = node.parent
     }
-    // @ts-ignore
     return nodes
   }
 
-  /**
-   * @description Returns the array of descendant nodes, starting with this node.
-   *
-   */
   descendants() {
     return Array.from(this)
   }
@@ -205,7 +226,7 @@ export class Node {
   }
 
   eachAfter(callback: (node, index?: number) => void): this {
-    const nodes = [ this, ] as unknown as ReturnType<this['descendants']>
+    const nodes = [ this, ]
     const next = []
     let children
     let i
@@ -233,7 +254,7 @@ export class Node {
   }
 
   eachBefore(callback: (node, index?: number) => void): this {
-    const nodes = [ this, ] as unknown as ReturnType<this['descendants']>
+    const nodes = [ this, ]
     let children
     let i
     let index = -1
@@ -277,7 +298,7 @@ export class Node {
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves() {
+  leaves(): Array<Node<Datum, KeyFunctions, KeyFunctions['length']>> {
     const leaves = []
 
     this.eachBefore((node) => {
