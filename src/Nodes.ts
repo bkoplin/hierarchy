@@ -5,16 +5,12 @@ import {
   min,
   omit,
   propOr,
-  take,
-  takeLast,
   uniq,
   zipObj,
 } from 'rambdax'
 import type {
   ConditionalExcept,
   FixedLengthArray,
-  Get,
-  IsNever,
   IterableElement,
   JsonObject,
   LiteralUnion,
@@ -27,7 +23,7 @@ import type {
 import chroma from 'chroma-js'
 import { pie, } from 'd3-shape'
 import type {
-  I, L, N,
+  A, I, L, N, O,
 } from 'ts-toolbelt'
 import { objectEntries, } from '@antfu/utils'
 import type { KeyFnKey, } from './types.d'
@@ -35,32 +31,40 @@ import type { KeyFnKey, } from './types.d'
 export type DescendantIter<
   ThisNode,
   DescendantList extends L.List = []
-> = IsNever<ThisNode> extends true
-  ? L.UnionOf<DescendantList>
-  : ThisNode extends { height: number; depth: number }
-    ? ThisNode['height'] extends 0
-      ? L.UnionOf<L.Append<DescendantList, ThisNode>>
-      : ThisNode extends { children: Array<infer Child> }
-        ? DescendantIter<Child, L.Append<DescendantList, ThisNode>>
-        : L.UnionOf<L.Append<DescendantList, ThisNode>>
+> = ThisNode extends object
+  ? O.Has<ThisNode, 'height', number> extends 1
+    ? N.Greater<A.At<ThisNode, 'height'>, 0> extends 1
+      ? DescendantIter<
+            L.UnionOf<A.At<ThisNode, 'children'>>,
+            L.Append<DescendantList, ThisNode>
+          >
+      : L.UnionOf<L.Append<DescendantList, ThisNode>>
     : never
-
-type AncestorBy<ThisNode, Prop extends string, Value> = ThisNode extends object
-  ? Get<ThisNode, `${Prop}`> extends Value
-    ? ThisNode
-    : ThisNode extends { parent: infer Parent }
-      ? AncestorBy<Parent, Prop, Value>
-      : never
   : never
 
 type AncestorArray<
   ThisNode,
   AncestorList extends L.List = []
-> = ThisNode extends { parent: infer Parent; depth: number }
-  ? ThisNode['depth'] extends 0
-    ? [...AncestorList, ThisNode]
-    : AncestorArray<Parent, [...AncestorList, ThisNode]>
-  : AncestorList
+> = ThisNode extends object
+  ? A.At<ThisNode, 'depth'> extends number
+    ? N.Greater<A.At<ThisNode, 'depth'>, 0> extends 1
+      ? AncestorArray<
+            A.At<ThisNode, 'parent'>,
+            L.Append<AncestorList, ThisNode>
+          >
+      : L.Append<AncestorList, ThisNode>
+    : never
+  : never
+
+type AncestorBy<ThisNode, Prop extends string, Value> = ThisNode extends object
+  ? O.Has<ThisNode, Prop, Value> extends 1
+    ? ThisNode
+    : O.Has<ThisNode, 'depth', number> extends 1
+      ? N.Greater<A.At<ThisNode, 'depth'>, 0> extends 1
+        ? AncestorBy<A.At<ThisNode, 'parent'>, Prop, Value>
+        : never
+      : never
+  : never
 
 type GetDimIndex<
   Dims,
@@ -72,24 +76,17 @@ type GetDimIndex<
     : GetDimIndex<Rest, DimVal, I.Next<Iter>>
   : never
 
-type ArrayMap<
-  Arr extends FixedLengthArray<unknown, number>,
-  Length extends number,
-  Final extends L.List = [],
-  Iter extends I.Iteration = I.IterationOf<0>
-> = {
-  0: Final
-  1: ArrayMap<Arr, Length, [...Final, Arr[I.Pos<Iter>]], I.Next<Iter>>
-}[N.Lower<I.Pos<Iter>, Length>]
-
 export class Node<
-  Datum extends JsonObject | string = JsonObject,
-  KeysOfDatum extends FixedLengthArray<
-    KeyFnKey<Datum>,
-    L.KeySet<1, 13>
-  > = FixedLengthArray<KeyFnKey<Datum>, L.KeySet<1, 13>>,
-  Depth extends number = L.KeySet<0, KeysOfDatum['length']>,
-  Height extends number = N.Sub<KeysOfDatum['length'], Depth>
+  Datum extends JsonObject | string,
+  KeysOfDatum extends FixedLengthArray<KeyFnKey<Datum>, L.KeySet<1, 10>>,
+  Depth extends L.KeySet<0, KeysOfDatum['length']> = 0,
+  Height extends N.Sub<
+    KeysOfDatum['length'],
+    Depth
+  > = N.Sub<
+    KeysOfDatum['length'],
+    Depth
+  >
 > {
   constructor(
     public readonly keyFns: KeysOfDatum,
@@ -100,7 +97,7 @@ export class Node<
     let [ record, ] = records
 
     if (typeof record === 'string')
-    // @ts-ignore
+      // @ts-ignore
       record = String(record)
     this.value = records.length
     this.colorScaleNum = records.length
@@ -111,22 +108,6 @@ export class Node<
     ]
 
     this.dims = localDims
-    this.ancestorDimPath = take(
-      this.depth + 1,
-      localDims
-    ).reverse() as ArrayMap<KeysOfDatum, Depth, [], I.IterationOf<0>>
-    // @ts-ignore
-    this.descendantDimPath = takeLast(
-      // @ts-ignore
-      this.height + 1,
-      // @ts-ignore
-      localDims
-    ) as ArrayMap<
-      KeysOfDatum,
-      KeysOfDatum['length'],
-      [],
-      I.IterationOf<N.Sub<Depth, 1>>
-    >
 
     this.dim = localDims[depth]
     this.id = propOr(
@@ -159,24 +140,22 @@ export class Node<
   readonly height: Height
   readonly name: Depth extends 0 ? undefined : ValueOf<Datum>
   readonly id: Depth extends 0 ? undefined : ValueOf<Datum>
-  readonly ancestorDimPath!: ArrayMap<KeysOfDatum, Depth, [], I.IterationOf<0>>
+  readonly ancestorDimPath!: {
+    [Prop in keyof KeysOfDatum]: Prop extends L.KeySet<0, Depth>
+      ? A.At<KeysOfDatum, N.Sub<Prop, 1>>
+      : Prop
+  }
 
-  readonly descendantDimPath!: ArrayMap<
-    KeysOfDatum,
-    KeysOfDatum['length'],
-    [],
-    I.IterationOf<N.Sub<Depth, 1>>
-  >
-
-  #parent!: N.Sub<Depth, 1> extends L.KeySet<0, KeysOfDatum['length']>
-    ? Node<Datum, KeysOfDatum, N.Sub<Depth, 1>>
-    : never
+  #parent: N.Greater<Depth, 0> extends 1
+    ? N.Lower<Height, KeysOfDatum['length']> extends 1
+      ? Node<Datum, KeysOfDatum, N.Sub<Depth, 1>, N.Add<Height, 1>>
+      : undefined : undefined = undefined
 
   value: number
 
-  children!: N.Add<Depth, 1> extends L.KeySet<0, KeysOfDatum['length']>
-    ? Array<Node<Datum, KeysOfDatum, N.Add<Depth, 1>>>
-    : never
+  children: N.Greater<Height, 0> extends 1
+    ? Array<Node<Datum, KeysOfDatum, N.Add<Depth, 1>, N.Sub<Height, 1>>>
+    : never[] = []
 
   addChild(
     this: Node<Datum, KeysOfDatum, Depth>,
@@ -196,7 +175,8 @@ export class Node<
    * @default
    * pipe(prop('records'), length)
    */
-  valueFunction = (rec: Node<Datum, KeysOfDatum, Depth>) => rec.records.length
+  valueFunction = (rec: Node<Datum, KeysOfDatum, Depth>) =>
+    rec.records.length
 
   get idObject() {
     return { [this.dim as unknown as string]: this.id, }
@@ -259,7 +239,8 @@ export class Node<
       : Height extends 0
         ? 'leaf'
         : 'node'
-    if (this.depth === 0) return 'leaf' as ReturnType
+    if (this.depth === 0)
+      return 'leaf' as ReturnType
     else if (this.height === 0)
       return 'root' as ReturnType
     else return 'node' as ReturnType
@@ -318,16 +299,19 @@ export class Node<
     //           ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
     //           : never
     //         : never
-    type ReturnType = Params['depth'] extends L.KeySet<0, Depth>
+    type ReturnType = Params['depth'] extends number
       ? AncestorBy<ThisNode, 'depth', Params['depth']>
-      : Params['dim'] extends L.Take<KeysOfDatum, Depth>[number]
+      : Params['dim'] extends string
         ? AncestorBy<ThisNode, 'dim', Params['dim']>
         : never
     const node: ReturnType = this.ancestors()
-    // @ts-ignore
+      // @ts-ignore
       .find((ancestor) => {
         // @ts-ignore
-        return ('depth' in depthOrDim && depthOrDim.depth === ancestor.depth) || ('dim' in depthOrDim && depthOrDim.dim === ancestor.dim)
+        return (
+          ('depth' in depthOrDim && depthOrDim.depth === ancestor.depth) ||
+          ('dim' in depthOrDim && depthOrDim.dim === ancestor.dim)
+        )
       })
 
     return node
@@ -339,7 +323,7 @@ export class Node<
    * @see {@link https://github.com/d3/d3-hierarchy#ancestors}
    * @see {ancestorAt}
    */
-  ancestors(this: Node<Datum, KeysOfDatum, Depth>): AncestorArray<Node<Datum, KeysOfDatum, Depth>> {
+  ancestors(): AncestorArray<Node<Datum, KeysOfDatum, Depth>> {
     const nodes = [ this, ]
     let node = this
 
@@ -374,8 +358,8 @@ export class Node<
     type ReturnType = Params['depth'] extends ThisNode['depth']
       ? ThisNode
       : Params['depth'] extends L.KeySet<Depth, KeysOfDatum['length']>
-        // @ts-ignore
-        ? Node<Datum, KeysOfDatum, Params['depth']>
+        ? // @ts-ignore
+        Node<Datum, KeysOfDatum, Params['depth']>
         : Params['dim'] extends ThisNode['dim']
           ? ThisNode
           : Params['dim'] extends L.Drop<KeysOfDatum, Depth>[number]
@@ -383,8 +367,8 @@ export class Node<
           Depth,
           KeysOfDatum['length']
         >
-            // @ts-ignore
-              ? Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
+              ? // @ts-ignore
+              Node<Datum, KeysOfDatum, GetDimIndex<this['dims'], Params['dim']>>
               : never
             : never
     return this.descendants().filter((node) => {
@@ -440,7 +424,7 @@ export class Node<
       index?: number
     ) => void
   ): this {
-    const nodes = [ this, ]
+    const nodes = [ this, ] as unknown as ReturnType<this['descendants']>
     const next = []
     let children
     let i
@@ -449,8 +433,12 @@ export class Node<
 
     while ((node = nodes.pop()) !== undefined) {
       next.push(node)
-      if ((children = node?.children) !== undefined)
-        children.forEach(child => nodes.push(child))
+      if ((children = node?.children) !== undefined) {
+        children.forEach((child) => {
+          if (child)
+            nodes.push(child as unknown as (typeof nodes)[number])
+        })
+      }
     }
     while ((node = next.pop()) !== undefined) {
       callback(
@@ -479,7 +467,7 @@ export class Node<
       index?: number
     ) => void
   ): this {
-    const nodes = [ this, ]
+    const nodes = [ this, ] as unknown as ReturnType<this['descendants']>
     let children
     let i
     let index = -1
@@ -490,8 +478,14 @@ export class Node<
         node,
         ++index
       )
-      if ((children = node?.children) !== undefined)
-        for (i = children.length - 1; i >= 0; --i) nodes.push(children[i])
+      if ((children = node?.children) !== undefined) {
+        for (i = children.length - 1; i >= 0; --i) {
+          const child = children[i]
+
+          if (child)
+            nodes.push(child as unknown as (typeof nodes)[number])
+        }
+      }
     }
     return this
   }
@@ -510,15 +504,15 @@ export class Node<
     return this.descendants().find(callback)
   }
 
-  hasParent(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.KeySet<1, KeysOfDatum['length']>> {
+  hasParent(this: Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.KeySet<1, KeysOfDatum['length']>> {
     return this?.depth > 0
   }
 
-  isRoot(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, 0> {
+  isRoot(this: Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, 0> {
     return this?.depth === 0
   }
 
-  isLeaf(this: unknown | Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>> {
+  isLeaf(this: Node<Datum, KeysOfDatum, Depth>): this is Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>> {
     return this?.height === 0
   }
 
@@ -527,7 +521,7 @@ export class Node<
    *
    * @see {@link https://github.com/d3/d3-hierarchy#leaves}
    */
-  leaves(): Array<Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>>> {
+  leaves(): Array<Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>, 0>> {
     const leaves = [] as unknown as Array<
       Node<Datum, KeysOfDatum, L.Length<KeysOfDatum>>
     >
@@ -578,6 +572,7 @@ export class Node<
         const parent = node.parent
         const children = parent.children
         const minParentArcWidth = children
+          // @ts-ignore
           .map(p => p.endAngle ?? 0 - p.startAngle ?? 0)
           .reduce((a, b) => Math.min(
             a,
@@ -592,7 +587,8 @@ export class Node<
                 minParentArcWidth
               ) / children.length :
               0
-        const nodePieStart = node.depth === 1 ? pieStart : node.parent.startAngle
+        const nodePieStart =
+          node.depth === 1 ? pieStart : node.parent.startAngle
         const nodePieEnd = node.depth === 1 ? pieEnd : node.parent.endAngle
         const pies = pie<(typeof children)[number]>()
           .startAngle(nodePieStart)
@@ -611,7 +607,9 @@ export class Node<
         pies.forEach((p, i) => {
           if (p.data.id === node.id) {
             const {
-              startAngle: startAngleIn, endAngle: endAngleIn, padAngle,
+              startAngle: startAngleIn,
+              endAngle: endAngleIn,
+              padAngle,
             } = p
             const startAngle = startAngleIn
             const endAngle = endAngleIn - padAngle
@@ -754,7 +752,9 @@ export class Node<
   }
 
   toJSON(this: Node<Datum, KeysOfDatum, Depth>) {
-    const node = filterObject<ConditionalExcept<Node<Datum, KeysOfDatum, Depth>, undefined>>(
+    const node = filterObject<
+      ConditionalExcept<Node<Datum, KeysOfDatum, Depth>, undefined>
+    >(
       (v) => {
       // if (Array.isArray(v)) return v.length > 0
       // else
