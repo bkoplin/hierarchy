@@ -17,17 +17,21 @@ import { objectEntries, } from '@antfu/utils'
 import type {
   L, N,
 } from 'ts-toolbelt'
-import type { KeyFn, } from './types'
+import type { KeyFn, KeyFnTuple, } from './types'
 
 type Ancestors<ThisNode, AncestorList extends L.List = []> = ThisNode extends { parent: unknown; depth: number }
-  ? N.Greater<ThisNode['depth'], 0> extends 1
-    ? Ancestors<ThisNode['parent'], L.Append<AncestorList, ThisNode>>
+  ? N.GreaterEq<ThisNode['depth'], 0> extends 1
+    ? N.IsZero<ThisNode['depth']> extends 1
+      ? L.Append<AncestorList, ThisNode>
+      : Ancestors<ThisNode['parent'], L.Append<AncestorList, ThisNode>>
     : L.Append<AncestorList, ThisNode>
   : never
 
 type Descendants<ThisNode, DescendantList extends L.List = []> = ThisNode extends { children: unknown[]; height: number }
-  ? N.Greater<ThisNode['height'], 0> extends 1
-    ? Descendants<ThisNode['children'][number], L.Append<DescendantList, ThisNode>>
+  ? N.GreaterEq<ThisNode['height'], 0> extends 1
+    ? N.IsZero<ThisNode['height']> extends 1
+      ? L.Append<DescendantList, ThisNode>
+      : Descendants<ThisNode['children'][number], L.Append<DescendantList, ThisNode>>
     : L.Append<DescendantList, ThisNode>
   : never
 
@@ -91,14 +95,14 @@ export class Node<
   valueFunction = rec => rec.records.length
 
   get keyFn() {
-    return this.keyFns[this.depth]
+    return this.keyFns[this.depth - 1] as N.IsZero<Depth> extends 1 ? '' : KeyFunctions[N.Sub<Depth, 1>]
   }
 
-  get dim() {
+  get dim(): this['keyFn'] extends KeyFnTuple<Datum> ? L.Head<this['keyFn']> : this['keyFn'] {
     if (typeof this.keyFn === 'undefined')
       return ''
     else if (typeof this.keyFn === 'string' || typeof this.keyFn === 'number' || typeof this.keyFn === 'symbol')
-      return `${this.keyFn}`
+      return this.keyFn
     else return this.keyFn[0]
   }
 

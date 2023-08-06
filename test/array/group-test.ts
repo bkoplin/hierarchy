@@ -8,10 +8,10 @@ import data from '../data/MOCK_DATA.json'
 const groupByAge = group(
   data,
   'education_level',
-  // [
-  //   'state_letter' as const,
-  //   x => x.state[0],
-  // ],
+  [
+    'state_letter' as const,
+    x => x.state[0],
+  ],
   'state'
 )
 
@@ -29,8 +29,9 @@ describe(
           root,
         ] = leaf.ancestors()
 
-        expect(firstAncestor.depth).toBe(0)
-        expect(firstAncestor.height).toBe(2)
+        expect(firstAncestor.dim).toBe(0)
+        expect(secondAncestor.dim).toBe(0)
+        expect(secondAncestor.height).toBe(2)
         expect(firstAncestor.ancestorAt({ dim: 'education_level', })?.depth).toBe(1)
         expect(secondAncestor.ancestorDimPath).toMatchInlineSnapshot(`
           [
@@ -68,7 +69,7 @@ describe(
           ]
         `)
         root.makePies()
-        const d = groupByAge.descendants().map(desc => desc.depth)
+        const d = groupByAge.descendants().map(desc => desc.dim)
 
         expect(root).toMatchFileSnapshot('./pies.json')
         expect(root.find(node => node.dim === 'state' && node.id === 'Missouri')).toMatchInlineSnapshot(`
