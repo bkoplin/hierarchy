@@ -49,7 +49,6 @@ export function group<
           keyFns,
           records,
           childDepth,
-          node.height - 1,
           _key
         )
 

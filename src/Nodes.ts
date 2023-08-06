@@ -25,6 +25,12 @@ type Ancestors<ThisNode, AncestorList extends L.List = []> = ThisNode extends { 
     : L.Append<AncestorList, ThisNode>
   : never
 
+type Descendants<ThisNode, DescendantList extends L.List = []> = ThisNode extends { children: unknown[]; height: number }
+  ? N.Greater<ThisNode['height'], 0> extends 1
+    ? Descendants<ThisNode['children'][number], L.Append<DescendantList, ThisNode>>
+    : L.Append<DescendantList, ThisNode>
+  : never
+
 export class Node<
   Datum = any,
   KeyFunctions extends ReadonlyArray<KeyFn<Datum>> = readonly [KeyFn<Datum>],
@@ -41,8 +47,8 @@ export class Node<
     public readonly keyFns: KeyFunctions,
     public records: Datum[],
     public depth: Depth,
-    public height: Height = keyFns.length - depth,
-    public readonly id?: any = undefined
+    public readonly id = undefined as any,
+    public height = (keyFns.length - depth) as Height
   ) {
     this.name = this.id
     this.colorScaleNum = this.records.length
@@ -145,10 +151,7 @@ export class Node<
   }
 
   *[Symbol.iterator](): Generator<
-    {
-      1: Node<Datum, KeyFunctions, L.KeySet<Depth, KeyFunctions['length']>>
-      0: never
-    }[N.Greater<Height, 0>],
+    L.UnionOf<Descendants<this>>,
     void,
     unknown
     > {
