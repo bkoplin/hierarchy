@@ -1,14 +1,12 @@
 import { objectEntries, } from '@antfu/utils'
-import { groupBy, } from 'rambdax'
+import {
+  groupBy, prop,
+} from 'rambdax'
 
-import type {
-  FixedLengthArray, JsonObject,
-} from 'type-fest'
+import type { JsonObject, } from 'type-fest'
 
-import type {
-  L, N,
-} from 'ts-toolbelt'
-import type { KeyFn, KeyFnKey, } from './types'
+import type { N, } from 'ts-toolbelt'
+import type { KeyFn, } from './types'
 import { Node, } from './Nodes'
 
 export function group<
@@ -32,11 +30,11 @@ export function group<
     const keyFns = node.keyFns
     const depth = node.depth
     const childDepth = depth + 1
-    const keyFn = keyFns[depth]
+    const keyFn = Array.isArray(keyFns[depth]) ? keyFns[depth][1] : prop(keyFns[depth])
 
     objectEntries(groupBy(
       // @ts-ignore
-      rec => rec[keyFn],
+      rec => keyFn(rec),
       node.records
     )).forEach((vals) => {
       const [
