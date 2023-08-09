@@ -11,7 +11,9 @@ export default defineConfig({
   format: [
     'cjs',
     'esm',
+    'iife'
   ],
+  globalName: 'hierarchy',
   dts: {
     entry: [ 'src/index.ts', ],
     compilerOptions: { noEmitOnError: false, },
